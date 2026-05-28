@@ -1,7 +1,7 @@
 /**
  * app.js — Application Bootstrap & Runtime Verification
  * Initializes all libraries, verifies runtime, prepares SPA shell
- * Phase 2: Sidebar Navigation, Collapse Behavior & Dashboard View
+ * Phase 3: Sidebar, Dashboard & Data Layer with Reactive Bindings
  * Part of Vanilla Micro-SPA Tool Platform Foundation
  */
 
@@ -365,7 +365,7 @@
     };
 
     /**
-     * Handle tool opening (placeholder for Phase 3 plugin system)
+     * Handle tool opening (placeholder for Phase 4 plugin system)
      * @param {string} toolName - Tool identifier
      */
     const handleToolOpen = (toolName) => {
@@ -375,7 +375,7 @@
         // Emit tool loading event
         EventBus.emit(EventBus.Events.TOOL_LOADING, { tool: toolName });
         
-        // For now, show toast notification (plugin system comes in Phase 3)
+        // For now, show toast notification (plugin system comes in Phase 4)
         if (typeof Toastify !== 'undefined') {
             Toastify({
                 text: `ابزار "${toolName}" انتخاب شد`,
@@ -395,7 +395,7 @@
             }).showToast();
         }
         
-        console.log(`🔧 Tool selected: ${toolName} (plugin system coming in Phase 3)`);
+        console.log(`🔧 Tool selected: ${toolName} (plugin system coming in Phase 4)`);
     };
 
     /**
@@ -419,6 +419,11 @@
                 
                 // Emit refresh event
                 EventBus.emit('dashboard:refresh');
+                
+                // Refresh data
+                ActionRegistry.updateStats();
+                DOMBindings.updateStatCards();
+                DOMBindings.updateActivityList();
                 
                 // Toast notification
                 if (typeof Toastify !== 'undefined') {
@@ -502,6 +507,29 @@
         console.log('✅ Dashboard Module — Complete');
     };
 
+    // ============================================
+    // Phase 3 — Data Layer Simulation
+    // ============================================
+
+    /**
+     * Simulate initial history for demo
+     * Runs async — UI updates reactively via EventBus
+     */
+    const simulateInitialHistory = async () => {
+        const actions = ['ai-text-generator', 'image-optimizer', 'json-formatter', 'base64-encoder', 'github-actions'];
+        
+        for (const actionId of actions) {
+            try {
+                await ActionRegistry.execute(actionId, { demo: true });
+                await Utils.wait(300);
+            } catch (error) {
+                // Silent fail for demo
+            }
+        }
+        
+        console.log('✅ Initial history simulation complete');
+    };
+
     /**
      * Main Bootstrap Sequence
      */
@@ -528,6 +556,20 @@
         // Phase 2 — Initialize Dashboard
         // ============================================
         initDashboard();
+
+        // ============================================
+        // Phase 3 — Initialize Data Layer
+        // ============================================
+        ActionRegistry.initDefaultActions();
+        
+        // Initialize DOM bindings first (prepares reactive UI)
+        DOMBindings.init();
+        
+        // Run simulation with small delay to demonstrate reactive binding
+        // UI shows initial state, then updates as data arrives
+        setTimeout(() => {
+            simulateInitialHistory();
+        }, 500);
 
         // Mark app as ready
         AppState.setState('app.ready', true);
