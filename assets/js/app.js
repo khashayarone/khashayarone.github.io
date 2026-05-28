@@ -1,6 +1,7 @@
 /**
  * app.js — Application Bootstrap & Runtime Verification
  * Initializes all libraries, verifies runtime, prepares SPA shell
+ * Phase 2: Sidebar Navigation & Collapse Behavior
  * Part of Vanilla Micro-SPA Tool Platform Foundation
  */
 
@@ -23,6 +24,15 @@
         } catch (error) {
             console.warn('⚠️ Lucide Icons — Failed:', error.message);
             return false;
+        }
+    };
+
+    /**
+     * Refresh Lucide Icons (for dynamically added icons)
+     */
+    const refreshIcons = () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     };
 
@@ -168,6 +178,129 @@
         console.log('✅ Keyboard Shortcuts — Active');
     };
 
+    // ============================================
+    // Phase 2 — Sidebar Behavior
+    // ============================================
+
+    /**
+     * Initialize Sidebar Navigation
+     * Handles view switching and active state management
+     */
+    const initSidebarNavigation = () => {
+        const navItems = document.querySelectorAll('.nav-item[data-view]');
+        
+        if (navItems.length === 0) {
+            console.warn('⚠️ Sidebar Navigation — No nav items found');
+            return;
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const view = item.dataset.view;
+                
+                // Update active state visually
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update application state
+                AppState.setState('ui.currentView', view);
+                
+                // Emit navigation event for other modules
+                EventBus.emit(EventBus.Events.NAVIGATION, { 
+                    view,
+                    previousView: AppState.getState('ui.currentView')
+                });
+
+                console.log(`📍 Navigation: ${view}`);
+            });
+        });
+
+        console.log('✅ Sidebar Navigation — Active');
+    };
+
+    /**
+     * Initialize Sidebar Collapse
+     * Handles collapse/expand with GSAP animation
+     */
+    const initSidebarCollapse = () => {
+        const collapseBtn = document.querySelector('.sidebar-collapse-btn');
+        const sidebar = document.querySelector('.sidebar');
+        
+        if (!collapseBtn || !sidebar) {
+            console.warn('⚠️ Sidebar Collapse — Elements not found');
+            return;
+        }
+
+        // Update collapse button icon based on state
+        const updateCollapseIcon = (isCollapsed) => {
+            const icon = collapseBtn.querySelector('i');
+            if (icon) {
+                if (isCollapsed) {
+                    icon.setAttribute('data-lucide', 'panel-right-open');
+                } else {
+                    icon.setAttribute('data-lucide', 'panel-right-close');
+                }
+                refreshIcons();
+            }
+        };
+
+        collapseBtn.addEventListener('click', () => {
+            const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
+            const newCollapsedState = !isCurrentlyCollapsed;
+            
+            // Toggle class
+            if (newCollapsedState) {
+                sidebar.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+            
+            // Update state
+            AppState.setState('ui.sidebarCollapsed', newCollapsedState);
+            
+            // Update icon
+            updateCollapseIcon(newCollapsedState);
+            
+            // Animate with GSAP if available
+            if (typeof gsap !== 'undefined') {
+                const targetWidth = newCollapsedState 
+                    ? 'var(--sidebar-collapsed)' 
+                    : 'var(--sidebar-width)';
+                
+                gsap.to(sidebar, {
+                    width: targetWidth,
+                    duration: 0.3,
+                    ease: 'power2.inOut'
+                });
+            }
+            
+            // Emit event
+            EventBus.emit(EventBus.Events.SIDEBAR_TOGGLE, { 
+                collapsed: newCollapsedState 
+            });
+        });
+
+        // Listen for keyboard shortcut from EventBus
+        EventBus.on(EventBus.Events.SIDEBAR_TOGGLE, (data) => {
+            // If event came from keyboard shortcut (no data), trigger click
+            if (!data || data.collapsed === undefined) {
+                collapseBtn.click();
+            }
+        });
+
+        console.log('✅ Sidebar Collapse — Active');
+    };
+
+    /**
+     * Initialize Sidebar (All sidebar functionality)
+     */
+    const initSidebar = () => {
+        initSidebarNavigation();
+        initSidebarCollapse();
+        refreshIcons();
+        console.log('✅ Sidebar Module — Complete');
+    };
+
     /**
      * Main Bootstrap Sequence
      */
@@ -184,6 +317,11 @@
         // Setup core handlers
         setupResizeHandler();
         setupKeyboardShortcuts();
+
+        // ============================================
+        // Phase 2 — Initialize Sidebar
+        // ============================================
+        initSidebar();
 
         // Mark app as ready
         AppState.setState('app.ready', true);
