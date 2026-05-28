@@ -39,7 +39,70 @@
     <!-- Application Mount Point -->
     <div id="app" aria-label="Application Shell">
         <!-- Layout Zones (Empty, for Phase 2) -->
-        <div id="sidebar-zone" aria-label="Sidebar Container"></div>
+        <!-- Sidebar Zone — Professional Dashboard Navigation -->
+<div id="sidebar-zone" aria-label="Sidebar Container">
+    <aside class="sidebar" role="navigation" aria-label="Main Navigation">
+        
+        <!-- Brand Section -->
+        <div class="sidebar-brand">
+            <div class="brand-logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="var(--color-accent-primary)" opacity="0.15"/>
+                    <rect x="4" y="4" width="24" height="24" rx="6" stroke="var(--color-accent-primary)" stroke-width="2" fill="none"/>
+                    <path d="M12 16L15 19L20 13" stroke="var(--color-accent-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">Tool Platform</span>
+                <span class="brand-version">v1.0</span>
+            </div>
+        </div>
+
+        <!-- Main Navigation -->
+        <nav class="sidebar-nav" aria-label="Primary Navigation">
+            <ul class="nav-list">
+                <li class="nav-item active" data-view="dashboard">
+                    <i data-lucide="layout-dashboard" class="nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">داشبورد</span>
+                    <span class="nav-indicator"></span>
+                </li>
+                <li class="nav-item" data-view="tools">
+                    <i data-lucide="wrench" class="nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">ابزارها</span>
+                    <span class="nav-indicator"></span>
+                </li>
+                <li class="nav-item" data-view="actions">
+                    <i data-lucide="zap" class="nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">عملیات‌ها</span>
+                    <span class="nav-badge">3</span>
+                    <span class="nav-indicator"></span>
+                </li>
+                <li class="nav-item" data-view="history">
+                    <i data-lucide="clock" class="nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">تاریخچه</span>
+                    <span class="nav-indicator"></span>
+                </li>
+                <li class="nav-item" data-view="settings">
+                    <i data-lucide="settings" class="nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">تنظیمات</span>
+                    <span class="nav-indicator"></span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="sidebar-status">
+                <span class="status-dot status-online" aria-label="System Online"></span>
+                <span class="status-text">عملیاتی</span>
+            </div>
+            <button class="sidebar-collapse-btn" aria-label="Toggle Sidebar" title="Ctrl+B">
+                <i data-lucide="panel-right-close" class="nav-icon" aria-hidden="true"></i>
+            </button>
+        </div>
+    </aside>
+</div>
+        
         <main id="main-zone" aria-label="Main Workspace"></main>
         <div id="overlay-zone" aria-label="Overlay Container"></div>
     </div>
