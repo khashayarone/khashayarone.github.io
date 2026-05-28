@@ -1,7 +1,7 @@
 /**
  * app.js — Application Bootstrap & Runtime Verification
  * Initializes all libraries, verifies runtime, prepares SPA shell
- * Phase 2: Sidebar Navigation & Collapse Behavior
+ * Phase 2: Sidebar Navigation, Collapse Behavior & Dashboard View
  * Part of Vanilla Micro-SPA Tool Platform Foundation
  */
 
@@ -301,6 +301,207 @@
         console.log('✅ Sidebar Module — Complete');
     };
 
+    // ============================================
+    // Phase 2 — Dashboard Behavior
+    // ============================================
+
+    /**
+     * Initialize Bento Card Mouse Tracking
+     * Creates dynamic radial gradient effect following cursor
+     */
+    const initBentoCardEffects = () => {
+        const cards = document.querySelectorAll('.bento-card');
+        
+        if (cards.length === 0) return;
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                
+                card.style.setProperty('--mouse-x', `${x}%`);
+                card.style.setProperty('--mouse-y', `${y}%`);
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.setProperty('--mouse-x', '50%');
+                card.style.setProperty('--mouse-y', '50%');
+            });
+        });
+
+        console.log('✅ Bento Card Effects — Active');
+    };
+
+    /**
+     * Initialize Tool Card Click Handler
+     * Prepares for future plugin loading system
+     */
+    const initToolCardActions = () => {
+        const toolCards = document.querySelectorAll('.bento-card[data-tool]');
+        
+        toolCards.forEach(card => {
+            // Main card click
+            card.addEventListener('click', (e) => {
+                // Ignore if clicking the action button directly
+                if (e.target.closest('.card-action-btn')) return;
+                
+                const toolName = card.dataset.tool;
+                handleToolOpen(toolName);
+            });
+
+            // Action button click
+            const actionBtn = card.querySelector('.card-action-btn');
+            if (actionBtn) {
+                actionBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const toolName = card.dataset.tool;
+                    handleToolOpen(toolName);
+                });
+            }
+        });
+
+        console.log('✅ Tool Card Actions — Active');
+    };
+
+    /**
+     * Handle tool opening (placeholder for Phase 3 plugin system)
+     * @param {string} toolName - Tool identifier
+     */
+    const handleToolOpen = (toolName) => {
+        // Update active tool in state
+        AppState.setState('ui.activeTool', toolName);
+        
+        // Emit tool loading event
+        EventBus.emit(EventBus.Events.TOOL_LOADING, { tool: toolName });
+        
+        // For now, show toast notification (plugin system comes in Phase 3)
+        if (typeof Toastify !== 'undefined') {
+            Toastify({
+                text: `ابزار "${toolName}" انتخاب شد`,
+                duration: 2000,
+                gravity: 'bottom',
+                position: 'left',
+                style: {
+                    background: 'var(--color-bg-elevated)',
+                    color: 'var(--color-text-primary)',
+                    border: '1px solid var(--color-border-primary)',
+                    borderRadius: 'var(--radius-md)',
+                    fontFamily: 'var(--font-family-primary)',
+                    fontSize: 'var(--font-size-sm)',
+                    backdropFilter: 'blur(12px)',
+                    boxShadow: 'var(--shadow-lg)'
+                }
+            }).showToast();
+        }
+        
+        console.log(`🔧 Tool selected: ${toolName} (plugin system coming in Phase 3)`);
+    };
+
+    /**
+     * Initialize Header Action Buttons
+     */
+    const initHeaderActions = () => {
+        const refreshBtn = document.querySelector('.header-btn[aria-label="Refresh"]');
+        const newActionBtn = document.querySelector('.header-btn-primary');
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                // Animate refresh icon with GSAP
+                const icon = refreshBtn.querySelector('.btn-icon');
+                if (icon && typeof gsap !== 'undefined') {
+                    gsap.to(icon, {
+                        rotation: 360,
+                        duration: 0.6,
+                        ease: 'power2.inOut'
+                    });
+                }
+                
+                // Emit refresh event
+                EventBus.emit('dashboard:refresh');
+                
+                // Toast notification
+                if (typeof Toastify !== 'undefined') {
+                    Toastify({
+                        text: 'داشبورد بروزرسانی شد',
+                        duration: 2000,
+                        gravity: 'bottom',
+                        position: 'left',
+                        style: {
+                            background: 'var(--color-bg-elevated)',
+                            color: 'var(--color-text-primary)',
+                            border: '1px solid var(--color-border-primary)',
+                            borderRadius: 'var(--radius-md)',
+                            fontFamily: 'var(--font-family-primary)',
+                            fontSize: 'var(--font-size-sm)',
+                            backdropFilter: 'blur(12px)',
+                            boxShadow: 'var(--shadow-lg)'
+                        }
+                    }).showToast();
+                }
+            });
+        }
+
+        if (newActionBtn) {
+            newActionBtn.addEventListener('click', () => {
+                EventBus.emit('action:new');
+                console.log('➕ New action requested');
+            });
+        }
+
+        console.log('✅ Header Actions — Active');
+    };
+
+    /**
+     * Initialize View Switching
+     * Syncs sidebar navigation with main content views
+     */
+    const initViewSwitching = () => {
+        const views = document.querySelectorAll('.view[data-view]');
+        
+        if (views.length === 0) {
+            console.warn('⚠️ View Switching — No views found');
+            return;
+        }
+
+        // Listen for navigation events
+        EventBus.on(EventBus.Events.NAVIGATION, ({ view }) => {
+            views.forEach(v => {
+                if (v.dataset.view === view) {
+                    v.classList.add('active');
+                    v.style.display = 'flex';
+                } else {
+                    v.classList.remove('active');
+                    v.style.display = 'none';
+                }
+            });
+
+            // Scroll to top of main zone smoothly
+            const mainZone = document.getElementById('main-zone');
+            if (mainZone) {
+                if (window.__lenis) {
+                    window.__lenis.scrollTo(mainZone, { offset: 0 });
+                } else {
+                    mainZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+
+        console.log('✅ View Switching — Active');
+    };
+
+    /**
+     * Initialize Dashboard Module (All dashboard functionality)
+     */
+    const initDashboard = () => {
+        initBentoCardEffects();
+        initToolCardActions();
+        initHeaderActions();
+        initViewSwitching();
+        refreshIcons();
+        console.log('✅ Dashboard Module — Complete');
+    };
+
     /**
      * Main Bootstrap Sequence
      */
@@ -322,6 +523,11 @@
         // Phase 2 — Initialize Sidebar
         // ============================================
         initSidebar();
+
+        // ============================================
+        // Phase 2 — Initialize Dashboard
+        // ============================================
+        initDashboard();
 
         // Mark app as ready
         AppState.setState('app.ready', true);
