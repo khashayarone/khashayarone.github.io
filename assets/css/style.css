@@ -1,0 +1,71 @@
+/* ============================================
+   Core Shell Styles — Layout Backbone Only
+   No visual components, no sidebar UI
+   ============================================ */
+
+/* === Shell Container === */
+#app {
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    isolation: isolate;
+}
+
+/* === Sidebar Zone (Structural Only) === */
+#sidebar-zone {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: var(--z-sticky);
+    background: var(--color-bg-secondary);
+    border-left: 1px solid var(--color-border-primary);
+    /* Will be populated in Phase 2 */
+}
+
+/* === Main Workspace Zone === */
+#main-zone {
+    flex: 1;
+    margin-right: var(--sidebar-width);
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--space-2xl);
+    display: flex;
+    flex-direction: column;
+    /* Will be populated in Phase 2 */
+}
+
+/* === Overlay Zone (Empty, For Modals/Panels) === */
+#overlay-zone {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    pointer-events: none;
+    /* Children will have pointer-events: auto */
+}
+
+/* === Responsive Foundation === */
+@media (max-width: 768px) {
+    #sidebar-zone {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        position: relative;
+        border-left: none;
+        border-bottom: 1px solid var(--color-border-primary);
+    }
+
+    #main-zone {
+        margin-right: 0;
+        padding: var(--space-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    #main-zone {
+        padding: var(--space-md);
+    }
+}
