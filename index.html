@@ -103,7 +103,321 @@
     </aside>
 </div>
         
-        <main id="main-zone" aria-label="Main Workspace"></main>
+        <!-- Main Workspace Zone -->
+<main id="main-zone" aria-label="Main Workspace">
+    
+    <!-- Dashboard View (Default) -->
+    <div id="view-dashboard" class="view active" data-view="dashboard">
+        
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="header-title-group">
+                    <h1 class="dashboard-title">داشبورد</h1>
+                    <p class="dashboard-subtitle">خلاصه وضعیت سیستم و ابزارها</p>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" aria-label="Refresh" title="بروزرسانی">
+                        <i data-lucide="refresh-cw" class="btn-icon"></i>
+                    </button>
+                    <button class="header-btn header-btn-primary" aria-label="New Action">
+                        <i data-lucide="plus" class="btn-icon"></i>
+                        <span class="btn-text">عملیات جدید</span>
+                    </button>
+                </div>
+            </div>
+            <div class="header-divider"></div>
+        </header>
+
+        <!-- Stats Overview Row -->
+        <section class="stats-grid" aria-label="System Statistics">
+            <div class="stat-card glass-base glow-subtle">
+                <div class="stat-icon-wrapper">
+                    <i data-lucide="zap" class="stat-icon"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">۱۲</span>
+                    <span class="stat-label">عملیات فعال</span>
+                </div>
+                <div class="stat-trend stat-trend-up">
+                    <i data-lucide="trending-up" class="trend-icon"></i>
+                    <span>۸٪</span>
+                </div>
+            </div>
+
+            <div class="stat-card glass-base glow-subtle">
+                <div class="stat-icon-wrapper">
+                    <i data-lucide="check-circle" class="stat-icon"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">۹۴</span>
+                    <span class="stat-label">موفق</span>
+                </div>
+                <div class="stat-trend stat-trend-up">
+                    <i data-lucide="trending-up" class="trend-icon"></i>
+                    <span>۱۲٪</span>
+                </div>
+            </div>
+
+            <div class="stat-card glass-base glow-subtle">
+                <div class="stat-icon-wrapper">
+                    <i data-lucide="clock" class="stat-icon"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">۲.۴s</span>
+                    <span class="stat-label">میانگین زمان</span>
+                </div>
+                <div class="stat-trend stat-trend-down">
+                    <i data-lucide="trending-down" class="trend-icon"></i>
+                    <span>۳٪</span>
+                </div>
+            </div>
+
+            <div class="stat-card glass-base glow-subtle">
+                <div class="stat-icon-wrapper">
+                    <i data-lucide="activity" class="stat-icon"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">۸۷٪</span>
+                    <span class="stat-label">سلامت سیستم</span>
+                </div>
+                <div class="stat-trend stat-trend-stable">
+                    <i data-lucide="minus" class="trend-icon"></i>
+                    <span>پایدار</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Title -->
+        <div class="section-header">
+            <h2 class="section-title">ابزارهای پرکاربرد</h2>
+            <button class="section-link">
+                <span>مشاهده همه</span>
+                <i data-lucide="arrow-left" class="link-icon"></i>
+            </button>
+        </div>
+
+        <!-- Bento Grid — Tool Cards -->
+        <section class="bento-grid" aria-label="Tool Cards Grid">
+            
+            <!-- Card 1: Large - AI Text Generator -->
+            <div class="bento-card bento-card-lg glass-base" data-tool="ai-text-generator">
+                <div class="card-glow"></div>
+                <div class="card-header">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="sparkles" class="card-icon"></i>
+                    </div>
+                    <span class="card-badge">محبوب</span>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">تولید متن هوشمند</h3>
+                    <p class="card-description">تولید محتوای متنی با هوش مصنوعی، مناسب برای مقالات، توضیحات محصول و سناریوهای خلاقانه</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="card-stat">
+                            <i data-lucide="play" class="stat-mini-icon"></i>
+                            ۲.۳k اجرا
+                        </span>
+                        <span class="card-stat">
+                            <i data-lucide="clock" class="stat-mini-icon"></i>
+                            ۱.۲s
+                        </span>
+                    </div>
+                    <button class="card-action-btn" aria-label="Open tool">
+                        <i data-lucide="arrow-up-right" class="action-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: Medium - Image Optimizer -->
+            <div class="bento-card bento-card-md glass-base" data-tool="image-optimizer">
+                <div class="card-glow"></div>
+                <div class="card-header">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="image" class="card-icon"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">بهینه‌ساز تصاویر</h3>
+                    <p class="card-description">فشرده‌سازی و بهینه‌سازی تصاویر بدون افت کیفیت</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="card-stat">
+                            <i data-lucide="play" class="stat-mini-icon"></i>
+                            ۸۹۰ اجرا
+                        </span>
+                    </div>
+                    <button class="card-action-btn" aria-label="Open tool">
+                        <i data-lucide="arrow-up-right" class="action-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: Medium - JSON Formatter -->
+            <div class="bento-card bento-card-md glass-base" data-tool="json-formatter">
+                <div class="card-glow"></div>
+                <div class="card-header">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="braces" class="card-icon"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">فرمت‌دهنده JSON</h3>
+                    <p class="card-description">اعتبارسنجی، فرمت و تبدیل داده‌های JSON</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="card-stat">
+                            <i data-lucide="play" class="stat-mini-icon"></i>
+                            ۱.۵k اجرا
+                        </span>
+                    </div>
+                    <button class="card-action-btn" aria-label="Open tool">
+                        <i data-lucide="arrow-up-right" class="action-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 4: Small - Color Picker -->
+            <div class="bento-card bento-card-sm glass-base" data-tool="color-picker">
+                <div class="card-glow"></div>
+                <div class="card-header">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="palette" class="card-icon"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">انتخاب‌گر رنگ</h3>
+                    <p class="card-description">انتخاب و تبدیل کدهای رنگی</p>
+                </div>
+                <div class="card-footer">
+                    <button class="card-action-btn" aria-label="Open tool">
+                        <i data-lucide="arrow-up-right" class="action-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 5: Small - Base64 Encoder -->
+            <div class="bento-card bento-card-sm glass-base" data-tool="base64-encoder">
+                <div class="card-glow"></div>
+                <div class="card-header">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="binary" class="card-icon"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">Base64</h3>
+                    <p class="card-description">کدگذاری و decode سریع</p>
+                </div>
+                <div class="card-footer">
+                    <button class="card-action-btn" aria-label="Open tool">
+                        <i data-lucide="arrow-up-right" class="action-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 6: Large - GitHub Action Runner -->
+            <div class="bento-card bento-card-lg glass-base" data-tool="github-actions">
+                <div class="card-glow"></div>
+                <div class="card-header">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="github" class="card-icon"></i>
+                    </div>
+                    <span class="card-badge card-badge-live">
+                        <span class="badge-dot"></span>
+                        زنده
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">GitHub Actions</h3>
+                    <p class="card-description">مدیریت و اجرای workflow های گیت‌هاب، مشاهده لاگ و وضعیت build ها</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="card-stat">
+                            <i data-lucide="play" class="stat-mini-icon"></i>
+                            ۴۵۶ اجرا
+                        </span>
+                        <span class="card-stat">
+                            <i data-lucide="git-branch" class="stat-mini-icon"></i>
+                            ۳ فعال
+                        </span>
+                    </div>
+                    <button class="card-action-btn" aria-label="Open tool">
+                        <i data-lucide="arrow-up-right" class="action-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Recent Activity Section -->
+        <div class="section-header">
+            <h2 class="section-title">فعالیت‌های اخیر</h2>
+            <button class="section-link">
+                <span>مشاهده همه</span>
+                <i data-lucide="arrow-left" class="link-icon"></i>
+            </button>
+        </div>
+
+        <section class="activity-list" aria-label="Recent Activities">
+            <div class="activity-item glass-base">
+                <div class="activity-icon activity-success">
+                    <i data-lucide="check" class="activity-check"></i>
+                </div>
+                <div class="activity-content">
+                    <span class="activity-title">تولید متن هوشمند</span>
+                    <span class="activity-desc">اجرا با موفقیت completed — 2.1s</span>
+                </div>
+                <span class="activity-time">۲ دقیقه پیش</span>
+            </div>
+
+            <div class="activity-item glass-base">
+                <div class="activity-icon activity-running">
+                    <div class="activity-spinner"></div>
+                </div>
+                <div class="activity-content">
+                    <span class="activity-title">GitHub Actions</span>
+                    <span class="activity-desc">Build #42 در حال اجرا — 65%</span>
+                </div>
+                <span class="activity-time">۵ دقیقه پیش</span>
+            </div>
+
+            <div class="activity-item glass-base">
+                <div class="activity-icon activity-error">
+                    <i data-lucide="x" class="activity-check"></i>
+                </div>
+                <div class="activity-content">
+                    <span class="activity-title">بهینه‌ساز تصاویر</span>
+                    <span class="activity-desc">خطا در پردازش — حجم فایل نامعتبر</span>
+                </div>
+                <span class="activity-time">۱۲ دقیقه پیش</span>
+            </div>
+
+            <div class="activity-item glass-base">
+                <div class="activity-icon activity-success">
+                    <i data-lucide="check" class="activity-check"></i>
+                </div>
+                <div class="activity-content">
+                    <span class="activity-title">فرمت‌دهنده JSON</span>
+                    <span class="activity-desc">اعتبارسنجی موفق — 32KB</span>
+                </div>
+                <span class="activity-time">۱۸ دقیقه پیش</span>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Other Views (Empty, for future) -->
+    <div id="view-tools" class="view" data-view="tools" style="display:none;"></div>
+    <div id="view-actions" class="view" data-view="actions" style="display:none;"></div>
+    <div id="view-history" class="view" data-view="history" style="display:none;"></div>
+    <div id="view-settings" class="view" data-view="settings" style="display:none;"></div>
+
+</main>
+        
         <div id="overlay-zone" aria-label="Overlay Container"></div>
     </div>
 
