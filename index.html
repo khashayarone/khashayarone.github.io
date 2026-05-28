@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Vanilla Micro-SPA Tool Platform">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Tool Platform | Shell</title>
+
+    <!-- 1. Vazirmatn Font Foundation -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+
+    <!-- 2. CSS Foundation Layer -->
+    <link rel="stylesheet" href="assets/css/tokens.css">
+    <link rel="stylesheet" href="assets/css/utilities.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- 3. Lucide Icons (Initialize runtime, no inline chaos) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- 4. GSAP Animation Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+
+    <!-- 5. Lenis Smooth Scrolling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.js"></script>
+
+    <!-- 6. Swup Page Transitions (SPA shell) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swup/4.8.2/Swup.umd.min.js"></script>
+
+    <!-- 7. Toastify Notifications -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+
+    <!-- 8. Floating UI (For future positioning) -->
+    <script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.6.1"></script>
+</head>
+<body>
+    <!-- Application Mount Point -->
+    <div id="app" aria-label="Application Shell">
+        <!-- Layout Zones (Empty, for Phase 2) -->
+        <div id="sidebar-zone" aria-label="Sidebar Container"></div>
+        <main id="main-zone" aria-label="Main Workspace"></main>
+        <div id="overlay-zone" aria-label="Overlay Container"></div>
+    </div>
+
+    <!-- JS Foundation Layer -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/events.js"></script>
+    <script src="assets/js/state.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
