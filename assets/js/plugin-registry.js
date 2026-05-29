@@ -38,6 +38,7 @@ const PluginRegistry = (() => {
             cssPath: manifest.cssPath || `plugins/${manifest.id}/tool.css`,
             dataPath: manifest.dataPath || null,
             dataPattern: manifest.dataPattern || null,
+            dataSource: manifest.dataSource || null,
             yearRange: manifest.yearRange || null,
             // Runtime state (not from manifest)
             _loaded: false,
@@ -139,9 +140,27 @@ const PluginRegistry = (() => {
             yearRange: [2000, 2026]
         });
 
+        // Register Proxy Finder plugin
+        register({
+            id: 'proxy-finder',
+            title: 'پروکسی‌یاب',
+            icon: 'shield-check',
+            category: 'network',
+            size: 'large',
+            description: 'لیست پروکسی‌های بروز V2Ray، Shadowsocks، Trojan و VMess — آپدیت خودکار هر ۱۰ دقیقه',
+            version: '1.0.0',
+            author: 'Tool Platform',
+            permissions: [],
+            jsPath: 'plugins/proxy-finder/tool.js',
+            cssPath: 'plugins/proxy-finder/tool.css',
+            dataPath: 'data/proxy-finder/',
+            dataSource: 'proxy.json'
+        });
+
         // More plugins can be registered here in the future
-        // register({ id: 'json-formatter', title: 'فرمت‌دهنده JSON', ... });
-        // register({ id: 'image-optimizer', title: 'بهینه‌ساز تصاویر', ... });
+        // register({ id: 'youtube-downloader', title: 'دانلودر یوتوب', ... });
+        // register({ id: 'youtube-search', title: 'جستجوی یوتوب', ... });
+        // register({ id: 'soundcloud-downloader', title: 'SoundCloud DL', ... });
 
         console.log(`✅ Plugin Registry — ${plugins.size} plugins registered`);
     };
