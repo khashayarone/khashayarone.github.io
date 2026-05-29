@@ -1,0 +1,29 @@
+{
+  "request_id": "yt-mprafc80-3gxk20p",
+  "status": "completed",
+  "completed_at": "2026-05-29T19:03:26Z",
+  "input": {
+    "urls": "https://www.youtube.com/watch?v=73_1biulkYk",
+    "quality": "1080p",
+    "audio_only": false
+  },
+  "results": [
+    {
+      "url": "https://www.youtube.com/watch?v=73_1biulkYk",
+      "title": "Deadpool & Wolverine | Official Trailer | In Theaters July 26",
+      "creator": "Marvel Entertainment",
+      "quality": "1080p",
+      "status": "completed",
+      "file_size": 9014969,
+      "file_name": "Deadpool-Wolverine-Official-Trailer-In-Theaters-July-26.mp4",
+      "multipart": false,
+      "total_parts": 1
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "total_urls": 1,
+    "succeeded": 1,
+    "failed": 0
+  }
+}
