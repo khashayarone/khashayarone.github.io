@@ -79,7 +79,7 @@ const PluginLoader = (() => {
 
     /**
      * Find plugin instance in global scope
-     * Uses multiple strategies to locate the plugin object
+     * Uses exact name matching only — excludes library objects
      * @param {string} pluginId - Plugin identifier
      * @returns {Object|null} Plugin instance with init() method
      */
@@ -100,59 +100,111 @@ const PluginLoader = (() => {
 
         const globalName = instanceMap[pluginId];
         
-        // Strategy 1: Direct window lookup by exact name
-        if (globalName && window[globalName]) {
+        // Known library objects to exclude (GSAP internals, framework objects, etc.)
+        const EXCLUDED_NAMES = [
+            'CSSPlugin', 'GSAP', 'gsap', 'ScrollTrigger', 'ScrollToPlugin',
+            'lucide', 'Swup', 'Lenis', 'Toastify', 'FloatingUICore',
+            'Utils', 'EventBus', 'AppState', 'ActionRegistry', 'DOMBindings',
+            'PluginRegistry', 'PluginLoader', 'PluginContainer',
+            '__lenis', '__swup', '__gsap', '__core-js_shared__',
+            'ontouchstart', 'onwheel', 'onmousewheel'
+        ];
+
+        if (!globalName) {
+            console.error(`❌ No global name mapping for plugin: "${pluginId}"`);
+            console.error(`   Add entry to instanceMap in plugin-loader.js`);
+            return null;
+        }
+
+        // Strategy 1: Exact match by expected name
+        if (window[globalName]) {
             const obj = window[globalName];
             if (typeof obj === 'object' && obj !== null && typeof obj.init === 'function') {
-                console.log(`✅ Plugin instance found via window.${globalName}`);
+                console.log(`✅ Plugin instance found: window.${globalName}`);
                 return obj;
             }
         }
 
-        // Strategy 2: Search all window properties for objects with init() method
-        const candidates = [];
+        // Strategy 2: Search all window properties, exclude known non-plugin objects
+        const idNormalized = pluginId.replace(/-/g, '').toLowerCase();
+        const globalNameLower = globalName.toLowerCase();
+        
+        let bestMatch = null;
+
         for (const key of Object.keys(window)) {
             try {
+                // Skip excluded names
+                if (EXCLUDED_NAMES.includes(key)) continue;
+                
+                // Skip browser built-ins and event handlers
+                if (key.startsWith('on') && key.length > 2 && key[2] === key[2].toLowerCase()) continue;
+                if (key.startsWith('webkit') || key.startsWith('moz') || key.startsWith('ms')) continue;
+                if (key === 'window' || key === 'self' || key === 'top' || key === 'parent') continue;
+                if (key === 'console' || key === 'document' || key === 'navigator') continue;
+                if (key === 'localStorage' || key === 'sessionStorage') continue;
+                if (key.startsWith('_')) continue; // Skip private variables
+                
                 const obj = window[key];
-                if (obj && typeof obj === 'object' && obj !== window && obj !== null && typeof obj.init === 'function') {
-                    candidates.push({ key, obj });
+                
+                // Must be a plain object with init method
+                if (!obj || typeof obj !== 'object' || obj === null) continue;
+                if (obj === window) continue;
+                if (typeof obj.init !== 'function') continue;
+                if (Array.isArray(obj)) continue;
+                if (obj instanceof HTMLElement) continue;
+                if (obj instanceof Node) continue;
+                
+                const keyLower = key.toLowerCase();
+                
+                // Check if key matches plugin naming pattern
+                const isMatch = (
+                    key === globalName ||
+                    keyLower === globalNameLower ||
+                    keyLower.includes(idNormalized) ||
+                    idNormalized.includes(keyLower)
+                );
+
+                if (isMatch) {
+                    // Verify it has expected plugin methods
+                    if (typeof obj.init === 'function') {
+                        console.log(`✅ Plugin instance found via search: window.${key}`);
+                        return obj;
+                    }
                 }
+                
+                // Track as fallback if key contains "plugin"
+                if (keyLower.includes('plugin') && !bestMatch) {
+                    bestMatch = { key, obj };
+                }
+
             } catch (e) {
                 // Skip inaccessible properties
             }
         }
 
-        // Strategy 2a: Fuzzy match on plugin ID
-        if (globalName) {
-            const exactMatch = candidates.find(c => c.key === globalName);
-            if (exactMatch) {
-                console.log(`✅ Plugin instance found via candidate match: window.${exactMatch.key}`);
-                return exactMatch.obj;
-            }
+        // Fallback: if we found something with "plugin" in name, use it
+        if (bestMatch) {
+            console.log(`⚠️ Using fallback plugin match: window.${bestMatch.key}`);
+            return bestMatch.obj;
         }
 
-        // Strategy 2b: Match by naming pattern
-        const idNormalized = pluginId.replace(/-/g, '').toLowerCase();
-        const fuzzyMatch = candidates.find(c => {
-            const keyLower = c.key.toLowerCase();
-            return keyLower.includes(idNormalized) || idNormalized.includes(keyLower);
+        // Debug: show what's available (only objects with init)
+        const available = Object.keys(window).filter(k => {
+            try {
+                if (EXCLUDED_NAMES.includes(k)) return false;
+                if (k.startsWith('on') || k.startsWith('_')) return false;
+                const obj = window[k];
+                return obj && typeof obj === 'object' && obj !== window && obj !== null && 
+                       typeof obj.init === 'function' && !Array.isArray(obj);
+            } catch (e) {
+                return false;
+            }
         });
 
-        if (fuzzyMatch) {
-            console.log(`✅ Plugin instance found via fuzzy match: window.${fuzzyMatch.key}`);
-            return fuzzyMatch.obj;
-        }
-
-        // Strategy 2c: If only one candidate with init(), use it as fallback
-        if (candidates.length === 1) {
-            console.log(`⚠️ Using only available plugin-like object: window.${candidates[0].key}`);
-            return candidates[0].obj;
-        }
-
-        // Debug: log all candidates to help diagnose
-        console.error(`❌ Plugin instance not found for "${pluginId}".`);
-        console.error(`   Expected global name: ${globalName || 'unknown'}`);
-        console.error(`   Candidates with init() method:`, candidates.map(c => c.key));
+        console.error(`❌ Plugin instance not found for: "${pluginId}"`);
+        console.error(`   Expected global name: window.${globalName}`);
+        console.error(`   Available window objects with init(): ${available.length > 0 ? available.join(', ') : 'none'}`);
+        console.error(`   Make sure tool.js has: window.${globalName} = ${globalName};`);
         
         return null;
     };
@@ -206,7 +258,7 @@ const PluginLoader = (() => {
             if (!instance) {
                 throw new Error(
                     `Plugin "${pluginId}" loaded but instance not found in global scope. ` +
-                    `Make sure the plugin script exposes itself via window.${instanceMap[pluginId] || pluginId + 'Plugin'}`
+                    `Make sure the plugin script exposes itself via window.MovieFinderPlugin = MovieFinderPlugin;`
                 );
             }
 
