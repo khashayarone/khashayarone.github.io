@@ -1,21 +1,29 @@
 /**
  * Movie Finder Plugin — tool.js
  * Advanced movie search with TMDB dataset (2000-2026)
+ * Optimized: image proxy via weserv, progressive year-by-year search, compact details layout
  * Part of Vanilla Micro-SPA Tool Platform
  */
 
 const MovieFinderPlugin = (() => {
     'use strict';
 
+    // ============================================
     // Constants
-    const IMAGE_BASE = 'https://image.tmdb.org/t/p/';
+    // ============================================
+    
+    // Image proxy — weserv.nl bypasses Iran restrictions on TMDB
+    const IMAGE_PROXY = 'https://images.weserv.nl/?url=';
+    const TMDB_IMAGE_BASE = 'image.tmdb.org/t/p/';
     const POSTER_SIZE = 'w500';
     const BACKDROP_SIZE = 'w1280';
     const PROFILE_SIZE = 'w185';
     const DATA_PATH = 'data/movie-finder/';
-    const YEAR_RANGE = { from: 2000, to: 2026 };
 
-    // Fallback SVGs
+    // ============================================
+    // Fallback SVG Images
+    // ============================================
+    
     const FALLBACK_POSTER = `data:image/svg+xml,${encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750">
             <rect width="500" height="750" fill="#1a1a24"/>
@@ -42,7 +50,10 @@ const MovieFinderPlugin = (() => {
         </svg>
     `)}`;
 
-    // Genre mapping (ID -> Persian name)
+    // ============================================
+    // Data Mappings
+    // ============================================
+    
     const GENRE_MAP = {
         28: 'اکشن', 12: 'ماجراجویی', 16: 'انیمیشن', 35: 'کمدی',
         80: 'جنایی', 99: 'مستند', 18: 'درام', 10751: 'خانوادگی',
@@ -51,7 +62,6 @@ const MovieFinderPlugin = (() => {
         10770: 'تلویزیونی', 53: 'هیجانی', 10752: 'جنگی', 37: 'وسترن'
     };
 
-    // Country code mapping
     const COUNTRY_MAP = {
         'US': 'آمریکا', 'GB': 'انگلیس', 'FR': 'فرانسه', 'DE': 'آلمان',
         'JP': 'ژاپن', 'KR': 'کره جنوبی', 'IN': 'هند', 'IR': 'ایران',
@@ -59,16 +69,18 @@ const MovieFinderPlugin = (() => {
         'CN': 'چین', 'RU': 'روسیه', 'BR': 'برزیل', 'MX': 'مکزیک'
     };
 
-    // Language mapping
     const LANGUAGE_MAP = {
         'en': 'انگلیسی', 'fa': 'فارسی', 'fr': 'فرانسوی', 'de': 'آلمانی',
         'ja': 'ژاپنی', 'ko': 'کره‌ای', 'es': 'اسپانیایی', 'it': 'ایتالیایی',
         'zh': 'چینی', 'ru': 'روسی', 'ar': 'عربی', 'hi': 'هندی'
     };
 
+    // ============================================
     // Plugin State
+    // ============================================
+    
     let state = {
-        view: 'search',
+        view: 'search',           // 'search' | 'results' | 'details'
         query: '',
         filters: {
             yearFrom: 2000,
@@ -82,70 +94,69 @@ const MovieFinderPlugin = (() => {
         filteredResults: [],
         selectedMovie: null,
         isLoading: false,
+        isSearching: false,
         cache: new Map(),
-        filtersOpen: true
+        filtersOpen: true,
+        searchAborted: false
     };
 
-    let worker = null;
+    // ============================================
+    // Image Helpers
+    // ============================================
 
     /**
-     * Initialize Web Worker for search
+     * Build proxied image URL through weserv.nl
+     * @param {string} path - TMDB image path
+     * @param {string} type - 'poster' | 'backdrop' | 'profile'
+     * @returns {string} Proxied URL or fallback SVG
      */
-    const initWorker = () => {
-        const workerCode = `
-            self.onmessage = function(e) {
-                const { action, data } = e.data;
-                
-                if (action === 'filter') {
-                    const results = filterMovies(data.movies, data.query, data.filters);
-                    self.postMessage({ action: 'results', results });
-                }
-            };
-            
-            function filterMovies(movies, query, filters) {
-                let filtered = [...movies];
-                
-                if (query) {
-                    const q = query.toLowerCase().trim();
-                    filtered = filtered.filter(m => 
-                        (m.title && m.title.toLowerCase().includes(q)) ||
-                        (m.original_title && m.original_title.toLowerCase().includes(q)) ||
-                        (m.overview && m.overview.toLowerCase().includes(q))
-                    );
-                }
-                
-                if (filters.minRating > 0) {
-                    filtered = filtered.filter(m => m.vote_average >= filters.minRating);
-                }
-                
-                if (filters.genres && filters.genres.length > 0) {
-                    filtered = filtered.filter(m => 
-                        m.genres && m.genres.some(g => filters.genres.includes(g.id))
-                    );
-                }
-                
-                if (filters.countries && filters.countries.length > 0) {
-                    filtered = filtered.filter(m => 
-                        m.origin_country && m.origin_country.some(c => filters.countries.includes(c))
-                    );
-                }
-                
-                if (filters.languages && filters.languages.length > 0) {
-                    filtered = filtered.filter(m => 
-                        m.original_language && filters.languages.includes(m.original_language)
-                    );
-                }
-                
-                return filtered;
-            }
-        `;
-
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        worker = new Worker(URL.createObjectURL(blob));
+    const getImageUrl = (path, type = 'poster') => {
+        if (!path) {
+            return type === 'backdrop' ? FALLBACK_BACKDROP : 
+                   type === 'profile' ? FALLBACK_PROFILE : FALLBACK_POSTER;
+        }
+        
+        const size = type === 'backdrop' ? BACKDROP_SIZE :
+                     type === 'profile' ? PROFILE_SIZE : POSTER_SIZE;
+        
+        const tmdbUrl = `${TMDB_IMAGE_BASE}${size}${path}`;
+        return `${IMAGE_PROXY}${encodeURIComponent(tmdbUrl)}`;
     };
+
+    /**
+     * Handle image load error — show fallback SVG
+     * @param {HTMLImageElement} img - Image element
+     * @param {string} type - 'poster' | 'backdrop' | 'profile'
+     */
+    const handleImageError = (img, type = 'poster') => {
+        if (!img) return;
+        if (img.src.includes('data:image/svg+xml')) return; // Prevent infinite loop
+        
+        img.src = type === 'backdrop' ? FALLBACK_BACKDROP :
+                  type === 'profile' ? FALLBACK_PROFILE : FALLBACK_POSTER;
+        img.classList.add('fallback-image');
+    };
+
+    /**
+     * Format currency amount
+     * @param {number} amount - Amount in dollars
+     * @returns {string} Formatted currency string
+     */
+    const formatCurrency = (amount) => {
+        if (!amount || amount === 0) return '—';
+        if (amount >= 1000000000) return `$${(amount / 1000000000).toFixed(1)}B`;
+        if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
+        return `$${(amount / 1000).toFixed(1)}K`;
+    };
+
+    // ============================================
+    // Data Loading
+    // ============================================
 
     /**
      * Load movie data for a specific year
+     * @param {number} year - Year to load
+     * @returns {Promise<Array>} Array of movie objects
      */
     const loadYearData = async (year) => {
         if (state.cache.has(year)) {
@@ -163,13 +174,16 @@ const MovieFinderPlugin = (() => {
             state.cache.set(year, movies);
             return movies;
         } catch (error) {
-            console.error(`Failed to load year ${year}:`, error);
+            console.warn(`Failed to load year ${year}:`, error.message);
             return [];
         }
     };
 
     /**
-     * Load all years in range
+     * Load all years in range with batching
+     * @param {number} fromYear - Start year
+     * @param {number} toYear - End year
+     * @returns {Promise<Array>} Combined movies array
      */
     const loadAllData = async (fromYear, toYear) => {
         const years = [];
@@ -200,80 +214,118 @@ const MovieFinderPlugin = (() => {
         return allMovies;
     };
 
+    // ============================================
+    // Search Engine
+    // ============================================
+
     /**
-     * Perform search
+     * Filter movies locally (synchronous, no worker needed)
+     * @param {Array} movies - Movies to filter
+     * @param {string} query - Search query
+     * @param {Object} filters - Filter criteria
+     * @returns {Array} Filtered movies
+     */
+    const filterMoviesLocal = (movies, query, filters) => {
+        let filtered = [...movies];
+
+        if (query) {
+            const q = query.toLowerCase().trim();
+            filtered = filtered.filter(m =>
+                (m.title && m.title.toLowerCase().includes(q)) ||
+                (m.original_title && m.original_title.toLowerCase().includes(q)) ||
+                (m.overview && m.overview.toLowerCase().includes(q))
+            );
+        }
+
+        if (filters.minRating > 0) {
+            filtered = filtered.filter(m => m.vote_average >= filters.minRating);
+        }
+
+        if (filters.genres && filters.genres.length > 0) {
+            filtered = filtered.filter(m =>
+                m.genres && m.genres.some(g => filters.genres.includes(g.id))
+            );
+        }
+
+        if (filters.countries && filters.countries.length > 0) {
+            filtered = filtered.filter(m =>
+                m.origin_country && m.origin_country.some(c => filters.countries.includes(c))
+            );
+        }
+
+        if (filters.languages && filters.languages.length > 0) {
+            filtered = filtered.filter(m =>
+                m.original_language && filters.languages.includes(m.original_language)
+            );
+        }
+
+        return filtered;
+    };
+
+    /**
+     * Perform progressive search — loads year by year, shows results incrementally
      */
     const performSearch = async () => {
+        // Abort previous search if running
+        if (state.isSearching) {
+            state.searchAborted = true;
+            await Utils.wait(150);
+        }
+
+        state.isSearching = true;
+        state.searchAborted = false;
         state.isLoading = true;
+        state.results = [];
+        state.view = 'results';
         renderView();
 
-        try {
-            const movies = await loadAllData(state.filters.yearFrom, state.filters.yearTo);
-            
-            worker.postMessage({
-                action: 'filter',
-                data: {
-                    movies,
-                    query: state.query,
-                    filters: state.filters
-                }
-            });
+        const years = [];
+        for (let y = state.filters.yearFrom; y <= state.filters.yearTo; y++) {
+            years.push(y);
+        }
 
-            worker.onmessage = (e) => {
-                if (e.data.action === 'results') {
-                    state.results = e.data.results;
-                    state.view = 'results';
-                    state.isLoading = false;
+        let totalChecked = 0;
+
+        for (const year of years) {
+            if (state.searchAborted) break;
+
+            try {
+                const movies = await loadYearData(year);
+                if (movies.length === 0) continue;
+
+                totalChecked += movies.length;
+                const filtered = filterMoviesLocal(movies, state.query, state.filters);
+                
+                if (filtered.length > 0) {
+                    state.results = [...state.results, ...filtered];
+                    // Progressive UI update
                     renderView();
-                    EventBus.emit('movie-finder:search:complete', {
-                        count: state.results.length
-                    });
+                    bindEvents();
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
                 }
-            };
-        } catch (error) {
-            console.error('Search failed:', error);
-            state.isLoading = false;
-            state.view = 'search';
-            renderView();
+            } catch (error) {
+                console.warn(`Search error for year ${year}:`, error.message);
+            }
         }
+
+        state.isLoading = false;
+        state.isSearching = false;
+        renderView();
+        bindEvents();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+        EventBus.emit('movie-finder:search:complete', {
+            count: state.results.length,
+            totalChecked
+        });
     };
 
-    /**
-     * Get image URL with fallback handling
-     */
-    const getImageUrl = (path, type = 'poster') => {
-        if (!path) {
-            return type === 'backdrop' ? FALLBACK_BACKDROP : 
-                   type === 'profile' ? FALLBACK_PROFILE : FALLBACK_POSTER;
-        }
-        const base = type === 'backdrop' ? `${IMAGE_BASE}${BACKDROP_SIZE}` :
-                     type === 'profile' ? `${IMAGE_BASE}${PROFILE_SIZE}` :
-                     `${IMAGE_BASE}${POSTER_SIZE}`;
-        return base + path;
-    };
+    // ============================================
+    // View Rendering
+    // ============================================
 
     /**
-     * Handle image load error
-     */
-    const handleImageError = (img, type = 'poster') => {
-        if (!img) return;
-        img.src = type === 'backdrop' ? FALLBACK_BACKDROP :
-                  type === 'profile' ? FALLBACK_PROFILE : FALLBACK_POSTER;
-        img.classList.add('fallback-image');
-    };
-
-    /**
-     * Format currency
-     */
-    const formatCurrency = (amount) => {
-        if (!amount || amount === 0) return 'نامشخص';
-        if (amount >= 1000000000) return `$${(amount / 1000000000).toFixed(1)}B`;
-        if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
-        return `$${(amount / 1000).toFixed(1)}K`;
-    };
-
-    /**
-     * Render the current view
+     * Render the current view based on state
      */
     const renderView = () => {
         const container = document.getElementById('plugin-container');
@@ -288,9 +340,6 @@ const MovieFinderPlugin = (() => {
                 break;
             case 'details':
                 container.innerHTML = renderDetailsView();
-                break;
-            case 'loading':
-                container.innerHTML = renderLoadingView();
                 break;
         }
 
@@ -371,13 +420,11 @@ const MovieFinderPlugin = (() => {
                     </div>
                 </div>
             </div>
-
-            ${state.isLoading ? renderLoadingView() : ''}
         </div>
     `;
 
     /**
-     * Render Loading View
+     * Render Loading Indicator
      */
     const renderLoadingView = () => `
         <div class="search-loading">
@@ -390,27 +437,32 @@ const MovieFinderPlugin = (() => {
      */
     const renderResultsView = () => `
         <div class="movie-finder">
-            <button class="back-button" id="btn-back-to-search">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                بازگشت به جستجو
-            </button>
-            
-            <div class="results-header">
-                <h2 class="section-title">نتایج جستجو</h2>
+            <div class="results-top-bar">
+                <button class="back-button" id="btn-back-to-search">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    جستجوی جدید
+                </button>
                 <span class="results-count">
-                    <strong>${state.results.length.toLocaleString('fa-IR')}</strong> فیلم یافت شد
+                    ${state.isLoading && state.results.length === 0 
+                        ? 'در حال جستجو...' 
+                        : `<strong>${state.results.length.toLocaleString('fa-IR')}</strong> فیلم یافت شد`}
                 </span>
             </div>
 
-            ${state.results.length === 0 ? `
+            ${state.isLoading && state.results.length === 0 ? `
+                <div class="search-loading">
+                    <div class="search-spinner"></div>
+                    <span style="color: var(--color-text-muted); margin-top: var(--space-md); font-size: var(--font-size-sm);">در حال جستجو در دیتابیس فیلم‌ها...</span>
+                </div>
+            ` : state.results.length === 0 ? `
                 <div class="empty-state">
                     <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
                     <span class="empty-state-text">فیلمی یافت نشد</span>
-                    <span class="empty-state-sub">فیلترهای دیگری را امتحان کنید</span>
+                    <span class="empty-state-sub">فیلترهای دیگری را امتحان کنید یا عبارت جستجو را تغییر دهید</span>
                 </div>
             ` : `
                 <div class="results-grid">
@@ -441,12 +493,13 @@ const MovieFinderPlugin = (() => {
                         </div>
                     `).join('')}
                 </div>
+                ${state.isLoading ? '<div class="search-loading" style="padding: var(--space-lg);"><div class="search-spinner" style="width:24px;height:24px;border-width:2px;"></div></div>' : ''}
             `}
         </div>
     `;
 
     /**
-     * Render Details View
+     * Render Details View — Compact optimized layout
      */
     const renderDetailsView = () => {
         const movie = state.selectedMovie;
@@ -456,6 +509,7 @@ const MovieFinderPlugin = (() => {
         const cast = movie.credits?.cast?.slice(0, 6) || [];
         const companies = movie.production_companies || [];
         const director = movie.credits?.crew?.find(c => c.job === 'Director');
+        const genres = movie.genres || [];
 
         return `
             <div class="movie-finder">
@@ -466,48 +520,79 @@ const MovieFinderPlugin = (() => {
                     بازگشت به نتایج
                 </button>
 
-                <div class="movie-details">
-                    <div class="details-hero">
-                        <img class="details-backdrop" 
-                             src="${getImageUrl(movie.backdrop_path, 'backdrop')}" 
-                             alt=""
-                             onerror="MovieFinderPlugin.handleImageError(this, 'backdrop')">
-                        <div class="details-backdrop-gradient"></div>
-                        <div class="details-hero-content">
-                            <div class="details-poster">
-                                <img src="${getImageUrl(movie.poster_path, 'poster')}" 
-                                     alt="${Utils.escapeHtml(movie.title)}"
-                                     onerror="MovieFinderPlugin.handleImageError(this, 'poster')">
-                            </div>
-                            <div class="details-info">
-                                <h1 class="details-title">${Utils.escapeHtml(movie.title)}</h1>
-                                ${movie.original_title !== movie.title ? `
-                                    <span class="details-original-title">${Utils.escapeHtml(movie.original_title)}</span>
+                <div class="movie-details-compact">
+                    
+                    <!-- Header Row: Poster + Info -->
+                    <div class="details-header-row glass-base">
+                        <div class="details-poster-compact">
+                            <img src="${getImageUrl(movie.poster_path, 'poster')}" 
+                                 alt="${Utils.escapeHtml(movie.title)}"
+                                 onerror="MovieFinderPlugin.handleImageError(this, 'poster')">
+                        </div>
+                        <div class="details-header-info">
+                            <h1 class="details-title">${Utils.escapeHtml(movie.title)}</h1>
+                            ${movie.original_title !== movie.title ? `<span class="details-original-title">${Utils.escapeHtml(movie.original_title)}</span>` : ''}
+                            ${movie.tagline ? `<span class="details-tagline">"${Utils.escapeHtml(movie.tagline)}"</span>` : ''}
+                            
+                            <div class="details-meta-row">
+                                ${movie.vote_average ? `
+                                    <span class="details-rating-badge">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        ${movie.vote_average.toFixed(1)}
+                                        <small>(${(movie.vote_count || 0).toLocaleString('fa-IR')} رأی)</small>
+                                    </span>
                                 ` : ''}
-                                ${movie.tagline ? `
-                                    <span class="details-tagline">"${Utils.escapeHtml(movie.tagline)}"</span>
-                                ` : ''}
-                                <div class="details-meta-row">
-                                    ${movie.vote_average ? `
-                                        <span class="details-rating-badge">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                            ${movie.vote_average.toFixed(1)} (${(movie.vote_count || 0).toLocaleString('fa-IR')})
-                                        </span>
-                                    ` : ''}
+                                <span class="details-meta-dot"></span>
+                                <span class="details-meta-item">📅 ${year}</span>
+                                ${movie.runtime ? `
                                     <span class="details-meta-dot"></span>
-                                    <span class="details-meta-item">${year}</span>
-                                    ${movie.runtime ? `
-                                        <span class="details-meta-dot"></span>
-                                        <span class="details-meta-item">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                            ${movie.runtime} دقیقه
-                                        </span>
-                                    ` : ''}
-                                </div>
+                                    <span class="details-meta-item">🕐 ${movie.runtime} دقیقه</span>
+                                ` : ''}
+                                ${movie.status ? `
+                                    <span class="details-meta-dot"></span>
+                                    <span class="details-meta-item">${movie.status === 'Released' ? '✅ منتشر شده' : movie.status}</span>
+                                ` : ''}
                             </div>
+
+                            ${genres.length > 0 ? `
+                                <div class="genres-list">
+                                    ${genres.map(g => `<span class="genre-tag">${GENRE_MAP[g.id] || g.name}</span>`).join('')}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
 
+                    <!-- Quick Stats Row -->
+                    <div class="details-quick-stats">
+                        ${movie.budget > 0 ? `
+                            <div class="quick-stat">
+                                <span class="qs-label">بودجه</span>
+                                <span class="qs-value">${formatCurrency(movie.budget)}</span>
+                            </div>
+                        ` : ''}
+                        ${movie.revenue > 0 ? `
+                            <div class="quick-stat">
+                                <span class="qs-label">فروش</span>
+                                <span class="qs-value">${formatCurrency(movie.revenue)}</span>
+                            </div>
+                        ` : ''}
+                        <div class="quick-stat">
+                            <span class="qs-label">محبوبیت</span>
+                            <span class="qs-value">${(movie.popularity || 0).toFixed(1)}</span>
+                        </div>
+                        <div class="quick-stat">
+                            <span class="qs-label">زبان اصلی</span>
+                            <span class="qs-value">${LANGUAGE_MAP[movie.original_language] || movie.original_language || '—'}</span>
+                        </div>
+                        ${movie.production_countries && movie.production_countries.length > 0 ? `
+                            <div class="quick-stat">
+                                <span class="qs-label">کشور</span>
+                                <span class="qs-value">${movie.production_countries.map(c => COUNTRY_MAP[c.iso_3166_1] || c.name).join('، ')}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Overview -->
                     ${movie.overview ? `
                         <div class="details-section">
                             <h3 class="details-section-title">خلاصه داستان</h3>
@@ -515,52 +600,13 @@ const MovieFinderPlugin = (() => {
                         </div>
                     ` : ''}
 
-                    <div class="details-grid">
-                        ${movie.budget > 0 ? `
-                            <div class="details-grid-item">
-                                <span class="grid-item-label">بودجه</span>
-                                <span class="grid-item-value">${formatCurrency(movie.budget)}</span>
-                            </div>
+                    <!-- Director + Cast -->
+                    <div class="details-section">
+                        <h3 class="details-section-title">عوامل کلیدی</h3>
+                        ${director ? `
+                            <span class="director-name">🎬 کارگردان: <strong>${Utils.escapeHtml(director.name)}</strong></span>
                         ` : ''}
-                        ${movie.revenue > 0 ? `
-                            <div class="details-grid-item">
-                                <span class="grid-item-label">فروش</span>
-                                <span class="grid-item-value">${formatCurrency(movie.revenue)}</span>
-                            </div>
-                        ` : ''}
-                        <div class="details-grid-item">
-                            <span class="grid-item-label">محبوبیت</span>
-                            <span class="grid-item-value">${(movie.popularity || 0).toFixed(1)}</span>
-                        </div>
-                        ${movie.status ? `
-                            <div class="details-grid-item">
-                                <span class="grid-item-label">وضعیت</span>
-                                <span class="grid-item-value">${movie.status === 'Released' ? 'منتشر شده' : movie.status}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    ${movie.genres && movie.genres.length > 0 ? `
-                        <div class="details-section">
-                            <h3 class="details-section-title">ژانرها</h3>
-                            <div class="genres-list">
-                                ${movie.genres.map(g => `
-                                    <span class="genre-tag">${GENRE_MAP[g.id] || g.name}</span>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${director ? `
-                        <div class="details-section">
-                            <h3 class="details-section-title">کارگردان</h3>
-                            <span style="color: var(--color-text-primary); font-size: var(--font-size-base);">${Utils.escapeHtml(director.name)}</span>
-                        </div>
-                    ` : ''}
-
-                    ${cast.length > 0 ? `
-                        <div class="details-section">
-                            <h3 class="details-section-title">بازیگران</h3>
+                        ${cast.length > 0 ? `
                             <div class="cast-list">
                                 ${cast.map(actor => `
                                     <div class="cast-card">
@@ -576,9 +622,10 @@ const MovieFinderPlugin = (() => {
                                     </div>
                                 `).join('')}
                             </div>
-                        </div>
-                    ` : ''}
+                        ` : ''}
+                    </div>
 
+                    <!-- Production Companies -->
                     ${companies.length > 0 ? `
                         <div class="details-section">
                             <h3 class="details-section-title">شرکت‌های تولید</h3>
@@ -589,15 +636,30 @@ const MovieFinderPlugin = (() => {
                             </div>
                         </div>
                     ` : ''}
+
+                    <!-- Backdrop Image -->
+                    <div class="details-backdrop-wrapper">
+                        <img class="details-backdrop-full" 
+                             src="${getImageUrl(movie.backdrop_path, 'backdrop')}" 
+                             alt="${Utils.escapeHtml(movie.title)}"
+                             loading="lazy"
+                             onerror="MovieFinderPlugin.handleImageError(this, 'backdrop')">
+                    </div>
+
                 </div>
             </div>
         `;
     };
 
+    // ============================================
+    // Event Binding
+    // ============================================
+
     /**
-     * Bind events to DOM elements
+     * Bind all UI events after render
      */
     const bindEvents = () => {
+        // Search button
         const searchBtn = document.getElementById('btn-search');
         if (searchBtn) {
             searchBtn.addEventListener('click', () => {
@@ -606,6 +668,7 @@ const MovieFinderPlugin = (() => {
             });
         }
 
+        // Search on Enter key
         const searchInput = document.getElementById('movie-search-input');
         if (searchInput) {
             searchInput.addEventListener('keydown', (e) => {
@@ -619,6 +682,7 @@ const MovieFinderPlugin = (() => {
             }, 300));
         }
 
+        // Filters toggle
         const filtersHeader = document.getElementById('filters-header');
         if (filtersHeader) {
             filtersHeader.addEventListener('click', () => {
@@ -630,6 +694,7 @@ const MovieFinderPlugin = (() => {
             });
         }
 
+        // Filter inputs
         const yearFrom = document.getElementById('filter-year-from');
         const yearTo = document.getElementById('filter-year-to');
         const minRating = document.getElementById('filter-min-rating');
@@ -638,6 +703,7 @@ const MovieFinderPlugin = (() => {
         if (yearTo) yearTo.addEventListener('change', (e) => { state.filters.yearTo = parseInt(e.target.value) || 2026; });
         if (minRating) minRating.addEventListener('change', (e) => { state.filters.minRating = parseFloat(e.target.value) || 0; });
 
+        // Genre chips
         document.querySelectorAll('.filter-chip[data-genre]').forEach(chip => {
             chip.addEventListener('click', () => {
                 const genreId = parseInt(chip.dataset.genre);
@@ -651,6 +717,7 @@ const MovieFinderPlugin = (() => {
             });
         });
 
+        // Apply filters
         const applyBtn = document.getElementById('btn-apply-filters');
         if (applyBtn) {
             applyBtn.addEventListener('click', () => {
@@ -659,6 +726,7 @@ const MovieFinderPlugin = (() => {
             });
         }
 
+        // Clear filters
         const clearBtn = document.getElementById('btn-clear-filters');
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
@@ -668,6 +736,7 @@ const MovieFinderPlugin = (() => {
             });
         }
 
+        // Back to search
         const backToSearch = document.getElementById('btn-back-to-search');
         if (backToSearch) {
             backToSearch.addEventListener('click', () => {
@@ -677,6 +746,7 @@ const MovieFinderPlugin = (() => {
             });
         }
 
+        // Back to results
         const backToResults = document.getElementById('btn-back-to-results');
         if (backToResults) {
             backToResults.addEventListener('click', () => {
@@ -686,6 +756,7 @@ const MovieFinderPlugin = (() => {
             });
         }
 
+        // Movie card clicks → details view
         document.querySelectorAll('.movie-card[data-movie-id]').forEach(card => {
             card.addEventListener('click', () => {
                 const movieId = parseInt(card.dataset.movieId);
@@ -699,31 +770,37 @@ const MovieFinderPlugin = (() => {
         });
     };
 
+    // ============================================
+    // Plugin Lifecycle
+    // ============================================
+
     /**
-     * Initialize plugin
+     * Initialize plugin — called by PluginContainer
+     * @param {HTMLElement} container - Container element
      */
     const init = async (container) => {
-        initWorker();
         state.view = 'search';
         state.results = [];
         state.selectedMovie = null;
+        state.isLoading = false;
+        state.isSearching = false;
+        state.searchAborted = false;
         renderView();
         EventBus.emit('tool:mounted', { toolId: 'movie-finder' });
     };
 
     /**
-     * Destroy plugin — cleanup
+     * Destroy plugin — cleanup resources
      */
     const destroy = () => {
-        if (worker) {
-            worker.terminate();
-            worker = null;
-        }
+        state.searchAborted = true;
         state.cache.clear();
         EventBus.emit('tool:destroyed', { toolId: 'movie-finder' });
     };
 
-    // Public API — only ONE return statement
+    // ============================================
+    // Public API
+    // ============================================
     return {
         init,
         destroy,
