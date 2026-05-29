@@ -1,7 +1,7 @@
 /**
  * app.js — Application Bootstrap & Runtime Verification
  * Initializes all libraries, verifies runtime, prepares SPA shell
- * Phase 3: Sidebar, Dashboard & Data Layer with Reactive Bindings
+ * Phase 4: Sidebar, Dashboard, Data Layer & Plugin System
  * Part of Vanilla Micro-SPA Tool Platform Foundation
  */
 
@@ -335,7 +335,7 @@
 
     /**
      * Initialize Tool Card Click Handler
-     * Prepares for future plugin loading system
+     * Routes clicks through Plugin System
      */
     const initToolCardActions = () => {
         const toolCards = document.querySelectorAll('.bento-card[data-tool]');
@@ -365,21 +365,26 @@
     };
 
     /**
-     * Handle tool opening (placeholder for Phase 4 plugin system)
+     * Handle tool opening via Plugin System (Phase 4)
+     * Routes to PluginContainer for registered plugins, shows toast for unregistered
      * @param {string} toolName - Tool identifier
      */
     const handleToolOpen = (toolName) => {
-        // Update active tool in state
+        // Check if plugin is registered in PluginRegistry
+        if (typeof PluginRegistry !== 'undefined' && PluginRegistry.has(toolName)) {
+            // Plugin is registered — use Plugin System
+            PluginContainer.loadAndMount(toolName);
+            return;
+        }
+
+        // Plugin not registered — show toast notification
         AppState.setState('ui.activeTool', toolName);
-        
-        // Emit tool loading event
         EventBus.emit(EventBus.Events.TOOL_LOADING, { tool: toolName });
         
-        // For now, show toast notification (plugin system comes in Phase 4)
         if (typeof Toastify !== 'undefined') {
             Toastify({
-                text: `ابزار "${toolName}" انتخاب شد`,
-                duration: 2000,
+                text: `ابزار "${toolName}" هنوز در دسترس نیست`,
+                duration: 3000,
                 gravity: 'bottom',
                 position: 'left',
                 style: {
@@ -395,7 +400,7 @@
             }).showToast();
         }
         
-        console.log(`🔧 Tool selected: ${toolName} (plugin system coming in Phase 4)`);
+        console.log(`🔧 Tool selected: ${toolName} (not yet registered as plugin)`);
     };
 
     /**
@@ -421,9 +426,13 @@
                 EventBus.emit('dashboard:refresh');
                 
                 // Refresh data
-                ActionRegistry.updateStats();
-                DOMBindings.updateStatCards();
-                DOMBindings.updateActivityList();
+                if (typeof ActionRegistry !== 'undefined') {
+                    ActionRegistry.updateStats();
+                }
+                if (typeof DOMBindings !== 'undefined') {
+                    DOMBindings.updateStatCards();
+                    DOMBindings.updateActivityList();
+                }
                 
                 // Toast notification
                 if (typeof Toastify !== 'undefined') {
@@ -570,6 +579,11 @@
         setTimeout(() => {
             simulateInitialHistory();
         }, 500);
+
+        // ============================================
+        // Phase 4 — Initialize Plugin System
+        // ============================================
+        PluginRegistry.initDefaultPlugins();
 
         // Mark app as ready
         AppState.setState('app.ready', true);
