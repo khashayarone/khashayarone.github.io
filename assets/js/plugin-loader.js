@@ -9,6 +9,8 @@ const PluginLoader = (() => {
 
     // Track loaded CSS files to avoid duplicates
     const loadedCSS = new Set();
+    // Track loaded JS files to avoid duplicates
+    const loadedJS = new Set();
 
     /**
      * Load a CSS file dynamically
@@ -16,7 +18,7 @@ const PluginLoader = (() => {
      * @returns {Promise} Resolves when CSS is loaded
      */
     const loadCSS = (path) => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             // Check if already loaded
             if (loadedCSS.has(path)) {
                 resolve();
@@ -33,7 +35,8 @@ const PluginLoader = (() => {
             };
             link.onerror = () => {
                 console.warn(`⚠️ CSS failed to load: ${path}`);
-                resolve(); // Non-critical, resolve anyway
+                // Non-critical, resolve anyway so plugin can still try to work
+                resolve();
             };
             document.head.appendChild(link);
         });
@@ -46,35 +49,128 @@ const PluginLoader = (() => {
      */
     const loadJS = (path) => {
         return new Promise((resolve, reject) => {
+            // Check if already loaded
+            if (loadedJS.has(path)) {
+                console.log(`📜 JS already loaded: ${path}`);
+                // Even if loaded, give a small tick for any pending execution
+                setTimeout(resolve, 50);
+                return;
+            }
+
             const script = document.createElement('script');
             script.src = path;
             script.async = true;
+            
             script.onload = () => {
+                loadedJS.add(path);
                 console.log(`📜 JS loaded: ${path}`);
-                resolve();
+                // Small delay to ensure any initialization code has run
+                setTimeout(resolve, 100);
             };
+            
             script.onerror = () => {
                 console.error(`❌ JS failed to load: ${path}`);
                 reject(new Error(`Failed to load script: ${path}`));
             };
+            
             document.head.appendChild(script);
         });
     };
 
     /**
+     * Find plugin instance in global scope
+     * Uses multiple strategies to locate the plugin object
+     * @param {string} pluginId - Plugin identifier
+     * @returns {Object|null} Plugin instance with init() method
+     */
+    const findPluginInstance = (pluginId) => {
+        // Map plugin IDs to expected global variable names
+        const instanceMap = {
+            'movie-finder': 'MovieFinderPlugin',
+            'proxy-finder': 'ProxyFinderPlugin',
+            'youtube-downloader': 'YouTubeDownloaderPlugin',
+            'youtube-search': 'YouTubeSearchPlugin',
+            'soundcloud-downloader': 'SoundCloudDownloaderPlugin',
+            'json-formatter': 'JSONFormatterPlugin',
+            'image-optimizer': 'ImageOptimizerPlugin',
+            'color-picker': 'ColorPickerPlugin',
+            'base64-encoder': 'Base64EncoderPlugin',
+            'github-actions': 'GitHubActionsPlugin'
+        };
+
+        const globalName = instanceMap[pluginId];
+        
+        // Strategy 1: Direct window lookup by exact name
+        if (globalName && window[globalName]) {
+            const obj = window[globalName];
+            if (typeof obj === 'object' && obj !== null && typeof obj.init === 'function') {
+                console.log(`✅ Plugin instance found via window.${globalName}`);
+                return obj;
+            }
+        }
+
+        // Strategy 2: Search all window properties for objects with init() method
+        const candidates = [];
+        for (const key of Object.keys(window)) {
+            try {
+                const obj = window[key];
+                if (obj && typeof obj === 'object' && obj !== window && obj !== null && typeof obj.init === 'function') {
+                    candidates.push({ key, obj });
+                }
+            } catch (e) {
+                // Skip inaccessible properties
+            }
+        }
+
+        // Strategy 2a: Fuzzy match on plugin ID
+        if (globalName) {
+            const exactMatch = candidates.find(c => c.key === globalName);
+            if (exactMatch) {
+                console.log(`✅ Plugin instance found via candidate match: window.${exactMatch.key}`);
+                return exactMatch.obj;
+            }
+        }
+
+        // Strategy 2b: Match by naming pattern
+        const idNormalized = pluginId.replace(/-/g, '').toLowerCase();
+        const fuzzyMatch = candidates.find(c => {
+            const keyLower = c.key.toLowerCase();
+            return keyLower.includes(idNormalized) || idNormalized.includes(keyLower);
+        });
+
+        if (fuzzyMatch) {
+            console.log(`✅ Plugin instance found via fuzzy match: window.${fuzzyMatch.key}`);
+            return fuzzyMatch.obj;
+        }
+
+        // Strategy 2c: If only one candidate with init(), use it as fallback
+        if (candidates.length === 1) {
+            console.log(`⚠️ Using only available plugin-like object: window.${candidates[0].key}`);
+            return candidates[0].obj;
+        }
+
+        // Debug: log all candidates to help diagnose
+        console.error(`❌ Plugin instance not found for "${pluginId}".`);
+        console.error(`   Expected global name: ${globalName || 'unknown'}`);
+        console.error(`   Candidates with init() method:`, candidates.map(c => c.key));
+        
+        return null;
+    };
+
+    /**
      * Load a plugin by ID
      * @param {string} pluginId - Plugin identifier
-     * @returns {Promise<Object>} Plugin definition with instance
+     * @returns {Promise<Object>} Plugin definition with _instance populated
      */
     const load = async (pluginId) => {
         const plugin = PluginRegistry.get(pluginId);
         
         if (!plugin) {
-            throw new Error(`Plugin "${pluginId}" not registered`);
+            throw new Error(`Plugin "${pluginId}" not registered in PluginRegistry`);
         }
 
-        // Check if already loaded
-        if (plugin._loaded && plugin._instance) {
+        // Check if already loaded and has valid instance
+        if (plugin._loaded && plugin._instance && typeof plugin._instance.init === 'function') {
             console.log(`📦 Plugin "${pluginId}" already loaded, reusing instance`);
             return plugin;
         }
@@ -90,22 +186,34 @@ const PluginLoader = (() => {
         AppState.setState('ui.loadingMessage', `در حال بارگذاری ${plugin.title}...`);
 
         try {
-            // Load CSS first (non-blocking)
+            // Load CSS first (non-blocking, fire and forget)
             if (plugin.cssPath) {
-                await loadCSS(plugin.cssPath);
+                loadCSS(plugin.cssPath).catch(err => {
+                    console.warn(`⚠️ CSS load warning for ${pluginId}:`, err);
+                });
             }
 
-            // Load JS
+            // Load JS (blocking — must complete before finding instance)
             if (plugin.jsPath) {
                 await loadJS(plugin.jsPath);
+            } else {
+                throw new Error(`Plugin "${pluginId}" has no jsPath defined`);
             }
 
             // Find plugin instance in global scope
-            // Plugin should expose itself as window[PluginName] or similar
             const instance = findPluginInstance(pluginId);
             
-            if (!instance || typeof instance.init !== 'function') {
-                throw new Error(`Plugin "${pluginId}" does not expose a valid init() method`);
+            if (!instance) {
+                throw new Error(
+                    `Plugin "${pluginId}" loaded but instance not found in global scope. ` +
+                    `Make sure the plugin script exposes itself via window.${instanceMap[pluginId] || pluginId + 'Plugin'}`
+                );
+            }
+
+            if (typeof instance.init !== 'function') {
+                throw new Error(
+                    `Plugin "${pluginId}" instance found but does not have an init() method`
+                );
             }
 
             // Mark as loaded
@@ -118,6 +226,8 @@ const PluginLoader = (() => {
             });
 
             console.log(`✅ Plugin "${pluginId}" loaded successfully`);
+            
+            // Return updated plugin info
             return PluginRegistry.get(pluginId);
 
         } catch (error) {
@@ -128,48 +238,14 @@ const PluginLoader = (() => {
                 error: error.message 
             });
 
+            // Clean up failed load state
+            PluginRegistry.markUnloaded(pluginId);
+
             throw error;
         } finally {
             AppState.setState('ui.isLoading', false);
             AppState.setState('ui.loadingMessage', '');
         }
-    };
-
-    /**
-     * Find plugin instance in global scope
-     * Maps plugin IDs to expected global variable names
-     * @param {string} pluginId - Plugin identifier
-     * @returns {Object|null} Plugin instance
-     */
-    const findPluginInstance = (pluginId) => {
-        // Map plugin IDs to expected global names
-        const instanceMap = {
-            'movie-finder': 'MovieFinderPlugin',
-            'json-formatter': 'JSONFormatterPlugin',
-            'image-optimizer': 'ImageOptimizerPlugin',
-            'color-picker': 'ColorPickerPlugin',
-            'base64-encoder': 'Base64EncoderPlugin',
-            'github-actions': 'GitHubActionsPlugin'
-        };
-
-        const globalName = instanceMap[pluginId];
-        
-        if (globalName && window[globalName]) {
-            return window[globalName];
-        }
-
-        // Fallback: search window for any object with matching init method
-        for (const key of Object.keys(window)) {
-            const obj = window[key];
-            if (obj && typeof obj === 'object' && typeof obj.init === 'function') {
-                // Check if this is our plugin by trying to match naming pattern
-                if (key.toLowerCase().includes(pluginId.replace(/-/g, '').toLowerCase())) {
-                    return obj;
-                }
-            }
-        }
-
-        return null;
     };
 
     /**
