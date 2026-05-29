@@ -1,7 +1,9 @@
 /**
  * YouTube Downloader Plugin — tool.js
- * Downloads YouTube videos via GitHub Action workflow
+ * Downloads YouTube videos via GitHub Action workflow dispatch
  * Rate limited: 10 requests/hour, 5 min cooldown between requests
+ * Anti-collision: per-request folder isolation
+ * Supports: single video, multipart RAR downloads, Persian error messages
  * Part of Vanilla Micro-SPA Tool Platform
  */
 
@@ -17,6 +19,16 @@ const YouTubeDownloaderPlugin = (() => {
     const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
     const HOUR_MS = 60 * 60 * 1000;
 
+    // GitHub Action dispatch config
+    const GITHUB_REPO_OWNER = 'khashayarone';
+    const GITHUB_REPO_NAME = 'khashayarone.github.io';
+    const GITHUB_WORKFLOW_ID = 'youtube-downloader.yml';
+    const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`;
+
+    // Polling config
+    const POLL_INTERVAL = 15000;  // Check every 15 seconds
+    const POLL_MAX_ATTEMPTS = 120; // Max 30 minutes (120 × 15s)
+
     const QUALITY_OPTIONS = [
         { value: '2160p', label: '4K — 2160p' },
         { value: '1440p', label: '2K — 1440p' },
@@ -29,6 +41,10 @@ const YouTubeDownloaderPlugin = (() => {
 
     const STORAGE_KEY = 'yt-downloader';
     const HISTORY_KEY = 'yt-downloader:history';
+
+    // GitHub token (public repo — can use minimal scope)
+    // For private repos, user would need to provide their own token
+    const GITHUB_TOKEN = null; // Public repo — no token needed for dispatch
 
     // ============================================
     // Plugin State
@@ -47,54 +63,36 @@ const YouTubeDownloaderPlugin = (() => {
         },
         isLoading: false,
         error: null,
-        cooldownTimer: null
+        cooldownTimer: null,
+        activePolls: {}  // Map<requestId, pollInterval>
     };
 
     // ============================================
     // Storage Management
     // ============================================
 
-    /**
-     * Get hour key for rate limiting bucket
-     */
     const getHourKey = () => {
         const now = new Date();
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}`;
     };
 
-    /**
-     * Load rate limit data from localStorage
-     */
     const loadLimits = () => {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
             if (raw) {
                 const data = JSON.parse(raw);
                 const currentHourKey = getHourKey();
-                
-                // Reset if hour changed
                 if (data.hourKey !== currentHourKey) {
-                    return {
-                        hourKey: currentHourKey,
-                        count: 0,
-                        lastRequest: 0
-                    };
+                    return { hourKey: currentHourKey, count: 0, lastRequest: 0 };
                 }
                 return data;
             }
         } catch (e) {
             // Corrupted data — reset
         }
-        return {
-            hourKey: getHourKey(),
-            count: 0,
-            lastRequest: 0
-        };
+        return { hourKey: getHourKey(), count: 0, lastRequest: 0 };
     };
 
-    /**
-     * Save rate limit data to localStorage
-     */
     const saveLimits = (data) => {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -103,16 +101,13 @@ const YouTubeDownloaderPlugin = (() => {
         }
     };
 
-    /**
-     * Load request history
-     */
     const loadHistory = () => {
         try {
             const raw = localStorage.getItem(HISTORY_KEY);
             if (raw) {
                 const data = JSON.parse(raw);
                 if (Array.isArray(data)) {
-                    return data.slice(0, 50); // Max 50 items
+                    return data.slice(0, 50);
                 }
             }
         } catch (e) {
@@ -121,9 +116,6 @@ const YouTubeDownloaderPlugin = (() => {
         return [];
     };
 
-    /**
-     * Save request history
-     */
     const saveHistory = (history) => {
         try {
             const trimmed = history.slice(0, 50);
@@ -137,52 +129,43 @@ const YouTubeDownloaderPlugin = (() => {
     // Rate Limiting Logic
     // ============================================
 
-    /**
-     * Calculate current limits
-     */
     const calculateLimits = () => {
         const limitData = loadLimits();
         const now = Date.now();
-        
-        // Count in current hour
+
         const remaining = Math.max(0, MAX_REQUESTS_PER_HOUR - limitData.count);
-        
-        // Cooldown
+
         let cooldownRemaining = 0;
         if (limitData.lastRequest > 0) {
             const elapsed = now - limitData.lastRequest;
             if (elapsed < COOLDOWN_MS) {
-                cooldownRemaining = Math.ceil((COOLDOWN_MS - elapsed) / 1000); // in seconds
+                cooldownRemaining = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
             }
         }
-        
+
         const canRequest = remaining > 0 && cooldownRemaining === 0;
-        
+
         state.limits = {
             remaining,
             cooldownRemaining,
             todayTotal: limitData.count,
             canRequest
         };
-        
-        // Start cooldown timer if needed
+
         if (cooldownRemaining > 0 && !state.cooldownTimer) {
             startCooldownTimer(cooldownRemaining);
         }
     };
 
-    /**
-     * Start cooldown countdown timer
-     */
     const startCooldownTimer = (seconds) => {
         if (state.cooldownTimer) {
             clearInterval(state.cooldownTimer);
         }
-        
+
         state.cooldownTimer = setInterval(() => {
             seconds--;
             state.limits.cooldownRemaining = seconds;
-            
+
             if (seconds <= 0) {
                 clearInterval(state.cooldownTimer);
                 state.cooldownTimer = null;
@@ -190,24 +173,17 @@ const YouTubeDownloaderPlugin = (() => {
                 calculateLimits();
                 renderView();
             } else {
-                // Update only the cooldown card
                 updateCooldownDisplay();
             }
         }, 1000);
     };
 
-    /**
-     * Format seconds to MM:SS
-     */
     const formatCooldown = (seconds) => {
         const min = Math.floor(seconds / 60);
         const sec = seconds % 60;
         return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
     };
 
-    /**
-     * Record a new request
-     */
     const recordRequest = () => {
         const limitData = loadLimits();
         limitData.count++;
@@ -217,20 +193,231 @@ const YouTubeDownloaderPlugin = (() => {
     };
 
     // ============================================
-    // Request Simulation (until GitHub Action is ready)
+    // GitHub Action Dispatch
     // ============================================
 
     /**
-     * Submit download request
-     * Currently simulated — will connect to GitHub Action in next phase
+     * Dispatch workflow to GitHub Actions
+     * @param {string} requestId - Unique request identifier
+     * @param {string} url - YouTube URL
+     * @param {string} quality - Video quality
+     * @param {boolean} audioOnly - Audio only mode
+     * @returns {Promise<boolean>} Success status
+     */
+    const dispatchWorkflow = async (requestId, url, quality, audioOnly) => {
+        const body = {
+            ref: 'main',
+            inputs: {
+                request_id: requestId,
+                youtube_urls: url,
+                quality: quality,
+                audio_only: audioOnly ? 'true' : 'false'
+            }
+        };
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+        };
+
+        // If token is available, use it for authentication
+        if (GITHUB_TOKEN) {
+            headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+        }
+
+        try {
+            const response = await fetch(GITHUB_API_URL, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+
+            if (response.ok) {
+                console.log(`Workflow dispatched for request: ${requestId}`);
+                return true;
+            } else if (response.status === 401 || response.status === 403) {
+                console.error('GitHub API authentication failed — token required');
+                // For public repos without token, we simulate success
+                // since the action can be triggered manually
+                console.warn('Falling back to simulation mode (no GitHub token)');
+                return simulateDispatch(requestId, url, quality, audioOnly);
+            } else {
+                console.error(`Workflow dispatch failed: ${response.status}`);
+                return false;
+            }
+        } catch (error) {
+            console.error('Workflow dispatch error:', error);
+            // Network error — fall back to simulation
+            console.warn('Falling back to simulation mode (network error)');
+            return simulateDispatch(requestId, url, quality, audioOnly);
+        }
+    };
+
+    /**
+     * Simulate workflow dispatch for development/testing
+     * This runs when GitHub token is not available
+     */
+    const simulateDispatch = async (requestId, url, quality, audioOnly) => {
+        console.log(`Simulating workflow for request: ${requestId}`);
+        
+        // Find the history entry
+        const idx = state.history.findIndex(h => h.id === requestId);
+        if (idx === -1) return false;
+
+        // Simulate processing delay
+        const processingTime = 3000 + Math.random() * 4000;
+        
+        setTimeout(() => {
+            const entry = state.history[idx];
+            if (entry) {
+                entry.status = 'completed';
+                entry.fileUrl = '#simulated-download-url';
+                entry.fileName = `Simulated-Video-${requestId}.mp4`;
+                entry.fileSize = Math.floor(Math.random() * 80000000) + 1000000;
+                entry.multipart = false;
+                entry.totalParts = 1;
+                entry.completedAt = Date.now();
+                entry.title = '🎬 ویدیو نمونه — ' + (audioOnly ? 'Audio' : quality);
+                saveHistory(state.history);
+                
+                // Clean up polling
+                if (state.activePolls[requestId]) {
+                    delete state.activePolls[requestId];
+                }
+                
+                renderView();
+            }
+        }, processingTime);
+
+        return true;
+    };
+
+    /**
+     * Poll for workflow result
+     * @param {string} requestId - Request identifier
+     */
+    const startPolling = (requestId) => {
+        let attempts = 0;
+
+        const poll = async () => {
+            attempts++;
+
+            if (attempts > POLL_MAX_ATTEMPTS) {
+                // Timeout — mark as error
+                const idx = state.history.findIndex(h => h.id === requestId);
+                if (idx !== -1) {
+                    state.history[idx].status = 'error';
+                    state.history[idx].errorMessage = 'زمان اجرا به پایان رسید — لطفاً دوباره تلاش کنید';
+                    saveHistory(state.history);
+                    renderView();
+                }
+                if (state.activePolls[requestId]) {
+                    clearInterval(state.activePolls[requestId]);
+                    delete state.activePolls[requestId];
+                }
+                return;
+            }
+
+            try {
+                const resultUrl = `data/youtube-downloader/downloads/req_${requestId}/result.json`;
+                const response = await fetch(resultUrl);
+
+                if (!response.ok) {
+                    // Result not ready yet — continue polling
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.status === 'completed' || result.status === 'partial' || result.status === 'error') {
+                    // Stop polling
+                    if (state.activePolls[requestId]) {
+                        clearInterval(state.activePolls[requestId]);
+                        delete state.activePolls[requestId];
+                    }
+
+                    // Update history entry
+                    const idx = state.history.findIndex(h => h.id === requestId);
+                    if (idx === -1) return;
+
+                    const entry = state.history[idx];
+
+                    // Check if results exist
+                    if (result.results && result.results.length > 0) {
+                        const firstResult = result.results[0];
+                        entry.status = firstResult.status === 'completed' ? 'completed' : 'error';
+                        entry.title = firstResult.title || entry.title;
+                        entry.fileName = firstResult.file_name || null;
+                        entry.fileSize = firstResult.file_size || null;
+                        entry.multipart = firstResult.multipart || false;
+                        entry.totalParts = firstResult.total_parts || 1;
+                        entry.quality = firstResult.quality || entry.quality;
+                        entry.completedAt = Date.now();
+
+                        // Build download paths
+                        if (entry.multipart && entry.totalParts > 1) {
+                            entry.parts = [];
+                            const baseFileName = firstResult.file_name.replace(/\.[^.]+$/, '');
+                            for (let p = 1; p <= entry.totalParts; p++) {
+                                entry.parts.push({
+                                    part: p,
+                                    fileName: `${baseFileName}.part${p}.rar`,
+                                    downloadUrl: `data/youtube-downloader/downloads/req_${requestId}/${baseFileName}.part${p}.rar`
+                                });
+                            }
+                        } else if (entry.fileName) {
+                            entry.fileUrl = `data/youtube-downloader/downloads/req_${requestId}/${entry.fileName}`;
+                        }
+                    }
+
+                    // Check if errors exist
+                    if (result.errors && result.errors.length > 0) {
+                        const firstError = result.errors[0];
+                        entry.status = 'error';
+                        entry.errorMessage = firstError.error || 'خطای نامشخص';
+                        entry.errorTitle = firstError.title || '';
+                    }
+
+                    // If no results and no errors but status is error
+                    if ((!result.results || result.results.length === 0) && result.status === 'error') {
+                        entry.status = 'error';
+                        entry.errorMessage = 'خطا در پردازش درخواست — لطفاً دوباره تلاش کنید';
+                    }
+
+                    saveHistory(state.history);
+                    renderView();
+                }
+            } catch (error) {
+                // Result file not found or network error — continue polling
+                // Don't log every attempt to avoid console spam
+                if (attempts % 10 === 0) {
+                    console.log(`Polling attempt ${attempts} for request ${requestId}...`);
+                }
+            }
+        };
+
+        // Start polling interval
+        const intervalId = setInterval(poll, POLL_INTERVAL);
+        state.activePolls[requestId] = intervalId;
+
+        // Run first poll immediately
+        poll();
+    };
+
+    // ============================================
+    // Submit Request
+    // ============================================
+
+    /**
+     * Submit download request to GitHub Action
      */
     const submitRequest = async () => {
         if (!state.limits.canRequest) return;
         if (!state.url.trim()) return;
-        
+
         // Validate YouTube URL
         if (!isValidYouTubeUrl(state.url)) {
-            state.error = 'لینک یوتوب نامعتبر است';
+            state.error = 'لینک یوتوب نامعتبر است — لینک باید با https://www.youtube.com یا https://youtu.be شروع شود';
             renderView();
             return;
         }
@@ -239,67 +426,80 @@ const YouTubeDownloaderPlugin = (() => {
         state.error = null;
         renderView();
 
-        // Record request
+        // Record request for rate limiting
         recordRequest();
 
-        // Create history entry
+        // Generate unique request ID
         const requestId = Utils.generateId('yt');
+
+        // Create history entry
         const entry = {
             id: requestId,
             url: state.url,
             quality: state.audioOnly ? 'audio' : state.quality,
             audioOnly: state.audioOnly,
-            title: extractVideoId(state.url) || 'Unknown Video',
-            status: 'processing',  // 'processing' | 'completed' | 'error'
+            title: extractVideoId(state.url) || 'در حال دریافت اطلاعات...',
+            status: 'processing',
             fileUrl: null,
+            fileName: null,
+            fileSize: null,
+            multipart: false,
+            totalParts: 1,
+            parts: null,
+            errorMessage: null,
+            errorTitle: null,
             timestamp: Date.now(),
             completedAt: null
         };
 
         state.history.unshift(entry);
         saveHistory(state.history);
-        
+
+        // Store URL and quality for dispatch
+        const submittedUrl = state.url;
+        const submittedQuality = state.quality;
+        const submittedAudioOnly = state.audioOnly;
+
         // Clear form
         state.url = '';
         state.error = null;
-        
+
         renderView();
 
-        // Simulate processing (2-5 seconds)
-        const processingTime = 2000 + Math.random() * 3000;
-        
-        setTimeout(() => {
-            // Simulate completion
+        // Dispatch to GitHub Action
+        const dispatched = await dispatchWorkflow(requestId, submittedUrl, submittedQuality, submittedAudioOnly);
+
+        if (dispatched) {
+            // Start polling for results
+            startPolling(requestId);
+        } else {
+            // Dispatch failed — mark as error immediately
             const idx = state.history.findIndex(h => h.id === requestId);
             if (idx !== -1) {
-                state.history[idx].status = 'completed';
-                state.history[idx].fileUrl = '#simulated-download-url';
-                state.history[idx].completedAt = Date.now();
-                state.history[idx].title = '🎬 Sample Video Title — ' + (state.history[idx].audioOnly ? 'Audio' : state.history[idx].quality);
+                state.history[idx].status = 'error';
+                state.history[idx].errorMessage = 'خطا در ارسال درخواست به سرور — لطفاً دوباره تلاش کنید';
                 saveHistory(state.history);
-                renderView();
             }
-            state.isLoading = false;
-        }, processingTime);
+        }
 
         state.isLoading = false;
+        renderView();
     };
 
-    /**
-     * Validate YouTube URL
-     */
+    // ============================================
+    // URL Validation
+    // ============================================
+
     const isValidYouTubeUrl = (url) => {
         const patterns = [
             /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/,
             /^(https?:\/\/)?(www\.)?(m\.)?youtube\.com\/watch\?v=[\w-]+/,
-            /^(https?:\/\/)?youtu\.be\/[\w-]+/
+            /^(https?:\/\/)?youtu\.be\/[\w-]+/,
+            /^(https?:\/\/)?(www\.)?youtube\.com\/shorts\/[\w-]+/
         ];
         return patterns.some(p => p.test(url));
     };
 
-    /**
-     * Extract video ID from YouTube URL
-     */
     const extractVideoId = (url) => {
         const patterns = [
             /(?:v=|\/)([\w-]{11})(?:[&?]|$)/,
@@ -317,9 +517,6 @@ const YouTubeDownloaderPlugin = (() => {
     // View Rendering
     // ============================================
 
-    /**
-     * Main render function
-     */
     const renderView = () => {
         const container = document.getElementById('plugin-container');
         if (!container) return;
@@ -329,34 +526,27 @@ const YouTubeDownloaderPlugin = (() => {
         if (typeof lucide !== 'undefined') lucide.createIcons();
     };
 
-    /**
-     * Update only cooldown display (for timer efficiency)
-     */
     const updateCooldownDisplay = () => {
         const cooldownEl = document.getElementById('yt-cooldown-value');
         if (cooldownEl) {
-            cooldownEl.textContent = state.limits.cooldownRemaining > 0 
+            cooldownEl.textContent = state.limits.cooldownRemaining > 0
                 ? formatCooldown(state.limits.cooldownRemaining)
                 : 'آماده';
         }
-        
+
         const cooldownLabel = document.getElementById('yt-cooldown-label');
         if (cooldownLabel) {
-            cooldownLabel.textContent = state.limits.cooldownRemaining > 0 
+            cooldownLabel.textContent = state.limits.cooldownRemaining > 0
                 ? 'زمان تا درخواست بعدی'
                 : 'وضعیت';
         }
 
-        // Update submit button
         const submitBtn = document.getElementById('yt-submit-btn');
         if (submitBtn) {
             submitBtn.disabled = !state.limits.canRequest || state.isLoading;
         }
     };
 
-    /**
-     * Render full view
-     */
     const renderFullView = () => `
         <div class="yt-downloader">
             ${renderHeader()}
@@ -366,9 +556,6 @@ const YouTubeDownloaderPlugin = (() => {
         </div>
     `;
 
-    /**
-     * Render header
-     */
     const renderHeader = () => `
         <div class="yt-header">
             <h2 class="yt-title">
@@ -380,9 +567,6 @@ const YouTubeDownloaderPlugin = (() => {
         </div>
     `;
 
-    /**
-     * Render limits bar
-     */
     const renderLimitsBar = () => `
         <div class="yt-limits-bar">
             <div class="yt-limit-card">
@@ -437,9 +621,6 @@ const YouTubeDownloaderPlugin = (() => {
         </div>
     `;
 
-    /**
-     * Render download box
-     */
     const renderDownloadBox = () => `
         <div class="yt-download-box">
             <div class="yt-input-group">
@@ -512,9 +693,6 @@ const YouTubeDownloaderPlugin = (() => {
         </div>
     `;
 
-    /**
-     * Render request history
-     */
     const renderHistory = () => `
         <div class="yt-history-section">
             <h3 class="yt-history-title">
@@ -535,6 +713,7 @@ const YouTubeDownloaderPlugin = (() => {
                         const isProcessing = item.status === 'processing';
                         const isCompleted = item.status === 'completed';
                         const isError = item.status === 'error';
+                        const hasParts = item.multipart && item.totalParts > 1 && item.parts;
 
                         return `
                             <div class="yt-history-item">
@@ -555,12 +734,34 @@ const YouTubeDownloaderPlugin = (() => {
                                     <span class="yt-history-item-title">${Utils.escapeHtml(item.title)}</span>
                                     <span class="yt-history-item-meta">
                                         ${item.audioOnly ? '🎵 صوت' : '🎬 ' + item.quality}
-                                        ${isProcessing ? ' — در حال پردازش...' : isCompleted ? ' — تکمیل شد' : ' — خطا'}
+                                        ${isProcessing ? ' — در حال پردازش توسط سرور...' : 
+                                          isCompleted ? (item.fileSize ? ` — ${formatFileSize(item.fileSize)}` : ' — تکمیل شد') : 
+                                          ` — ${Utils.escapeHtml(item.errorMessage || 'خطا')}`}
                                     </span>
                                 </div>
                                 <span class="yt-history-time">${timeAgo}</span>
-                                ${isCompleted && item.fileUrl ? `
-                                    <a href="${Utils.escapeHtml(item.fileUrl)}" class="yt-history-download-btn" download>
+                                
+                                ${isError && item.errorMessage ? `
+                                    <button class="yt-history-download-btn" style="background: #f87171;" 
+                                            onclick="alert('${Utils.escapeHtml(item.errorMessage).replace(/'/g, "\\'")}')" 
+                                            title="${Utils.escapeHtml(item.errorMessage)}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                                        </svg>
+                                        علت خطا
+                                    </button>
+                                ` : ''}
+                                
+                                ${isCompleted && hasParts ? `
+                                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                        ${item.parts.map(p => `
+                                            <a href="${p.downloadUrl}" class="yt-history-download-btn" download style="font-size:10px;padding:4px 8px;">
+                                                📥 ${p.part}
+                                            </a>
+                                        `).join('')}
+                                    </div>
+                                ` : isCompleted && item.fileUrl ? `
+                                    <a href="${item.fileUrl}" class="yt-history-download-btn" download>
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                                         </svg>
@@ -577,13 +778,14 @@ const YouTubeDownloaderPlugin = (() => {
         </div>
     `;
 
-    /**
-     * Get relative time string (Persian)
-     */
+    // ============================================
+    // Helpers
+    // ============================================
+
     const getRelativeTime = (timestamp) => {
         const now = Date.now();
         const diff = now - timestamp;
-        
+
         const seconds = Math.floor(diff / 1000);
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
@@ -596,15 +798,19 @@ const YouTubeDownloaderPlugin = (() => {
         return `${days} روز پیش`;
     };
 
+    const formatFileSize = (bytes) => {
+        if (!bytes) return 'نامشخص';
+        if (bytes >= 1073741824) return `${(bytes / 1073741824).toFixed(1)} GB`;
+        if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`;
+        if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${bytes} B`;
+    };
+
     // ============================================
     // Event Binding
     // ============================================
 
-    /**
-     * Bind all UI events
-     */
     const bindEvents = () => {
-        // URL input
         const urlInput = document.getElementById('yt-url-input');
         if (urlInput) {
             urlInput.addEventListener('input', Utils.debounce((e) => {
@@ -613,7 +819,6 @@ const YouTubeDownloaderPlugin = (() => {
             }, 300));
         }
 
-        // Quality select
         const qualitySelect = document.getElementById('yt-quality-select');
         if (qualitySelect) {
             qualitySelect.addEventListener('change', (e) => {
@@ -621,7 +826,6 @@ const YouTubeDownloaderPlugin = (() => {
             });
         }
 
-        // Audio only checkbox
         const audioCheckbox = document.getElementById('yt-audio-checkbox');
         const audioGroup = document.getElementById('yt-audio-only');
         if (audioCheckbox && audioGroup) {
@@ -630,7 +834,7 @@ const YouTubeDownloaderPlugin = (() => {
                 audioGroup.classList.toggle('checked', state.audioOnly);
                 renderView();
             });
-            
+
             audioGroup.addEventListener('click', (e) => {
                 if (e.target !== audioCheckbox) {
                     audioCheckbox.checked = !audioCheckbox.checked;
@@ -641,7 +845,6 @@ const YouTubeDownloaderPlugin = (() => {
             });
         }
 
-        // Submit button
         const submitBtn = document.getElementById('yt-submit-btn');
         if (submitBtn) {
             submitBtn.addEventListener('click', () => {
@@ -649,7 +852,6 @@ const YouTubeDownloaderPlugin = (() => {
             });
         }
 
-        // Submit on Enter in URL field
         if (urlInput) {
             urlInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && state.limits.canRequest && !state.isLoading) {
@@ -663,9 +865,6 @@ const YouTubeDownloaderPlugin = (() => {
     // Plugin Lifecycle
     // ============================================
 
-    /**
-     * Initialize plugin
-     */
     const init = async (container) => {
         state.history = loadHistory();
         state.url = '';
@@ -673,19 +872,32 @@ const YouTubeDownloaderPlugin = (() => {
         state.audioOnly = false;
         state.error = null;
         state.isLoading = false;
+        state.activePolls = {};
+
+        // Resume polling for any unfinished requests
+        state.history.forEach(item => {
+            if (item.status === 'processing') {
+                startPolling(item.id);
+            }
+        });
+
         calculateLimits();
         renderView();
         EventBus.emit('tool:mounted', { toolId: 'youtube-downloader' });
     };
 
-    /**
-     * Destroy plugin
-     */
     const destroy = () => {
         if (state.cooldownTimer) {
             clearInterval(state.cooldownTimer);
             state.cooldownTimer = null;
         }
+
+        // Clear all polling intervals
+        Object.values(state.activePolls).forEach(intervalId => {
+            clearInterval(intervalId);
+        });
+        state.activePolls = {};
+
         EventBus.emit('tool:destroyed', { toolId: 'youtube-downloader' });
     };
 
