@@ -1006,3 +1006,141 @@
         align-items: flex-start;
     }
 }
+/* ============================================
+   Plugin Container & Skeleton Styles
+   Phase 4 — Plugin System
+   ============================================ */
+
+/* === Plugin Container === */
+.plugin-container {
+    width: 100%;
+    min-height: 60vh;
+}
+
+/* === Skeleton Loader === */
+.plugin-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    padding: var(--space-xl) 0;
+}
+
+.skeleton-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.skeleton-back-btn {
+    width: 120px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-title {
+    width: 200px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-md);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-base);
+    font-family: var(--font-family-primary);
+}
+
+.skeleton-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.skeleton-hero {
+    width: 100%;
+    height: 250px;
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-elevated);
+    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-lg);
+}
+
+.skeleton-block {
+    height: 100px;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-elevated);
+    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-block-lg {
+    height: 140px;
+}
+
+.skeleton-block-md {
+    height: 80px;
+}
+
+.skeleton-block-sm {
+    height: 60px;
+}
+
+.skeleton-text {
+    height: 16px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-elevated);
+    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    width: 100%;
+}
+
+.skeleton-text-lg {
+    height: 20px;
+    width: 70%;
+}
+
+.skeleton-text-sm {
+    height: 12px;
+    width: 40%;
+}
+
+/* === Plugin Error State === */
+.plugin-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    padding: var(--space-3xl);
+    text-align: center;
+    min-height: 50vh;
+}
+
+.plugin-error-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-error);
+}
+
+.plugin-error-message {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    max-width: 400px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .skeleton-hero {
+        height: 180px;
+    }
+
+    .skeleton-row {
+        grid-template-columns: 1fr;
+    }
+}
