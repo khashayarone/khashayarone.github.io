@@ -768,9 +768,6 @@ return {
 };
 })();
 
-// Expose to global scope for PluginLoader
-window.MovieFinderPlugin = MovieFinderPlugin;
-
 // Freeze for immutability
 Object.freeze(MovieFinderPlugin);
 
