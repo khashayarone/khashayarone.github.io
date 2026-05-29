@@ -68,7 +68,7 @@ const MovieFinderPlugin = (() => {
 
     // Plugin State
     let state = {
-        view: 'search', // 'search' | 'results' | 'details'
+        view: 'search',
         query: '',
         filters: {
             yearFrom: 2000,
@@ -82,7 +82,7 @@ const MovieFinderPlugin = (() => {
         filteredResults: [],
         selectedMovie: null,
         isLoading: false,
-        cache: new Map(), // Map<year, movies[]>
+        cache: new Map(),
         filtersOpen: true
     };
 
@@ -92,7 +92,6 @@ const MovieFinderPlugin = (() => {
      * Initialize Web Worker for search
      */
     const initWorker = () => {
-        // Create inline worker for search operations
         const workerCode = `
             self.onmessage = function(e) {
                 const { action, data } = e.data;
@@ -106,7 +105,6 @@ const MovieFinderPlugin = (() => {
             function filterMovies(movies, query, filters) {
                 let filtered = [...movies];
                 
-                // Text search
                 if (query) {
                     const q = query.toLowerCase().trim();
                     filtered = filtered.filter(m => 
@@ -116,26 +114,22 @@ const MovieFinderPlugin = (() => {
                     );
                 }
                 
-                // Rating filter
                 if (filters.minRating > 0) {
                     filtered = filtered.filter(m => m.vote_average >= filters.minRating);
                 }
                 
-                // Genre filter
                 if (filters.genres && filters.genres.length > 0) {
                     filtered = filtered.filter(m => 
                         m.genres && m.genres.some(g => filters.genres.includes(g.id))
                     );
                 }
                 
-                // Country filter
                 if (filters.countries && filters.countries.length > 0) {
                     filtered = filtered.filter(m => 
                         m.origin_country && m.origin_country.some(c => filters.countries.includes(c))
                     );
                 }
                 
-                // Language filter
                 if (filters.languages && filters.languages.length > 0) {
                     filtered = filtered.filter(m => 
                         m.original_language && filters.languages.includes(m.original_language)
@@ -186,7 +180,6 @@ const MovieFinderPlugin = (() => {
         }
 
         if (years.length === 0) {
-            // All cached — collect from cache
             let allMovies = [];
             for (let y = fromYear; y <= toYear; y++) {
                 allMovies = allMovies.concat(state.cache.get(y) || []);
@@ -194,7 +187,6 @@ const MovieFinderPlugin = (() => {
             return allMovies;
         }
 
-        // Load uncached years in batches of 3
         const BATCH_SIZE = 3;
         for (let i = 0; i < years.length; i += BATCH_SIZE) {
             const batch = years.slice(i, i + BATCH_SIZE);
@@ -218,7 +210,6 @@ const MovieFinderPlugin = (() => {
         try {
             const movies = await loadAllData(state.filters.yearFrom, state.filters.yearTo);
             
-            // Use worker for filtering
             worker.postMessage({
                 action: 'filter',
                 data: {
@@ -265,6 +256,7 @@ const MovieFinderPlugin = (() => {
      * Handle image load error
      */
     const handleImageError = (img, type = 'poster') => {
+        if (!img) return;
         img.src = type === 'backdrop' ? FALLBACK_BACKDROP :
                   type === 'profile' ? FALLBACK_PROFILE : FALLBACK_POSTER;
         img.classList.add('fallback-image');
@@ -475,7 +467,6 @@ const MovieFinderPlugin = (() => {
                 </button>
 
                 <div class="movie-details">
-                    <!-- Hero Section -->
                     <div class="details-hero">
                         <img class="details-backdrop" 
                              src="${getImageUrl(movie.backdrop_path, 'backdrop')}" 
@@ -517,7 +508,6 @@ const MovieFinderPlugin = (() => {
                         </div>
                     </div>
 
-                    <!-- Overview -->
                     ${movie.overview ? `
                         <div class="details-section">
                             <h3 class="details-section-title">خلاصه داستان</h3>
@@ -525,7 +515,6 @@ const MovieFinderPlugin = (() => {
                         </div>
                     ` : ''}
 
-                    <!-- Financial & Info Grid -->
                     <div class="details-grid">
                         ${movie.budget > 0 ? `
                             <div class="details-grid-item">
@@ -551,7 +540,6 @@ const MovieFinderPlugin = (() => {
                         ` : ''}
                     </div>
 
-                    <!-- Genres -->
                     ${movie.genres && movie.genres.length > 0 ? `
                         <div class="details-section">
                             <h3 class="details-section-title">ژانرها</h3>
@@ -563,7 +551,6 @@ const MovieFinderPlugin = (() => {
                         </div>
                     ` : ''}
 
-                    <!-- Director -->
                     ${director ? `
                         <div class="details-section">
                             <h3 class="details-section-title">کارگردان</h3>
@@ -571,7 +558,6 @@ const MovieFinderPlugin = (() => {
                         </div>
                     ` : ''}
 
-                    <!-- Cast -->
                     ${cast.length > 0 ? `
                         <div class="details-section">
                             <h3 class="details-section-title">بازیگران</h3>
@@ -593,7 +579,6 @@ const MovieFinderPlugin = (() => {
                         </div>
                     ` : ''}
 
-                    <!-- Production Companies -->
                     ${companies.length > 0 ? `
                         <div class="details-section">
                             <h3 class="details-section-title">شرکت‌های تولید</h3>
@@ -613,7 +598,6 @@ const MovieFinderPlugin = (() => {
      * Bind events to DOM elements
      */
     const bindEvents = () => {
-        // Search button
         const searchBtn = document.getElementById('btn-search');
         if (searchBtn) {
             searchBtn.addEventListener('click', () => {
@@ -622,7 +606,6 @@ const MovieFinderPlugin = (() => {
             });
         }
 
-        // Search on Enter
         const searchInput = document.getElementById('movie-search-input');
         if (searchInput) {
             searchInput.addEventListener('keydown', (e) => {
@@ -636,7 +619,6 @@ const MovieFinderPlugin = (() => {
             }, 300));
         }
 
-        // Filters toggle
         const filtersHeader = document.getElementById('filters-header');
         if (filtersHeader) {
             filtersHeader.addEventListener('click', () => {
@@ -648,7 +630,6 @@ const MovieFinderPlugin = (() => {
             });
         }
 
-        // Filter inputs
         const yearFrom = document.getElementById('filter-year-from');
         const yearTo = document.getElementById('filter-year-to');
         const minRating = document.getElementById('filter-min-rating');
@@ -657,7 +638,6 @@ const MovieFinderPlugin = (() => {
         if (yearTo) yearTo.addEventListener('change', (e) => { state.filters.yearTo = parseInt(e.target.value) || 2026; });
         if (minRating) minRating.addEventListener('change', (e) => { state.filters.minRating = parseFloat(e.target.value) || 0; });
 
-        // Genre chips
         document.querySelectorAll('.filter-chip[data-genre]').forEach(chip => {
             chip.addEventListener('click', () => {
                 const genreId = parseInt(chip.dataset.genre);
@@ -671,7 +651,6 @@ const MovieFinderPlugin = (() => {
             });
         });
 
-        // Apply filters
         const applyBtn = document.getElementById('btn-apply-filters');
         if (applyBtn) {
             applyBtn.addEventListener('click', () => {
@@ -680,7 +659,6 @@ const MovieFinderPlugin = (() => {
             });
         }
 
-        // Clear filters
         const clearBtn = document.getElementById('btn-clear-filters');
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
@@ -690,7 +668,6 @@ const MovieFinderPlugin = (() => {
             });
         }
 
-        // Back to search
         const backToSearch = document.getElementById('btn-back-to-search');
         if (backToSearch) {
             backToSearch.addEventListener('click', () => {
@@ -700,7 +677,6 @@ const MovieFinderPlugin = (() => {
             });
         }
 
-        // Back to results
         const backToResults = document.getElementById('btn-back-to-results');
         if (backToResults) {
             backToResults.addEventListener('click', () => {
@@ -710,13 +686,9 @@ const MovieFinderPlugin = (() => {
             });
         }
 
-        // Movie card clicks
         document.querySelectorAll('.movie-card[data-movie-id]').forEach(card => {
             card.addEventListener('click', () => {
                 const movieId = parseInt(card.dataset.movieId);
-                const movieYear = card.dataset.movieYear;
-                
-                // Find movie in results
                 const movie = state.results.find(m => m.id === movieId);
                 if (movie) {
                     state.selectedMovie = movie;
@@ -732,6 +704,9 @@ const MovieFinderPlugin = (() => {
      */
     const init = async (container) => {
         initWorker();
+        state.view = 'search';
+        state.results = [];
+        state.selectedMovie = null;
         renderView();
         EventBus.emit('tool:mounted', { toolId: 'movie-finder' });
     };
@@ -748,28 +723,18 @@ const MovieFinderPlugin = (() => {
         EventBus.emit('tool:destroyed', { toolId: 'movie-finder' });
     };
 
-    // Public API
+    // Public API — only ONE return statement
     return {
         init,
         destroy,
         handleImageError,
         renderView
     };
+
 })();
-
-
-
-// Public API
-return {
-    init,
-    destroy,
-    handleImageError,
-    renderView
-};
-})();
-
-// Freeze for immutability
-Object.freeze(MovieFinderPlugin);
 
 // Expose to global scope for PluginLoader
 window.MovieFinderPlugin = MovieFinderPlugin;
+
+// Freeze for immutability
+Object.freeze(MovieFinderPlugin);
