@@ -1,6 +1,7 @@
 /**
  * utils.js — Pure Utility Functions
  * Zero DOM dependency, fully reusable
+ * Updated with escapeHtml for plugin safety
  * Part of Vanilla Micro-SPA Tool Platform Foundation
  */
 
@@ -72,6 +73,19 @@ const Utils = (() => {
     };
 
     /**
+     * Escape HTML special characters to prevent XSS
+     * Uses textContent for safe encoding
+     * @param {string} str - String to escape
+     * @returns {string} Escaped HTML-safe string
+     */
+    const escapeHtml = (str) => {
+        if (!str || typeof str !== 'string') return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    };
+
+    /**
      * Check if device is mobile/tablet
      * @returns {boolean} True if touch device
      */
@@ -126,6 +140,7 @@ const Utils = (() => {
         throttle,
         safeJSONParse,
         deepClone,
+        escapeHtml,
         isMobileDevice,
         prefersReducedMotion,
         formatDate,
