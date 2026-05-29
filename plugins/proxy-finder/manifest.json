@@ -1,0 +1,15 @@
+{
+    "id": "proxy-finder",
+    "title": "پروکسی‌یاب",
+    "icon": "shield-check",
+    "category": "network",
+    "size": "large",
+    "description": "لیست پروکسی‌های بروز V2Ray، Shadowsocks، Trojan و VMess — آپدیت خودکار هر ۱۰ دقیقه از ۸۶ کانال تلگرام",
+    "version": "1.0.0",
+    "author": "Tool Platform",
+    "permissions": [],
+    "jsPath": "plugins/proxy-finder/tool.js",
+    "cssPath": "plugins/proxy-finder/tool.css",
+    "dataPath": "data/proxy-finder/",
+    "dataSource": "proxy.json"
+}
