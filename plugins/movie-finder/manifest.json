@@ -1,0 +1,14 @@
+{
+    "id": "movie-finder",
+    "title": "فیلم‌یاب",
+    "icon": "film",
+    "category": "entertainment",
+    "size": "large",
+    "description": "جستجوی پیشرفته فیلم‌ها با فیلترهای دقیق — دیتابیس ۲۰۰۰ تا ۲۰۲۶",
+    "version": "1.0.0",
+    "author": "Tool Platform",
+    "permissions": [],
+    "dataPath": "data/movie-finder/",
+    "dataPattern": "movies_{year}.json",
+    "yearRange": [2000, 2026]
+}
