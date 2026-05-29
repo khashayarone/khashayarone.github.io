@@ -6,9 +6,9 @@
 # Architecture:
 #   - Each request → unique folder (req_${REQUEST_ID})
 #   - result.json per request — no overwrite
-#   - latest.json → symlink for quick plugin sync
 #   - Auto-cleanup: removes folders older than 24h
 #   - All errors → Persian messages in result.json
+#   - RAR split for files >90MB (preserved from original)
 # ============================================================
 
 name: "🎬 YouTube Downloader"
@@ -54,76 +54,65 @@ permissions:
 
 jobs:
   download:
-    name: "🎬 Processing Request: ${{ github.event.inputs.request_id }}"
+    name: "🎬 Process Request"
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
     steps:
-      # ──────────────────────────────────────────
-      # Step 1: Checkout
-      # ──────────────────────────────────────────
+
+      # ======================================================
+      # Step 1: Checkout Repository
+      # ======================================================
       - name: "📥 Checkout Repository"
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
 
-      # ──────────────────────────────────────────
-      # Step 2: Git Config
-      # ──────────────────────────────────────────
+      # ======================================================
+      # Step 2: Configure Git
+      # ======================================================
       - name: "⚙️ Configure Git"
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      # ──────────────────────────────────────────
-      # Step 3: Setup Environment
-      # ──────────────────────────────────────────
+      # ======================================================
+      # Step 3: Setup Environment & Validate Inputs
+      # ======================================================
       - name: "🔧 Setup Environment"
         id: setup
-        env:
-          REQUEST_ID: ${{ github.event.inputs.request_id }}
-          YT_URLS: ${{ github.event.inputs.youtube_urls }}
-          YT_QUALITY: ${{ github.event.inputs.quality }}
-          YT_AUDIO: ${{ github.event.inputs.audio_only }}
         run: |
-          REQUEST_ID="${REQUEST_ID}"
-          YT_URLS="${YT_URLS}"
-          QUALITY="${YT_QUALITY}"
-          AUDIO_ONLY="${YT_AUDIO}"
-          
-          # Validate inputs
+          REQUEST_ID="${{ github.event.inputs.request_id }}"
+          YT_URLS="${{ github.event.inputs.youtube_urls }}"
+          QUALITY="${{ github.event.inputs.quality }}"
+          AUDIO_ONLY="${{ github.event.inputs.audio_only }}"
+
           if [ -z "$REQUEST_ID" ]; then
-            echo "❌ REQUEST_ID is required"
+            echo "ERROR: request_id is required"
             exit 1
           fi
-          
+
           if [ -z "$YT_URLS" ]; then
-            echo "❌ YT_URLS is required"
+            echo "ERROR: youtube_urls is required"
             exit 1
           fi
-          
-          echo "══════════════════════════════════════════"
-          echo "  🎬 YouTube Downloader"
-          echo "══════════════════════════════════════════"
-          echo "  🆔 Request: ${REQUEST_ID}"
-          echo "  🔗 URLs: ${YT_URLS}"
-          echo "  📹 Quality: ${QUALITY}"
-          echo "  🎵 Audio Only: ${AUDIO_ONLY}"
-          echo "══════════════════════════════════════════"
-          
-          # Per-request output directory — NO COLLISION
+
+          echo "============================================"
+          echo "  YouTube Downloader"
+          echo "============================================"
+          echo "  Request ID : ${REQUEST_ID}"
+          echo "  URLs       : ${YT_URLS}"
+          echo "  Quality    : ${QUALITY}"
+          echo "  Audio Only : ${AUDIO_ONLY}"
+          echo "============================================"
+
+          # Per-request output directory — NO COLLISION between concurrent requests
           REQUEST_DIR="data/youtube-downloader/downloads/req_${REQUEST_ID}"
-          mkdir -p "$REQUEST_DIR"
-          
-          echo "REQUEST_ID=${REQUEST_ID}" >> $GITHUB_ENV
-          echo "YT_URLS=${YT_URLS}" >> $GITHUB_ENV
-          echo "QUALITY=${QUALITY}" >> $GITHUB_ENV
-          echo "AUDIO_ONLY=${AUDIO_ONLY}" >> $GITHUB_ENV
-          echo "REQUEST_DIR=${REQUEST_DIR}" >> $GITHUB_ENV
-          
-          # Quality format mapping
-          if [ "$AUDIO_ONLY" = "true" ]; then
+          mkdir -p "${REQUEST_DIR}"
+
+          # Quality format mapping for yt-dlp
+          if [ "${AUDIO_ONLY}" = "true" ]; then
             FORMAT="bestaudio/bestaudio*/best"
             QUALITY="audio"
           else
@@ -138,30 +127,19 @@ jobs:
               *)     FORMAT="bestvideo[height<=1080]+bestaudio/bestvideo[height<=1080]*+bestaudio*/bestvideo+bestaudio/best" ;;
             esac
           fi
-          echo "FORMAT=${FORMAT}" >> $GITHUB_ENV
-          
-          # Initialize result.json with request metadata
-          cat > "${REQUEST_DIR}/result.json" << 'RESULTEOF'
-{
-  "request_id": "${REQUEST_ID}",
-  "status": "processing",
-  "started_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
-  "input": {
-    "urls": "${YT_URLS}",
-    "quality": "${QUALITY}",
-    "audio_only": ${AUDIO_ONLY}
-  },
-  "results": [],
-  "errors": []
-}
-RESULTEOF
-          
-          echo "✅ Environment ready"
-          echo "📁 Output directory: ${REQUEST_DIR}"
 
-      # ──────────────────────────────────────────
-      # Step 4: Cloudflare WARP
-      # ──────────────────────────────────────────
+          echo "REQUEST_ID=${REQUEST_ID}" >> $GITHUB_ENV
+          echo "YT_URLS=${YT_URLS}" >> $GITHUB_ENV
+          echo "QUALITY=${QUALITY}" >> $GITHUB_ENV
+          echo "AUDIO_ONLY=${AUDIO_ONLY}" >> $GITHUB_ENV
+          echo "FORMAT=${FORMAT}" >> $GITHUB_ENV
+          echo "REQUEST_DIR=${REQUEST_DIR}" >> $GITHUB_ENV
+
+          echo "Setup complete. Output directory: ${REQUEST_DIR}"
+
+      # ======================================================
+      # Step 4: Cloudflare WARP (bypass YouTube restrictions)
+      # ======================================================
       - name: "🌐 Setup Cloudflare WARP"
         run: |
           docker network create warp-net 2>/dev/null || true
@@ -176,20 +154,20 @@ RESULTEOF
           for i in $(seq 1 8); do
             RESULT=$(curl -s --max-time 5 --socks5-hostname 127.0.0.1:1080 https://cloudflare.com/cdn-cgi/trace 2>/dev/null || echo "failed")
             if echo "$RESULT" | grep -qE "warp=(on|plus)"; then
-              echo "✅ WARP connected after ${i} attempts"
+              echo "WARP connected after ${i} attempts"
               WARP_OK=true
               break
             fi
-            echo "⏳ WARP attempt ${i}/8..."
+            echo "WARP attempt ${i}/8..."
             sleep 5
           done
           if [ "$WARP_OK" = false ]; then
-            echo "⚠️ WARP failed to connect — downloads may be slower"
+            echo "WARNING: WARP failed to connect — downloads may be slower"
           fi
 
-      # ──────────────────────────────────────────
+      # ======================================================
       # Step 5: Install Dependencies
-      # ──────────────────────────────────────────
+      # ======================================================
       - name: "📦 Install Dependencies"
         run: |
           sudo apt-get update -qq
@@ -199,226 +177,239 @@ RESULTEOF
           export PATH="$DENO_INSTALL/bin:$PATH"
           echo "$DENO_INSTALL/bin" >> $GITHUB_PATH
           pip3 install --upgrade yt-dlp --quiet
-          echo "✅ All dependencies installed"
+          echo "All dependencies installed successfully"
 
-      # ──────────────────────────────────────────
-      # Step 6: Download & Process
-      # ──────────────────────────────────────────
+      # ======================================================
+      # Step 6: Download & Process — Main Logic
+      # ======================================================
       - name: "🎬 Download & Process"
         id: download
         run: |
           #!/bin/bash
           shopt -s nullglob
-          set +e  # Don't exit on first error — capture all
-          
+          set +e
+
           REQUEST_DIR="${{ env.REQUEST_DIR }}"
           REQUEST_ID="${{ env.REQUEST_ID }}"
           TARGET_SIZE_BYTES=${{ env.TARGET_SIZE_BYTES }}
           TARGET_SIZE_MB=${{ env.TARGET_SIZE_MB }}
           MAX_PARTS=${{ env.MAX_PARTS }}
-          
-          # Results array
-          RESULTS="[]"
-          ERRORS="[]"
+
+          RESULTS_JSON="[]"
+          ERRORS_JSON="[]"
           OVERALL_STATUS="completed"
-          
-          # ═══════════════════════════════════════
-          # Helper Functions
-          # ═══════════════════════════════════════
-          
+
+          # ── Helper: Sanitize filename ─────────────────
           sanitize_name() {
             local name="$1"
-            name=$(echo "$name" | sed 's/[()（）]/_/g' | sed 's/[][{}\/\\<>|:;'"'"'"]/_/g')
+            name=$(echo "$name" | sed 's/[()（）]/_/g' | sed 's/[][{}\/\\<>|:;\"'"'"']/_/g')
             name=$(echo "$name" | tr '[:space:]｜　' '-' | tr -c 'a-zA-Z0-9_-' '-' | tr -s '-' | sed 's/^-//;s/-$//')
             [ -z "$name" ] && name="unknown"
             echo "$name"
           }
-          
+
+          # ── Helper: Add error to errors array ──────────
           add_error() {
-            local url="$1" title="$2" error_msg="$3"
-            ERRORS=$(echo "$ERRORS" | jq \
-              --arg url "$url" \
-              --arg title "$title" \
-              --arg error "$error_msg" \
-              '. + [{"url": $url, "title": $title, "error": $error}]')
-            echo "  ❌ ERROR: $error_msg"
+            local url="$1"
+            local title="$2"
+            local error_msg="$3"
+            local escaped_title
+            escaped_title=$(echo "$title" | jq -Rsc '.')
+            local escaped_url
+            escaped_url=$(echo "$url" | jq -Rsc '.')
+            local escaped_error
+            escaped_error=$(echo "$error_msg" | jq -Rsc '.')
+            ERRORS_JSON=$(echo "$ERRORS_JSON" | jq ". + [{url: ${escaped_url}, title: ${escaped_title}, error: ${escaped_error}}]")
+            echo "  ERROR: ${error_msg}"
           }
-          
+
+          # ── Helper: Add result to results array ────────
           add_result() {
             local json_entry="$1"
-            RESULTS=$(echo "$RESULTS" | jq ". + [${json_entry}]")
+            RESULTS_JSON=$(echo "$RESULTS_JSON" | jq ". + [${json_entry}]")
           }
-          
-          # ═══════════════════════════════════════
-          # Download Function
-          # ═══════════════════════════════════════
+
+          # ── Download function with 6 bypass methods ────
           download_video() {
-            local METHOD=$1 URL=$2 TMP_DIR=$3
-            
-            if [ "$AUDIO_ONLY" = "true" ] || [ "$QUALITY" = "audio" ]; then
+            local METHOD=$1
+            local URL=$2
+            local TMP_DIR=$3
+
+            if [ "${AUDIO_ONLY}" = "true" ] || [ "${QUALITY}" = "audio" ]; then
               COMMON_FLAGS="--extract-audio --audio-format mp3 --audio-quality 0 --write-thumbnail --convert-thumbnails jpg --no-cache-dir --output ${TMP_DIR}/%(title)s.%(ext)s --no-part --no-playlist --retries 5 --fragment-retries 5 --no-check-certificates --concurrent-fragments 8 --buffer-size 16K --http-chunk-size 10M --progress --newline"
             else
               COMMON_FLAGS="--merge-output-format mp4 --write-thumbnail --convert-thumbnails jpg --no-cache-dir --output ${TMP_DIR}/%(title)s.%(ext)s --no-part --no-playlist --retries 5 --fragment-retries 5 --no-check-certificates --concurrent-fragments 8 --buffer-size 16K --http-chunk-size 10M --progress --newline"
             fi
-            
+
             case $METHOD in
-              1) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "$FORMAT" $COMMON_FLAGS --extractor-args "youtube:player_client=web" --js-runtimes deno --remote-components ejs:github --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36" "$URL" 2>&1 ;;
-              2) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "$FORMAT" $COMMON_FLAGS --extractor-args "youtube:player_client=web,mweb,android_vr" --js-runtimes deno --remote-components ejs:github "$URL" 2>&1 ;;
-              3) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "$FORMAT" $COMMON_FLAGS --extractor-args "youtube:player_client=mweb" "$URL" 2>&1 ;;
-              4) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "$FORMAT" $COMMON_FLAGS --extractor-args "youtube:player_client=android_vr" "$URL" 2>&1 ;;
-              5) yt-dlp --format "$FORMAT" $COMMON_FLAGS --extractor-args "youtube:player_client=web" --js-runtimes deno --remote-components ejs:github "$URL" 2>&1 ;;
-              6) yt-dlp --format "$FORMAT" $COMMON_FLAGS "$URL" 2>&1 ;;
+              1) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "${FORMAT}" $COMMON_FLAGS --extractor-args "youtube:player_client=web" --js-runtimes deno --remote-components ejs:github --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36" "$URL" 2>&1 ;;
+              2) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "${FORMAT}" $COMMON_FLAGS --extractor-args "youtube:player_client=web,mweb,android_vr" --js-runtimes deno --remote-components ejs:github "$URL" 2>&1 ;;
+              3) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "${FORMAT}" $COMMON_FLAGS --extractor-args "youtube:player_client=mweb" "$URL" 2>&1 ;;
+              4) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "${FORMAT}" $COMMON_FLAGS --extractor-args "youtube:player_client=android_vr" "$URL" 2>&1 ;;
+              5) yt-dlp --format "${FORMAT}" $COMMON_FLAGS --extractor-args "youtube:player_client=web" --js-runtimes deno --remote-components ejs:github "$URL" 2>&1 ;;
+              6) yt-dlp --format "${FORMAT}" $COMMON_FLAGS "$URL" 2>&1 ;;
               *) return 1 ;;
             esac
           }
-          
-          # ═══════════════════════════════════════
-          # Main Processing Loop
-          # ═══════════════════════════════════════
-          read -ra URL_ARRAY <<< "$YT_URLS"
+
+          # ── Translate common yt-dlp errors to Persian ──
+          translate_error() {
+            local error_text="$1"
+            if echo "$error_text" | grep -qi "private\|not available\|unavailable"; then
+              echo "این ویدیو خصوصی است یا در دسترس نیست"
+            elif echo "$error_text" | grep -qi "blocked\|copyright\|removed\|deleted"; then
+              echo "این ویدیو به دلیل کپی‌رایت یا حذف شدن در دسترس نیست"
+            elif echo "$error_text" | grep -qi "age\|restricted\|sign in\|login"; then
+              echo "این ویدیو محدودیت سنی دارد یا نیاز به ورود به حساب کاربری دارد"
+            elif echo "$error_text" | grep -qi "not found\|404"; then
+              echo "ویدیو یافت نشد — لینک را بررسی کنید"
+            elif echo "$error_text" | grep -qi "rate\|limit\|too many"; then
+              echo "تعداد درخواست‌ها زیاد شده — چند دقیقه صبر کنید و دوباره تلاش کنید"
+            elif echo "$error_text" | grep -qi "network\|timeout\|connection\|refused"; then
+              echo "خطای شبکه در اتصال به YouTube — لطفاً بعداً تلاش کنید"
+            elif echo "$error_text" | grep -qi "premium\|members only\|paid"; then
+              echo "این ویدیو نیاز به اشتراک پریمیوم YouTube دارد"
+            elif echo "$error_text" | grep -qi "live\|livestream\|premiere"; then
+              echo "این ویدیو در حال پخش زنده است — فعلاً قابل دانلود نیست"
+            else
+              echo "خطا در دانلود ویدیو — تمام روش‌های bypass ناموفق بودند"
+            fi
+          }
+
+          # ═══════════════════════════════════════════════
+          # MAIN PROCESSING LOOP
+          # ═══════════════════════════════════════════════
+          read -ra URL_ARRAY <<< "${YT_URLS}"
           TOTAL_URLS=${#URL_ARRAY[@]}
-          
+
           for YT_URL in "${URL_ARRAY[@]}"; do
-            
-            # Normalize URL
+
+            # Normalize youtu.be short links
             if [[ "$YT_URL" =~ youtu\.be/([a-zA-Z0-9_-]+) ]]; then
               YT_URL="https://www.youtube.com/watch?v=${BASH_REMATCH[1]%%\?*}"
             fi
-            
+
             echo ""
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🔍 Processing: $YT_URL"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "Processing: ${YT_URL}"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
             # Validate URL format
             if ! echo "$YT_URL" | grep -qE "^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+"; then
-              add_error "$YT_URL" "Unknown" "لینک وارد شده معتبر نیست — فقط لینک‌های YouTube پشتیبانی می‌شوند"
+              add_error "$YT_URL" "لینک نامعتبر" "لینک وارد شده معتبر نیست — فقط لینک‌های YouTube پشتیبانی می‌شوند"
               continue
             fi
-            
-            # Get metadata
+
+            # Get video metadata
             INFO_JSON=$(yt-dlp --proxy "socks5://127.0.0.1:1080" --dump-json --skip-download "$YT_URL" 2>/dev/null || echo "{}")
-            
+
             if [ "$INFO_JSON" = "{}" ] || [ -z "$INFO_JSON" ]; then
-              add_error "$YT_URL" "Unknown" "خطا در دریافت اطلاعات ویدیو — لینک را بررسی کنید یا بعداً تلاش کنید"
+              add_error "$YT_URL" "نامشخص" "خطا در دریافت اطلاعات ویدیو — لینک را بررسی کنید یا بعداً تلاش کنید"
               continue
             fi
-            
+
             CREATOR=$(echo "$INFO_JSON" | jq -r '.uploader // .channel // "Unknown"')
             TITLE=$(echo "$INFO_JSON" | jq -r '.title // "Untitled"')
             DURATION=$(echo "$INFO_JSON" | jq -r '.duration // 0')
             VIEW_COUNT=$(echo "$INFO_JSON" | jq -r '.view_count // 0')
-            
-            echo "  👤 Creator: $CREATOR"
-            echo "  📝 Title: $TITLE"
-            echo "  ⏱ Duration: ${DURATION}s"
-            
+
+            echo "  Creator : ${CREATOR}"
+            echo "  Title   : ${TITLE}"
+            echo "  Duration: ${DURATION}s"
+            echo "  Views   : ${VIEW_COUNT}"
+
             # Check if video is too long (>2 hours)
             if [ "$DURATION" -gt 7200 ] 2>/dev/null; then
               add_error "$YT_URL" "$TITLE" "مدت زمان ویدیو بیشتر از ۲ ساعت است — امکان دانلود وجود ندارد"
               continue
             fi
-            
+
             TMP_DIR="tmp_yt_${REQUEST_ID}_${RANDOM}"
-            mkdir -p "$TMP_DIR"
-            
-            # Try all bypass methods
+            mkdir -p "${TMP_DIR}"
+
+            # Try all 6 bypass methods
             DOWNLOAD_SUCCESS=false
-            LAST_ERROR=""
-            
+            LAST_ERROR_TEXT=""
+
             for METHOD in 1 2 3 4 5 6; do
-              echo "  🎯 Trying bypass method ${METHOD}/6..."
-              
-              DOWNLOAD_OUTPUT=$(download_video $METHOD "$YT_URL" "$TMP_DIR" 2>&1)
+              echo "  Trying bypass method ${METHOD}/6..."
+
+              DOWNLOAD_OUTPUT=$(download_video $METHOD "$YT_URL" "${TMP_DIR}" 2>&1)
               DOWNLOAD_EXIT=$?
-              
-              if echo "$DOWNLOAD_OUTPUT" | grep -q "100%"; then
-                echo "  ✅ Downloaded successfully (method $METHOD)"
+
+              if echo "${DOWNLOAD_OUTPUT}" | grep -q "100%"; then
+                echo "  SUCCESS: Downloaded via method ${METHOD}"
                 DOWNLOAD_SUCCESS=true
                 break
               else
-                # Capture last error line for diagnostics
-                LAST_ERROR=$(echo "$DOWNLOAD_OUTPUT" | tail -5 | grep -i "error\|failed\|not found\|blocked\|private\|unavailable" | tail -1 || echo "Unknown error")
-                echo "  ❌ Method $METHOD failed"
+                LAST_ERROR_TEXT=$(echo "${DOWNLOAD_OUTPUT}" | tail -10 | grep -iE "error|failed|not found|blocked|private|unavailable|rate|network" | tail -1 || echo "")
+                echo "  Method ${METHOD} failed, trying next..."
                 sleep 2
               fi
             done
-            
-            if [ "$DOWNLOAD_SUCCESS" = false ]; then
-              # Translate common errors to Persian
-              if echo "$LAST_ERROR" | grep -qi "private\|not available\|unavailable"; then
-                ERROR_MSG="این ویدیو خصوصی است یا در دسترس نیست"
-              elif echo "$LAST_ERROR" | grep -qi "blocked\|copyright\|removed\|deleted"; then
-                ERROR_MSG="این ویدیو به دلیل کپی‌رایت یا حذف در دسترس نیست"
-              elif echo "$LAST_ERROR" | grep -qi "age\|restricted\|sign in\|login"; then
-                ERROR_MSG="این ویدیو محدودیت سنی دارد یا نیاز به ورود به حساب کاربری دارد"
-              elif echo "$LAST_ERROR" | grep -qi "not found\|404"; then
-                ERROR_MSG="ویدیو یافت نشد — لینک را بررسی کنید"
-              elif echo "$LAST_ERROR" | grep -qi "rate\|limit\|too many"; then
-                ERROR_MSG="تعداد درخواست‌ها زیاد شده — چند دقیقه صبر کنید"
-              elif echo "$LAST_ERROR" | grep -qi "network\|timeout\|connection\|refused"; then
-                ERROR_MSG="خطای شبکه در اتصال به YouTube — فیلترشکن فعال کنید یا بعداً تلاش کنید"
-              else
-                ERROR_MSG="خطا در دانلود ویدیو — تمام روش‌های bypass ناموفق بودند"
-              fi
-              
-              add_error "$YT_URL" "$TITLE" "$ERROR_MSG"
-              rm -rf "$TMP_DIR"
+
+            if [ "${DOWNLOAD_SUCCESS}" = false ]; then
+              ERROR_MSG=$(translate_error "${LAST_ERROR_TEXT}")
+              add_error "$YT_URL" "$TITLE" "${ERROR_MSG}"
+              rm -rf "${TMP_DIR}"
               continue
             fi
-            
-            # ═══════════════════════════════════════
+
+            # ═══════════════════════════════════════════════
             # Process Downloaded Files
-            # ═══════════════════════════════════════
+            # ═══════════════════════════════════════════════
             FILES_FOUND=false
-            
-            for MEDIA_FILE in "$TMP_DIR"/*.mp4 "$TMP_DIR"/*.webm "$TMP_DIR"/*.mkv "$TMP_DIR"/*.mp3 "$TMP_DIR"/*.m4a; do
+
+            for MEDIA_FILE in "${TMP_DIR}"/*.mp4 "${TMP_DIR}"/*.webm "${TMP_DIR}"/*.mkv "${TMP_DIR}"/*.mp3 "${TMP_DIR}"/*.m4a; do
               [ -f "$MEDIA_FILE" ] || continue
               FILES_FOUND=true
-              
+
               BASENAME=$(basename "$MEDIA_FILE")
               SAFE_NAME=$(sanitize_name "${BASENAME%.*}")
               EXT="${BASENAME##*.}"
               FILE_SIZE=$(stat -c%s "$MEDIA_FILE" 2>/dev/null || echo 0)
               FILE_SIZE_MB=$(( FILE_SIZE / 1024 / 1024 ))
-              
+
               echo ""
-              echo "  📦 File: ${SAFE_NAME}.${EXT} — ${FILE_SIZE_MB}MB"
-              
-              # ═══ SIZE CHECK ═══
+              echo "  File: ${SAFE_NAME}.${EXT} — ${FILE_SIZE_MB}MB"
+
+              # ── SIZE CHECK: >90MB needs RAR splitting ──
               if [ "$FILE_SIZE" -gt "$TARGET_SIZE_BYTES" ]; then
-                echo "  ⚠️ File exceeds ${TARGET_SIZE_MB}MB — splitting with RAR..."
-                
+                echo "  File exceeds ${TARGET_SIZE_MB}MB — splitting with RAR..."
+
                 SPLIT_DIR="/tmp/rar_${REQUEST_ID}_${RANDOM}"
-                mkdir -p "$SPLIT_DIR"
-                
-                cp "$MEDIA_FILE" "${SPLIT_DIR}/${SAFE_NAME}.${EXT}"
-                
-                cd "$SPLIT_DIR"
+                mkdir -p "${SPLIT_DIR}"
+
+                # Copy file to split directory
+                cp "${MEDIA_FILE}" "${SPLIT_DIR}/${SAFE_NAME}.${EXT}"
+
+                # Create RAR split volumes (each part = TARGET_SIZE_MB MB)
+                cd "${SPLIT_DIR}"
                 rar a -v${TARGET_SIZE_MB}m -ep1 -m0 -idq "${SAFE_NAME}.part.rar" "${SAFE_NAME}.${EXT}"
                 rm -f "${SAFE_NAME}.${EXT}"
                 cd - > /dev/null
-                
+
+                # Count parts
                 TOTAL_PARTS=$(ls "${SPLIT_DIR}/${SAFE_NAME}.part"*.rar 2>/dev/null | wc -l)
-                echo "  📦 Split into ${TOTAL_PARTS} RAR parts"
-                
+                echo "  Split into ${TOTAL_PARTS} RAR parts"
+
                 if [ "$TOTAL_PARTS" -gt "$MAX_PARTS" ]; then
-                  echo "  🚫 Too many parts (${TOTAL_PARTS}) — exceeds ${MAX_PARTS} part limit"
-                  rm -rf "$SPLIT_DIR"
+                  echo "  ERROR: Too many parts (${TOTAL_PARTS}) — exceeds ${MAX_PARTS} limit"
+                  rm -rf "${SPLIT_DIR}"
                   add_error "$YT_URL" "$TITLE" "حجم فایل خیلی زیاد است — حتی با تقسیم‌بندی بیش از ${MAX_PARTS} پارت می‌شود"
                   continue
                 fi
-                
+
                 # Move parts to request directory
                 PART_NUM=0
                 for PART_FILE in $(ls "${SPLIT_DIR}/${SAFE_NAME}.part"*.rar | sort); do
                   [ -f "$PART_FILE" ] || continue
                   PART_NUM=$((PART_NUM + 1))
                   PART_NAME=$(basename "$PART_FILE")
-                  mv "$PART_FILE" "${REQUEST_DIR}/${PART_NAME}"
-                  echo "    ✅ Part ${PART_NUM}/${TOTAL_PARTS}: ${PART_NAME}"
+                  mv "${PART_FILE}" "${REQUEST_DIR}/${PART_NAME}"
+                  echo "    Part ${PART_NUM}/${TOTAL_PARTS}: ${PART_NAME} saved"
                 done
-                
+
                 add_result "{
                   \"url\": \"${YT_URL}\",
                   \"title\": \"${TITLE}\",
@@ -430,24 +421,24 @@ RESULTEOF
                   \"multipart\": true,
                   \"total_parts\": ${TOTAL_PARTS}
                 }"
-                
-                rm -rf "$SPLIT_DIR"
-                
+
+                rm -rf "${SPLIT_DIR}"
+
               else
-                # Move file to request directory
+                # ── File within size limit: direct save ──
                 DEST_FILE="${REQUEST_DIR}/${SAFE_NAME}.${EXT}"
-                mv "$MEDIA_FILE" "$DEST_FILE"
-                echo "  ✅ Saved: ${SAFE_NAME}.${EXT}"
-                
-                # Copy thumbnail
-                for THUMB in "$TMP_DIR"/*.jpg "$TMP_DIR"/*.webp; do
+                mv "${MEDIA_FILE}" "${DEST_FILE}"
+                echo "  Saved: ${SAFE_NAME}.${EXT}"
+
+                # Copy thumbnail if exists
+                for THUMB in "${TMP_DIR}"/*.jpg "${TMP_DIR}"/*.webp; do
                   [ -f "$THUMB" ] || continue
                   THUMB_EXT="${THUMB##*.}"
                   cp "$THUMB" "${REQUEST_DIR}/${SAFE_NAME}.${THUMB_EXT}"
-                  echo "  🖼 Thumbnail: ${SAFE_NAME}.${THUMB_EXT}"
+                  echo "  Thumbnail: ${SAFE_NAME}.${THUMB_EXT}"
                   break
                 done
-                
+
                 add_result "{
                   \"url\": \"${YT_URL}\",
                   \"title\": \"${TITLE}\",
@@ -461,43 +452,68 @@ RESULTEOF
                 }"
               fi
             done
-            
-            if [ "$FILES_FOUND" = false ]; then
-              add_error "$YT_URL" "$TITLE" "دانلود انجام شد اما فایلی تولید نشد — خطای داخلی"
+
+            if [ "${FILES_FOUND}" = false ]; then
+              add_error "$YT_URL" "$TITLE" "دانلود انجام شد اما فایلی تولید نشد — خطای داخلی سیستم"
             fi
-            
-            rm -rf "$TMP_DIR"
+
+            rm -rf "${TMP_DIR}"
           done
-          
-          # ═══════════════════════════════════════
+
+          # ═══════════════════════════════════════════════
           # Generate Final result.json
-          # ═══════════════════════════════════════
-          
-          # Determine overall status
-          if [ "$(echo "$ERRORS" | jq '. | length')" -gt 0 ]; then
-            if [ "$(echo "$RESULTS" | jq '. | length')" -gt 0 ]; then
-              OVERALL_STATUS="partial"  # Some succeeded, some failed
+          # ═══════════════════════════════════════════════
+          SUCCEEDED_COUNT=$(echo "$RESULTS_JSON" | jq '. | length')
+          FAILED_COUNT=$(echo "$ERRORS_JSON" | jq '. | length')
+          TOTAL_COUNT=$(( SUCCEEDED_COUNT + FAILED_COUNT ))
+
+          if [ "$FAILED_COUNT" -gt 0 ]; then
+            if [ "$SUCCEEDED_COUNT" -gt 0 ]; then
+              OVERALL_STATUS="partial"
             else
-              OVERALL_STATUS="error"    # All failed
+              OVERALL_STATUS="error"
             fi
           fi
-          
+
+          COMPLETED_AT=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          STARTED_AT="${{ github.run_started_at }}"
+
           RESULT_FILE="${REQUEST_DIR}/result.json"
-          
+
+          # ═══════════════════════════════════════════════
+          # Generate Final result.json (using jq — no heredoc)
+          # ═══════════════════════════════════════════════
+          SUCCEEDED_COUNT=$(echo "$RESULTS_JSON" | jq '. | length')
+          FAILED_COUNT=$(echo "$ERRORS_JSON" | jq '. | length')
+          TOTAL_COUNT=$(( SUCCEEDED_COUNT + FAILED_COUNT ))
+
+          if [ "$FAILED_COUNT" -gt 0 ]; then
+            if [ "$SUCCEEDED_COUNT" -gt 0 ]; then
+              OVERALL_STATUS="partial"
+            else
+              OVERALL_STATUS="error"
+            fi
+          fi
+
+          COMPLETED_AT=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
+          RESULT_FILE="${REQUEST_DIR}/result.json"
+
           jq -n \
             --arg request_id "$REQUEST_ID" \
             --arg status "$OVERALL_STATUS" \
-            --arg started_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-            --arg completed_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-            --argjson results "$RESULTS" \
-            --argjson errors "$ERRORS" \
+            --arg completed_at "$COMPLETED_AT" \
             --arg urls "$YT_URLS" \
             --arg quality "$QUALITY" \
-            --argjson audio_only ${AUDIO_ONLY:-false} \
+            --argjson audio_only "${AUDIO_ONLY:-false}" \
+            --argjson results "$RESULTS_JSON" \
+            --argjson errors "$ERRORS_JSON" \
+            --argjson total "$TOTAL_COUNT" \
+            --argjson succeeded "$SUCCEEDED_COUNT" \
+            --argjson failed "$FAILED_COUNT" \
             '{
               request_id: $request_id,
               status: $status,
-              started_at: $started_at,
               completed_at: $completed_at,
               input: {
                 urls: $urls,
@@ -507,53 +523,52 @@ RESULTEOF
               results: $results,
               errors: $errors,
               summary: {
-                total_urls: ($results | length) + ($errors | length),
-                succeeded: ($results | length),
-                failed: ($errors | length)
+                total_urls: $total,
+                succeeded: $succeeded,
+                failed: $failed
               }
             }' > "$RESULT_FILE"
-          
-          echo ""
-          echo "══════════════════════════════════════════"
-          echo "📊 FINAL RESULT"
-          echo "══════════════════════════════════════════"
-          echo "  🆔 Request: ${REQUEST_ID}"
-          echo "  📈 Status: ${OVERALL_STATUS}"
-          echo "  ✅ Succeeded: $(echo "$RESULTS" | jq '. | length')"
-          echo "  ❌ Failed: $(echo "$ERRORS" | jq '. | length')"
-          echo "  📁 Output: ${RESULT_FILE}"
-          echo "══════════════════════════════════════════"
 
-      # ──────────────────────────────────────────
-      # Step 7: Stop WARP
-      # ──────────────────────────────────────────
+          echo ""
+          echo "============================================"
+          echo "  FINAL RESULT"
+          echo "============================================"
+          echo "  Request ID : ${REQUEST_ID}"
+          echo "  Status     : ${OVERALL_STATUS}"
+          echo "  Succeeded  : ${SUCCEEDED_COUNT}"
+          echo "  Failed     : ${FAILED_COUNT}"
+          echo "  Output     : ${RESULT_FILE}"
+          echo "============================================"
+      # ======================================================
+      # Step 7: Stop Cloudflare WARP
+      # ======================================================
       - name: "🛑 Stop WARP"
         if: always()
         run: |
           docker stop warp 2>/dev/null || true
           docker rm warp 2>/dev/null || true
 
-      # ──────────────────────────────────────────
-      # Step 8: Commit & Push
-      # ──────────────────────────────────────────
+      # ======================================================
+      # Step 8: Commit & Push Results
+      # ======================================================
       - name: "📤 Commit & Push"
         if: always()
         run: |
           REQUEST_DIR="${{ env.REQUEST_DIR }}"
-          
-          # Stage request directory
+
+          # Stage the request directory
           git add "${REQUEST_DIR}/" 2>/dev/null || true
-          
-          # Cleanup old requests (>24h)
+
+          # Cleanup old request folders (older than 24 hours)
           find data/youtube-downloader/downloads/ -maxdepth 1 -type d -name "req_*" -mmin +1440 -exec rm -rf {} \; 2>/dev/null || true
           git add -u data/youtube-downloader/downloads/ 2>/dev/null || true
-          
+
           if git diff --staged --quiet; then
             echo "No files to commit"
           else
             FILE_COUNT=$(git diff --staged --name-only | wc -l)
             REQUEST_ID="${{ env.REQUEST_ID }}"
-            git commit -m "🎬 YT DL [${REQUEST_ID}]: ${FILE_COUNT} file(s) — $(date -u +'%H:%M UTC')"
+            git commit -m "yt-dl [${REQUEST_ID}]: ${FILE_COUNT} file(s) — $(date -u +'%H:%M UTC')"
             git push
-            echo "✅ Committed and pushed ${FILE_COUNT} file(s)"
+            echo "Committed ${FILE_COUNT} file(s) successfully"
           fi
