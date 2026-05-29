@@ -757,6 +757,20 @@ const MovieFinderPlugin = (() => {
     };
 })();
 
+
+
+// Public API
+return {
+    init,
+    destroy,
+    handleImageError,
+    renderView
+};
+})();
+
+// Expose to global scope for PluginLoader
+window.MovieFinderPlugin = MovieFinderPlugin;
+
 // Freeze for immutability
 Object.freeze(MovieFinderPlugin);
 
