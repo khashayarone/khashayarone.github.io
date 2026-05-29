@@ -85,6 +85,7 @@ const PluginLoader = (() => {
      */
     const findPluginInstance = (pluginId) => {
         // Map plugin IDs to expected global variable names
+        // Updated: Complete list of all platform plugins
         const instanceMap = {
             'movie-finder': 'MovieFinderPlugin',
             'proxy-finder': 'ProxyFinderPlugin',
@@ -258,7 +259,7 @@ const PluginLoader = (() => {
             if (!instance) {
                 throw new Error(
                     `Plugin "${pluginId}" loaded but instance not found in global scope. ` +
-                    `Make sure the plugin script exposes itself via window.MovieFinderPlugin = MovieFinderPlugin;`
+                    `Make sure the plugin script exposes itself via window.${instanceMap[pluginId] || pluginId + 'Plugin'} = ${instanceMap[pluginId] || pluginId + 'Plugin'};`
                 );
             }
 
