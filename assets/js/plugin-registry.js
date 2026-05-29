@@ -157,8 +157,22 @@ const PluginRegistry = (() => {
             dataSource: 'proxy.json'
         });
 
+        // Register YouTube Downloader plugin
+        register({
+            id: 'youtube-downloader',
+            title: 'دانلودر یوتوب',
+            icon: 'download',
+            category: 'media',
+            size: 'large',
+            description: 'دانلود ویدیو و صوت از یوتوب با کیفیت‌های مختلف — حداکثر ۱۰ درخواست در ساعت',
+            version: '1.0.0',
+            author: 'Tool Platform',
+            permissions: [],
+            jsPath: 'plugins/youtube-downloader/tool.js',
+            cssPath: 'plugins/youtube-downloader/tool.css'
+        });
+
         // More plugins can be registered here in the future
-        // register({ id: 'youtube-downloader', title: 'دانلودر یوتوب', ... });
         // register({ id: 'youtube-search', title: 'جستجوی یوتوب', ... });
         // register({ id: 'soundcloud-downloader', title: 'SoundCloud DL', ... });
 
