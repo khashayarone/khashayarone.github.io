@@ -4,6 +4,7 @@
  * Rate limited: 10 requests/hour, 5 min cooldown between requests
  * Anti-collision: per-request folder isolation
  * Supports: single video, multipart RAR downloads, Persian error messages
+ * Token management: localStorage + prompt for missing token
  * Part of Vanilla Micro-SPA Tool Platform
  */
 
@@ -41,10 +42,7 @@ const YouTubeDownloaderPlugin = (() => {
 
     const STORAGE_KEY = 'yt-downloader';
     const HISTORY_KEY = 'yt-downloader:history';
-
-    // GitHub token (public repo — can use minimal scope)
-    // For private repos, user would need to provide their own token
-    const GITHUB_TOKEN = null; // Public repo — no token needed for dispatch
+    const TOKEN_STORAGE_KEY = 'yt-downloader:gh-token';
 
     // ============================================
     // Plugin State
@@ -64,7 +62,8 @@ const YouTubeDownloaderPlugin = (() => {
         isLoading: false,
         error: null,
         cooldownTimer: null,
-        activePolls: {}  // Map<requestId, pollInterval>
+        activePolls: {},
+        githubToken: null
     };
 
     // ============================================
@@ -122,6 +121,26 @@ const YouTubeDownloaderPlugin = (() => {
             localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
         } catch (e) {
             console.warn('Failed to save history to localStorage');
+        }
+    };
+
+    const loadToken = () => {
+        try {
+            const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+            if (token && token.startsWith('ghp_')) {
+                return token;
+            }
+        } catch (e) {
+            // Corrupted — ignore
+        }
+        return null;
+    };
+
+    const saveToken = (token) => {
+        try {
+            localStorage.setItem(TOKEN_STORAGE_KEY, token);
+        } catch (e) {
+            console.warn('Failed to save token to localStorage');
         }
     };
 
@@ -202,7 +221,7 @@ const YouTubeDownloaderPlugin = (() => {
      * @param {string} url - YouTube URL
      * @param {string} quality - Video quality
      * @param {boolean} audioOnly - Audio only mode
-     * @returns {Promise<boolean>} Success status
+     * @returns {Promise<boolean|string>} true=success, false=failed, 'needs_token'=token required
      */
     const dispatchWorkflow = async (requestId, url, quality, audioOnly) => {
         const body = {
@@ -220,9 +239,12 @@ const YouTubeDownloaderPlugin = (() => {
             'Accept': 'application/vnd.github.v3+json'
         };
 
-        // If token is available, use it for authentication
-        if (GITHUB_TOKEN) {
-            headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+        // Use token from state (loaded from localStorage) or fallback
+        const token = state.githubToken || loadToken();
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+            state.githubToken = token;
         }
 
         try {
@@ -233,63 +255,22 @@ const YouTubeDownloaderPlugin = (() => {
             });
 
             if (response.ok) {
-                console.log(`Workflow dispatched for request: ${requestId}`);
+                console.log(`✅ Workflow dispatched for request: ${requestId}`);
                 return true;
             } else if (response.status === 401 || response.status === 403) {
-                console.error('GitHub API authentication failed — token required');
-                // For public repos without token, we simulate success
-                // since the action can be triggered manually
-                console.warn('Falling back to simulation mode (no GitHub token)');
-                return simulateDispatch(requestId, url, quality, audioOnly);
+                console.error('❌ GitHub API authentication failed');
+                return 'needs_token';
+            } else if (response.status === 404) {
+                console.error('❌ Workflow file not found — check workflow filename');
+                return false;
             } else {
-                console.error(`Workflow dispatch failed: ${response.status}`);
+                console.error(`❌ Workflow dispatch failed: ${response.status} ${response.statusText}`);
                 return false;
             }
         } catch (error) {
-            console.error('Workflow dispatch error:', error);
-            // Network error — fall back to simulation
-            console.warn('Falling back to simulation mode (network error)');
-            return simulateDispatch(requestId, url, quality, audioOnly);
+            console.error('❌ Workflow dispatch error:', error.message);
+            return false;
         }
-    };
-
-    /**
-     * Simulate workflow dispatch for development/testing
-     * This runs when GitHub token is not available
-     */
-    const simulateDispatch = async (requestId, url, quality, audioOnly) => {
-        console.log(`Simulating workflow for request: ${requestId}`);
-        
-        // Find the history entry
-        const idx = state.history.findIndex(h => h.id === requestId);
-        if (idx === -1) return false;
-
-        // Simulate processing delay
-        const processingTime = 3000 + Math.random() * 4000;
-        
-        setTimeout(() => {
-            const entry = state.history[idx];
-            if (entry) {
-                entry.status = 'completed';
-                entry.fileUrl = '#simulated-download-url';
-                entry.fileName = `Simulated-Video-${requestId}.mp4`;
-                entry.fileSize = Math.floor(Math.random() * 80000000) + 1000000;
-                entry.multipart = false;
-                entry.totalParts = 1;
-                entry.completedAt = Date.now();
-                entry.title = '🎬 ویدیو نمونه — ' + (audioOnly ? 'Audio' : quality);
-                saveHistory(state.history);
-                
-                // Clean up polling
-                if (state.activePolls[requestId]) {
-                    delete state.activePolls[requestId];
-                }
-                
-                renderView();
-            }
-        }, processingTime);
-
-        return true;
     };
 
     /**
@@ -303,7 +284,6 @@ const YouTubeDownloaderPlugin = (() => {
             attempts++;
 
             if (attempts > POLL_MAX_ATTEMPTS) {
-                // Timeout — mark as error
                 const idx = state.history.findIndex(h => h.id === requestId);
                 if (idx !== -1) {
                     state.history[idx].status = 'error';
@@ -323,26 +303,22 @@ const YouTubeDownloaderPlugin = (() => {
                 const response = await fetch(resultUrl);
 
                 if (!response.ok) {
-                    // Result not ready yet — continue polling
                     return;
                 }
 
                 const result = await response.json();
 
                 if (result.status === 'completed' || result.status === 'partial' || result.status === 'error') {
-                    // Stop polling
                     if (state.activePolls[requestId]) {
                         clearInterval(state.activePolls[requestId]);
                         delete state.activePolls[requestId];
                     }
 
-                    // Update history entry
                     const idx = state.history.findIndex(h => h.id === requestId);
                     if (idx === -1) return;
 
                     const entry = state.history[idx];
 
-                    // Check if results exist
                     if (result.results && result.results.length > 0) {
                         const firstResult = result.results[0];
                         entry.status = firstResult.status === 'completed' ? 'completed' : 'error';
@@ -354,7 +330,6 @@ const YouTubeDownloaderPlugin = (() => {
                         entry.quality = firstResult.quality || entry.quality;
                         entry.completedAt = Date.now();
 
-                        // Build download paths
                         if (entry.multipart && entry.totalParts > 1) {
                             entry.parts = [];
                             const baseFileName = firstResult.file_name.replace(/\.[^.]+$/, '');
@@ -370,7 +345,6 @@ const YouTubeDownloaderPlugin = (() => {
                         }
                     }
 
-                    // Check if errors exist
                     if (result.errors && result.errors.length > 0) {
                         const firstError = result.errors[0];
                         entry.status = 'error';
@@ -378,7 +352,6 @@ const YouTubeDownloaderPlugin = (() => {
                         entry.errorTitle = firstError.title || '';
                     }
 
-                    // If no results and no errors but status is error
                     if ((!result.results || result.results.length === 0) && result.status === 'error') {
                         entry.status = 'error';
                         entry.errorMessage = 'خطا در پردازش درخواست — لطفاً دوباره تلاش کنید';
@@ -388,19 +361,14 @@ const YouTubeDownloaderPlugin = (() => {
                     renderView();
                 }
             } catch (error) {
-                // Result file not found or network error — continue polling
-                // Don't log every attempt to avoid console spam
                 if (attempts % 10 === 0) {
                     console.log(`Polling attempt ${attempts} for request ${requestId}...`);
                 }
             }
         };
 
-        // Start polling interval
         const intervalId = setInterval(poll, POLL_INTERVAL);
         state.activePolls[requestId] = intervalId;
-
-        // Run first poll immediately
         poll();
     };
 
@@ -415,7 +383,6 @@ const YouTubeDownloaderPlugin = (() => {
         if (!state.limits.canRequest) return;
         if (!state.url.trim()) return;
 
-        // Validate YouTube URL
         if (!isValidYouTubeUrl(state.url)) {
             state.error = 'لینک یوتوب نامعتبر است — لینک باید با https://www.youtube.com یا https://youtu.be شروع شود';
             renderView();
@@ -426,13 +393,10 @@ const YouTubeDownloaderPlugin = (() => {
         state.error = null;
         renderView();
 
-        // Record request for rate limiting
         recordRequest();
 
-        // Generate unique request ID
         const requestId = Utils.generateId('yt');
 
-        // Create history entry
         const entry = {
             id: requestId,
             url: state.url,
@@ -455,35 +419,150 @@ const YouTubeDownloaderPlugin = (() => {
         state.history.unshift(entry);
         saveHistory(state.history);
 
-        // Store URL and quality for dispatch
         const submittedUrl = state.url;
         const submittedQuality = state.quality;
         const submittedAudioOnly = state.audioOnly;
 
-        // Clear form
         state.url = '';
         state.error = null;
 
         renderView();
 
-        // Dispatch to GitHub Action
         const dispatched = await dispatchWorkflow(requestId, submittedUrl, submittedQuality, submittedAudioOnly);
 
-        if (dispatched) {
-            // Start polling for results
+        if (dispatched === true) {
             startPolling(requestId);
+        } else if (dispatched === 'needs_token') {
+            const idx = state.history.findIndex(h => h.id === requestId);
+            if (idx !== -1) {
+                state.history[idx].status = 'awaiting_token';
+                state.history[idx].errorMessage = 'نیاز به توکن GitHub — لطفاً توکن خود را وارد کنید';
+                saveHistory(state.history);
+            }
+            state.error = null;
+            renderView();
+            showTokenPrompt(requestId);
         } else {
-            // Dispatch failed — mark as error immediately
             const idx = state.history.findIndex(h => h.id === requestId);
             if (idx !== -1) {
                 state.history[idx].status = 'error';
-                state.history[idx].errorMessage = 'خطا در ارسال درخواست به سرور — لطفاً دوباره تلاش کنید';
+                state.history[idx].errorMessage = 'خطا در ارسال درخواست به سرور — لطفاً دوباره تلاش کنید یا توکن GitHub را تنظیم کنید';
                 saveHistory(state.history);
             }
         }
 
         state.isLoading = false;
         renderView();
+    };
+
+    /**
+     * Show token input prompt modal
+     * @param {string} requestId - Pending request ID to retry after token is saved
+     */
+    const showTokenPrompt = (requestId) => {
+        const container = document.getElementById('plugin-container');
+        if (!container) return;
+
+        const tokenHtml = `
+            <div class="yt-token-overlay" id="yt-token-overlay">
+                <div class="yt-token-box glass-base">
+                    <h3 class="yt-token-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-primary)" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                        تنظیم توکن GitHub
+                    </h3>
+                    <p class="yt-token-desc">
+                        برای دانلود خودکار نیاز به یک GitHub Personal Access Token دارید.
+                        <br><br>
+                        <strong>مراحل دریافت توکن:</strong>
+                        <br>۱. به 
+                        <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a> 
+                        بروید
+                        <br>۲. روی <strong>Generate new token</strong> → <strong>classic</strong> کلیک کنید
+                        <br>۳. فقط scope <code>workflow</code> را تیک بزنید
+                        <br>۴. توکن را کپی کرده و در کادر زیر وارد کنید
+                        <br><br>
+                        <small style="color: var(--color-text-muted);">توکن شما فقط در مرورگر خودتان ذخیره می‌شود و به جای دیگری ارسال نمی‌شود.</small>
+                    </p>
+                    <div class="yt-token-input-row">
+                        <input type="password" class="yt-token-input" id="yt-token-input" 
+                               placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" dir="ltr">
+                        <button class="btn btn-primary" id="yt-token-save" style="white-space:nowrap;">
+                            ذخیره و ادامه
+                        </button>
+                    </div>
+                    <button class="btn btn-ghost" id="yt-token-skip" style="width:100%;margin-top:var(--space-md);">
+                        بی‌خیال — حذف درخواست
+                    </button>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', tokenHtml);
+
+        const saveBtn = document.getElementById('yt-token-save');
+        const skipBtn = document.getElementById('yt-token-skip');
+        const tokenInput = document.getElementById('yt-token-input');
+
+        const removeOverlay = () => {
+            const overlay = document.getElementById('yt-token-overlay');
+            if (overlay) overlay.remove();
+        };
+
+        if (saveBtn && tokenInput) {
+            saveBtn.addEventListener('click', () => {
+                const token = tokenInput.value.trim();
+                if (token && token.startsWith('ghp_')) {
+                    saveToken(token);
+                    state.githubToken = token;
+                    removeOverlay();
+
+                    const idx = state.history.findIndex(h => h.id === requestId);
+                    if (idx !== -1) {
+                        const entry = state.history[idx];
+                        entry.status = 'processing';
+                        entry.errorMessage = null;
+                        saveHistory(state.history);
+
+                        dispatchWorkflow(requestId, entry.url, entry.quality, entry.audioOnly)
+                            .then(result => {
+                                if (result === true) {
+                                    startPolling(requestId);
+                                } else {
+                                    entry.status = 'error';
+                                    entry.errorMessage = 'خطا در ارسال درخواست — توکن را بررسی کنید';
+                                    saveHistory(state.history);
+                                    renderView();
+                                }
+                            });
+                    }
+
+                    renderView();
+                }
+            });
+        }
+
+        if (skipBtn) {
+            skipBtn.addEventListener('click', () => {
+                removeOverlay();
+                const idx = state.history.findIndex(h => h.id === requestId);
+                if (idx !== -1) {
+                    state.history.splice(idx, 1);
+                    saveHistory(state.history);
+                }
+                renderView();
+            });
+        }
+
+        if (tokenInput) {
+            tokenInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && saveBtn) {
+                    saveBtn.click();
+                }
+            });
+            setTimeout(() => tokenInput.focus(), 100);
+        }
     };
 
     // ============================================
@@ -711,15 +790,20 @@ const YouTubeDownloaderPlugin = (() => {
                     ${state.history.slice(0, 20).map(item => {
                         const timeAgo = getRelativeTime(item.timestamp);
                         const isProcessing = item.status === 'processing';
+                        const isAwaitingToken = item.status === 'awaiting_token';
                         const isCompleted = item.status === 'completed';
                         const isError = item.status === 'error';
                         const hasParts = item.multipart && item.totalParts > 1 && item.parts;
 
                         return `
                             <div class="yt-history-item">
-                                <div class="yt-history-icon ${isProcessing ? 'processing' : isCompleted ? 'completed' : 'error'}">
+                                <div class="yt-history-icon ${isProcessing || isAwaitingToken ? 'processing' : isCompleted ? 'completed' : 'error'}">
                                     ${isProcessing ? `
                                         <div class="yt-history-spinner"></div>
+                                    ` : isAwaitingToken ? `
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                                        </svg>
                                     ` : isCompleted ? `
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="20 6 9 17 4 12"/>
@@ -734,29 +818,52 @@ const YouTubeDownloaderPlugin = (() => {
                                     <span class="yt-history-item-title">${Utils.escapeHtml(item.title)}</span>
                                     <span class="yt-history-item-meta">
                                         ${item.audioOnly ? '🎵 صوت' : '🎬 ' + item.quality}
-                                        ${isProcessing ? ' — در حال پردازش توسط سرور...' : 
+                                        ${isAwaitingToken ? ' — نیاز به توکن GitHub' :
+                                          isProcessing ? ' — در حال پردازش توسط سرور...' : 
                                           isCompleted ? (item.fileSize ? ` — ${formatFileSize(item.fileSize)}` : ' — تکمیل شد') : 
                                           ` — ${Utils.escapeHtml(item.errorMessage || 'خطا')}`}
                                     </span>
                                 </div>
                                 <span class="yt-history-time">${timeAgo}</span>
                                 
-                                ${isError && item.errorMessage ? `
-                                    <button class="yt-history-download-btn" style="background: #f87171;" 
-                                            onclick="alert('${Utils.escapeHtml(item.errorMessage).replace(/'/g, "\\'")}')" 
-                                            title="${Utils.escapeHtml(item.errorMessage)}">
+                                ${isAwaitingToken ? `
+                                    <button class="yt-history-download-btn" id="yt-retry-token-${item.id}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                                        </svg>
+                                        تنظیم توکن
+                                    </button>
+                                ` : ''}
+                                
+                                ${isError && item.errorMessage && !isAwaitingToken ? `
+                                    <button class="yt-history-error-btn" onclick="document.getElementById('yt-error-popup-${item.id}').style.display='flex';document.getElementById('yt-error-overlay-${item.id}').style.display='block';">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
                                             <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                                         </svg>
                                         علت خطا
                                     </button>
+                                    <div class="yt-error-popup-overlay" id="yt-error-overlay-${item.id}" style="display:none;" onclick="document.getElementById('yt-error-overlay-${item.id}').style.display='none';document.getElementById('yt-error-popup-${item.id}').style.display='none';"></div>
+                                    <div class="yt-error-popup" id="yt-error-popup-${item.id}" style="display:none;">
+                                        <div class="yt-error-popup-title">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" style="width:22px;height:22px;">
+                                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                                            </svg>
+                                            خطا در دانلود
+                                        </div>
+                                        <div class="yt-error-popup-message">${Utils.escapeHtml(item.errorMessage)}</div>
+                                        ${item.errorTitle ? `<div class="yt-error-popup-url">🎬 ${Utils.escapeHtml(item.errorTitle)}</div>` : ''}
+                                        <button class="yt-error-popup-close" onclick="document.getElementById('yt-error-overlay-${item.id}').style.display='none';document.getElementById('yt-error-popup-${item.id}').style.display='none';">متوجه شدم</button>
+                                    </div>
                                 ` : ''}
                                 
                                 ${isCompleted && hasParts ? `
-                                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                    <div class="yt-parts-container">
                                         ${item.parts.map(p => `
-                                            <a href="${p.downloadUrl}" class="yt-history-download-btn" download style="font-size:10px;padding:4px 8px;">
-                                                📥 ${p.part}
+                                            <a href="${p.downloadUrl}" class="yt-part-btn" download>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                پارت ${p.part}
                                             </a>
                                         `).join('')}
                                     </div>
@@ -859,6 +966,18 @@ const YouTubeDownloaderPlugin = (() => {
                 }
             });
         }
+
+        // Token retry buttons (for awaiting_token items)
+        state.history.forEach(item => {
+            if (item.status === 'awaiting_token') {
+                const retryBtn = document.getElementById(`yt-retry-token-${item.id}`);
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', () => {
+                        showTokenPrompt(item.id);
+                    });
+                }
+            }
+        });
     };
 
     // ============================================
@@ -873,6 +992,7 @@ const YouTubeDownloaderPlugin = (() => {
         state.error = null;
         state.isLoading = false;
         state.activePolls = {};
+        state.githubToken = loadToken();
 
         // Resume polling for any unfinished requests
         state.history.forEach(item => {
@@ -892,7 +1012,6 @@ const YouTubeDownloaderPlugin = (() => {
             state.cooldownTimer = null;
         }
 
-        // Clear all polling intervals
         Object.values(state.activePolls).forEach(intervalId => {
             clearInterval(intervalId);
         });
