@@ -137,6 +137,24 @@ const YouTubeDownloaderPlugin = (() => {
         }
         return null;
     };
+    /**
+     * Get Bale connection from localStorage
+     * @returns {Object|null} Connection data or null
+     */
+    const getBaleConnection = () => {
+        try {
+            const raw = localStorage.getItem('bale-connection');
+            if (raw) {
+                const data = JSON.parse(raw);
+                if (data.status === 'connected' && data.chat_id) {
+                    return data;
+                }
+            }
+        } catch (e) {
+            // Corrupted
+        }
+        return null;
+    };
 
     const loadForkedRepo = () => {
         try {
@@ -258,13 +276,18 @@ const YouTubeDownloaderPlugin = (() => {
      * @returns {Promise<boolean|string>} true=success, false=failed, 'needs_token'=token required
      */
     const dispatchWorkflow = async (requestId, url, quality, audioOnly) => {
+        // Get Bale connection if available
+        const baleConnection = getBaleConnection();
+        
         const body = {
             ref: 'main',
             inputs: {
                 request_id: requestId,
                 youtube_urls: url,
                 quality: quality,
-                audio_only: audioOnly ? 'true' : 'false'
+                audio_only: audioOnly ? 'true' : 'false',
+                bale_code: baleConnection ? baleConnection.code : '',
+                bale_chat_id: baleConnection ? String(baleConnection.chat_id) : ''
             }
         };
 
@@ -425,6 +448,14 @@ const YouTubeDownloaderPlugin = (() => {
                     if ((!result.results || result.results.length === 0) && result.status === 'error') {
                         entry.status = 'error';
                         entry.errorMessage = 'خطا در پردازش درخواست — لطفاً دوباره تلاش کنید';
+                    }
+
+                    // Notify Bale bot if download completed
+                    if (entry.status === 'completed') {
+                        const bale = getBaleConnection();
+                        if (bale) {
+                            console.log(`📬 Bale notification ready for ${bale.first_name || 'user'} (chat_id: ${bale.chat_id})`);
+                        }
                     }
 
                     saveHistory(state.history);
