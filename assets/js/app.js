@@ -1222,8 +1222,6 @@
                 initBaleConnection();
             }, 100);
         }
-            setTimeout(() => initSettingsView(), 100);
-        }
 
         // Mark app as ready
         AppState.setState('app.ready', true);
