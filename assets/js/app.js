@@ -572,6 +572,7 @@
             clearBtn.addEventListener('click', () => {
                 localStorage.removeItem('yt-downloader:gh-token');
                 localStorage.removeItem('yt-downloader:fork-repo');
+                EventBus.emit('settings:token-cleared', {});
                 updateTokenUI();
                 if (typeof Toastify !== 'undefined') {
                     Toastify({
@@ -701,7 +702,13 @@
                     console.warn('⚠️ Fork failed — will use original repo:', e.message);
                 }
             }
-
+            
+            // Notify all plugins that token changed
+            EventBus.emit('settings:token-updated', {
+                token: token,
+                forkedRepo: localStorage.getItem('yt-downloader:fork-repo') || null
+            });
+            
             remove();
 
             if (onSaved) onSaved();
