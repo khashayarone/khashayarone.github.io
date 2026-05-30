@@ -1580,7 +1580,28 @@
     flex: 1;
     justify-content: center;
 }
+/* Bale Code Display */
+#bale-code-value {
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: all;
+}
 
+#bale-code-value:hover {
+    color: var(--color-accent-primary);
+}
+
+#bale-code-value.copied {
+    color: #2dd4bf;
+}
+
+/* Connection Status Pulse */
+.api-card-badge.connecting {
+    background: rgba(255, 107, 53, 0.1);
+    color: var(--color-accent-primary);
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    animation: pulse-status 1.5s ease-in-out infinite;
+}
 @media (max-width: 480px) {
     .api-cards-grid {
         grid-template-columns: 1fr;
