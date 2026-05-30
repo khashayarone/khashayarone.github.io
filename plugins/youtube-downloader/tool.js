@@ -1,10 +1,11 @@
 /**
  * YouTube Downloader Plugin — tool.js
  * Downloads YouTube videos via GitHub Action workflow dispatch
+ * BYOK: Auto-forks workflow to user's account for unlimited requests
  * Rate limited: 10 requests/hour, 5 min cooldown between requests
  * Anti-collision: per-request folder isolation
  * Supports: single video, multipart RAR downloads, Persian error messages
- * Token management: localStorage + prompt for missing token
+ * Token management: localStorage + shared modal with Settings
  * Part of Vanilla Micro-SPA Tool Platform
  */
 
@@ -20,15 +21,15 @@ const YouTubeDownloaderPlugin = (() => {
     const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
     const HOUR_MS = 60 * 60 * 1000;
 
-    // GitHub Action dispatch config
+    // Original GitHub Action dispatch config (fallback)
     const GITHUB_REPO_OWNER = 'khashayarone';
     const GITHUB_REPO_NAME = 'khashayarone.github.io';
     const GITHUB_WORKFLOW_ID = 'youtube-downloader.yml';
     const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`;
 
     // Polling config
-    const POLL_INTERVAL = 15000;  // Check every 15 seconds
-    const POLL_MAX_ATTEMPTS = 120; // Max 30 minutes (120 × 15s)
+    const POLL_INTERVAL = 15000;
+    const POLL_MAX_ATTEMPTS = 120;
 
     const QUALITY_OPTIONS = [
         { value: '2160p', label: '4K — 2160p' },
@@ -43,6 +44,7 @@ const YouTubeDownloaderPlugin = (() => {
     const STORAGE_KEY = 'yt-downloader';
     const HISTORY_KEY = 'yt-downloader:history';
     const TOKEN_STORAGE_KEY = 'yt-downloader:gh-token';
+    const FORK_STORAGE_KEY = 'yt-downloader:fork-repo';
 
     // ============================================
     // Plugin State
@@ -136,12 +138,16 @@ const YouTubeDownloaderPlugin = (() => {
         return null;
     };
 
-    const saveToken = (token) => {
+    const loadForkedRepo = () => {
         try {
-            localStorage.setItem(TOKEN_STORAGE_KEY, token);
+            const repo = localStorage.getItem(FORK_STORAGE_KEY);
+            if (repo && repo.includes('/')) {
+                return repo;
+            }
         } catch (e) {
-            console.warn('Failed to save token to localStorage');
+            // Corrupted — ignore
         }
+        return null;
     };
 
     // ============================================
@@ -212,8 +218,36 @@ const YouTubeDownloaderPlugin = (() => {
     };
 
     // ============================================
-    // GitHub Action Dispatch
+    // GitHub Action Dispatch (BYOK — Fork-Aware)
     // ============================================
+
+    /**
+     * Get the appropriate API URL for dispatching workflow
+     * Checks forked repo first, falls back to original repo
+     * @returns {string} API URL
+     */
+    const getDispatchUrl = () => {
+        const forkedRepo = loadForkedRepo();
+        if (forkedRepo) {
+            const [owner, repo] = forkedRepo.split('/');
+            return `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`;
+        }
+        return GITHUB_API_URL;
+    };
+
+    /**
+     * Get the appropriate raw URL for polling result.json
+     * @param {string} requestId - Request identifier
+     * @returns {string} Raw content URL
+     */
+    const getResultUrl = (requestId) => {
+        const forkedRepo = loadForkedRepo();
+        if (forkedRepo) {
+            const [owner, repo] = forkedRepo.split('/');
+            return `https://raw.githubusercontent.com/${owner}/${repo}/main/data/youtube-downloader/downloads/req_${requestId}/result.json`;
+        }
+        return `data/youtube-downloader/downloads/req_${requestId}/result.json`;
+    };
 
     /**
      * Dispatch workflow to GitHub Actions
@@ -242,35 +276,66 @@ const YouTubeDownloaderPlugin = (() => {
         // Use token from state (loaded from localStorage) or fallback
         const token = state.githubToken || loadToken();
         
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-            state.githubToken = token;
+        if (!token) {
+            return 'needs_token';
         }
 
-        try {
-            const response = await fetch(GITHUB_API_URL, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(body)
-            });
+        headers['Authorization'] = `Bearer ${token}`;
+        state.githubToken = token;
 
-            if (response.ok) {
-                console.log(`✅ Workflow dispatched for request: ${requestId}`);
-                return true;
-            } else if (response.status === 401 || response.status === 403) {
-                console.error('❌ GitHub API authentication failed');
-                return 'needs_token';
-            } else if (response.status === 404) {
-                console.error('❌ Workflow file not found — check workflow filename');
-                return false;
-            } else {
-                console.error(`❌ Workflow dispatch failed: ${response.status} ${response.statusText}`);
+        // Try dispatch to forked repo first, then original
+        const dispatchUrls = [getDispatchUrl()];
+        
+        // Add original repo as fallback (if forked repo exists but fails)
+        const forkedRepo = loadForkedRepo();
+        if (forkedRepo && dispatchUrls[0] !== GITHUB_API_URL) {
+            dispatchUrls.push(GITHUB_API_URL);
+        }
+
+        for (const apiUrl of dispatchUrls) {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    console.log(`✅ Workflow dispatched to: ${apiUrl}`);
+                    return true;
+                } else if (response.status === 401 || response.status === 403) {
+                    console.error(`❌ Auth failed for: ${apiUrl}`);
+                    // If forked repo fails auth, remove it and try original
+                    if (forkedRepo && apiUrl !== GITHUB_API_URL) {
+                        console.warn('⚠️ Fork auth failed — clearing fork and trying original');
+                        localStorage.removeItem(FORK_STORAGE_KEY);
+                        continue;
+                    }
+                    return 'needs_token';
+                } else if (response.status === 404) {
+                    console.error(`❌ Workflow not found at: ${apiUrl}`);
+                    if (forkedRepo && apiUrl !== GITHUB_API_URL) {
+                        console.warn('⚠️ Fork workflow not found — trying original repo');
+                        continue;
+                    }
+                    return false;
+                } else {
+                    console.error(`❌ Dispatch failed (${response.status}): ${apiUrl}`);
+                    if (forkedRepo && apiUrl !== GITHUB_API_URL) {
+                        continue;
+                    }
+                    return false;
+                }
+            } catch (error) {
+                console.error(`❌ Dispatch error for ${apiUrl}:`, error.message);
+                if (forkedRepo && apiUrl !== GITHUB_API_URL) {
+                    continue;
+                }
                 return false;
             }
-        } catch (error) {
-            console.error('❌ Workflow dispatch error:', error.message);
-            return false;
         }
+
+        return false;
     };
 
     /**
@@ -299,7 +364,7 @@ const YouTubeDownloaderPlugin = (() => {
             }
 
             try {
-                const resultUrl = `data/youtube-downloader/downloads/req_${requestId}/result.json`;
+                const resultUrl = getResultUrl(requestId);
                 const response = await fetch(resultUrl);
 
                 if (!response.ok) {
@@ -330,6 +395,11 @@ const YouTubeDownloaderPlugin = (() => {
                         entry.quality = firstResult.quality || entry.quality;
                         entry.completedAt = Date.now();
 
+                        const forkedRepo = loadForkedRepo();
+                        const basePath = forkedRepo 
+                            ? `https://raw.githubusercontent.com/${forkedRepo}/main/data/youtube-downloader/downloads/req_${requestId}`
+                            : `data/youtube-downloader/downloads/req_${requestId}`;
+
                         if (entry.multipart && entry.totalParts > 1) {
                             entry.parts = [];
                             const baseFileName = firstResult.file_name.replace(/\.[^.]+$/, '');
@@ -337,11 +407,11 @@ const YouTubeDownloaderPlugin = (() => {
                                 entry.parts.push({
                                     part: p,
                                     fileName: `${baseFileName}.part${p}.rar`,
-                                    downloadUrl: `data/youtube-downloader/downloads/req_${requestId}/${baseFileName}.part${p}.rar`
+                                    downloadUrl: `${basePath}/${baseFileName}.part${p}.rar`
                                 });
                             }
                         } else if (entry.fileName) {
-                            entry.fileUrl = `data/youtube-downloader/downloads/req_${requestId}/${entry.fileName}`;
+                            entry.fileUrl = `${basePath}/${entry.fileName}`;
                         }
                     }
 
@@ -456,24 +526,58 @@ const YouTubeDownloaderPlugin = (() => {
     };
 
     /**
-     * Show token input prompt modal
+     * Show token prompt — uses shared modal from app.js if available
      * @param {string} requestId - Pending request ID to retry after token is saved
      */
     const showTokenPrompt = (requestId) => {
+        // Try shared modal first (from Settings view in app.js)
+        if (typeof showGitHubTokenModal === 'function') {
+            showGitHubTokenModal(requestId, () => {
+                const idx = state.history.findIndex(h => h.id === requestId);
+                if (idx !== -1) {
+                    const entry = state.history[idx];
+                    entry.status = 'processing';
+                    entry.errorMessage = null;
+                    saveHistory(state.history);
+                    
+                    state.githubToken = loadToken();
+                    
+                    dispatchWorkflow(requestId, entry.url, entry.quality, entry.audioOnly)
+                        .then(result => {
+                            if (result === true) {
+                                startPolling(requestId);
+                            } else if (result === 'needs_token') {
+                                entry.status = 'awaiting_token';
+                                entry.errorMessage = 'توکن نامعتبر — لطفاً دوباره تنظیم کنید';
+                                saveHistory(state.history);
+                                renderView();
+                            } else {
+                                entry.status = 'error';
+                                entry.errorMessage = 'خطا در ارسال درخواست — توکن را بررسی کنید';
+                                saveHistory(state.history);
+                                renderView();
+                            }
+                        });
+                }
+            });
+            return;
+        }
+
+        // Fallback: inline token modal (only if shared modal not available)
         const container = document.getElementById('plugin-container');
         if (!container) return;
 
         const tokenHtml = `
-            <div class="yt-token-overlay" id="yt-token-overlay">
-                <div class="yt-token-box glass-base">
-                    <h3 class="yt-token-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-primary)" stroke-width="2">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+            <div class="token-modal-overlay" id="yt-token-overlay">
+                <div class="token-modal-box glass-base">
+                    <h3 class="token-modal-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                         </svg>
                         تنظیم توکن GitHub
                     </h3>
-                    <p class="yt-token-desc">
-                        برای دانلود خودکار نیاز به یک GitHub Personal Access Token دارید.
+                    <p class="token-modal-desc">
+                        برای دانلود خودکار نیاز به یک <strong>GitHub Personal Access Token (classic)</strong> دارید.
                         <br><br>
                         <strong>مراحل دریافت توکن:</strong>
                         <br>۱. به 
@@ -485,67 +589,92 @@ const YouTubeDownloaderPlugin = (() => {
                         <br><br>
                         <small style="color: var(--color-text-muted);">توکن شما فقط در مرورگر خودتان ذخیره می‌شود و به جای دیگری ارسال نمی‌شود.</small>
                     </p>
-                    <div class="yt-token-input-row">
-                        <input type="password" class="yt-token-input" id="yt-token-input" 
+                    <div class="token-modal-input-row">
+                        <input type="password" class="token-modal-input" id="yt-token-input" 
                                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" dir="ltr">
                         <button class="btn btn-primary" id="yt-token-save" style="white-space:nowrap;">
-                            ذخیره و ادامه
+                            ذخیره
                         </button>
                     </div>
-                    <button class="btn btn-ghost" id="yt-token-skip" style="width:100%;margin-top:var(--space-md);">
-                        بی‌خیال — حذف درخواست
-                    </button>
+                    <div class="token-modal-checkboxes">
+                        <label class="token-modal-checkbox">
+                            <input type="checkbox" id="yt-token-fork" checked>
+                            <div class="token-modal-checkbox-label">
+                                <strong>فورک خودکار اکشن در اکانت من</strong>
+                                <span>یک ریپو جدید به نام <code>youtube-downloader-action</code> در اکانت شما ساخته می‌شود و workflow در آن اجرا می‌شود.</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="token-modal-actions">
+                        <button class="btn btn-ghost" id="yt-token-cancel">انصراف</button>
+                    </div>
                 </div>
             </div>
         `;
 
         container.insertAdjacentHTML('beforeend', tokenHtml);
 
+        const overlay = document.getElementById('yt-token-overlay');
         const saveBtn = document.getElementById('yt-token-save');
-        const skipBtn = document.getElementById('yt-token-skip');
+        const cancelBtn = document.getElementById('yt-token-cancel');
         const tokenInput = document.getElementById('yt-token-input');
+        const forkCheckbox = document.getElementById('yt-token-fork');
 
-        const removeOverlay = () => {
-            const overlay = document.getElementById('yt-token-overlay');
-            if (overlay) overlay.remove();
-        };
+        const remove = () => { if (overlay) overlay.remove(); };
 
         if (saveBtn && tokenInput) {
-            saveBtn.addEventListener('click', () => {
+            saveBtn.addEventListener('click', async () => {
                 const token = tokenInput.value.trim();
-                if (token && token.startsWith('ghp_')) {
-                    saveToken(token);
-                    state.githubToken = token;
-                    removeOverlay();
+                if (!token || !token.startsWith('ghp_')) return;
 
-                    const idx = state.history.findIndex(h => h.id === requestId);
-                    if (idx !== -1) {
-                        const entry = state.history[idx];
-                        entry.status = 'processing';
-                        entry.errorMessage = null;
-                        saveHistory(state.history);
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
 
-                        dispatchWorkflow(requestId, entry.url, entry.quality, entry.audioOnly)
-                            .then(result => {
-                                if (result === true) {
-                                    startPolling(requestId);
-                                } else {
-                                    entry.status = 'error';
-                                    entry.errorMessage = 'خطا در ارسال درخواست — توکن را بررسی کنید';
-                                    saveHistory(state.history);
-                                    renderView();
-                                }
-                            });
+                localStorage.setItem(TOKEN_STORAGE_KEY, token);
+                state.githubToken = token;
+
+                if (forkCheckbox && forkCheckbox.checked) {
+                    try {
+                        if (typeof forkWorkflowToUser === 'function') {
+                            const forkResult = await forkWorkflowToUser(token);
+                            if (forkResult) {
+                                localStorage.setItem(FORK_STORAGE_KEY, forkResult);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Fork failed:', e.message);
                     }
-
-                    renderView();
                 }
+
+                remove();
+
+                const idx = state.history.findIndex(h => h.id === requestId);
+                if (idx !== -1) {
+                    const entry = state.history[idx];
+                    entry.status = 'processing';
+                    entry.errorMessage = null;
+                    saveHistory(state.history);
+
+                    dispatchWorkflow(requestId, entry.url, entry.quality, entry.audioOnly)
+                        .then(result => {
+                            if (result === true) {
+                                startPolling(requestId);
+                            } else {
+                                entry.status = 'error';
+                                entry.errorMessage = 'خطا در ارسال درخواست — توکن را بررسی کنید';
+                                saveHistory(state.history);
+                                renderView();
+                            }
+                        });
+                }
+
+                renderView();
             });
         }
 
-        if (skipBtn) {
-            skipBtn.addEventListener('click', () => {
-                removeOverlay();
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                remove();
                 const idx = state.history.findIndex(h => h.id === requestId);
                 if (idx !== -1) {
                     state.history.splice(idx, 1);
@@ -557,9 +686,7 @@ const YouTubeDownloaderPlugin = (() => {
 
         if (tokenInput) {
             tokenInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && saveBtn) {
-                    saveBtn.click();
-                }
+                if (e.key === 'Enter' && saveBtn) saveBtn.click();
             });
             setTimeout(() => tokenInput.focus(), 100);
         }
@@ -994,7 +1121,6 @@ const YouTubeDownloaderPlugin = (() => {
         state.activePolls = {};
         state.githubToken = loadToken();
 
-        // Resume polling for any unfinished requests
         state.history.forEach(item => {
             if (item.status === 'processing') {
                 startPolling(item.id);
