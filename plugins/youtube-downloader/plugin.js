@@ -21,7 +21,7 @@ const YouTubeDownloaderPlugin = (() => {
     const GITHUB_REPO_OWNER = 'khashayarone';
     const GITHUB_REPO_NAME = 'khashayarone.github.io';
     const GITHUB_WORKFLOW_ID = 'youtube-downloader.yml';
-    const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`;
+    const DISPATCH_URL = 'https://fozogame.com/bale-bot/dispatch-workflow.php';
 
     const QUALITY_OPTIONS = [
         { value: '2160p', label: '4K — 2160p' },
@@ -156,8 +156,10 @@ const YouTubeDownloaderPlugin = (() => {
 
     const dispatchWorkflow = async (requestId, url, quality, audioOnly) => {
         const bale = getBaleConnection();
+        
+        // New body format for CPanel dispatcher
         const body = {
-            ref: 'main',
+            workflow_id: 'youtube-downloader.yml',
             inputs: {
                 request_id: requestId,
                 youtube_urls: url,
@@ -168,15 +170,24 @@ const YouTubeDownloaderPlugin = (() => {
             }
         };
 
-        const headers = { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' };
-
         try {
-            const response = await fetch(GITHUB_API_URL, {
-                method: 'POST', headers, body: JSON.stringify(body)
+            // Send to CPanel dispatcher instead of GitHub API directly
+            const response = await fetch(DISPATCH_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
-            if (response.ok) return true;
-            return response.status === 401 || response.status === 403 ? 'needs_token' : false;
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.ok === true) return true;
+                console.error('Dispatch failed:', result);
+                return false;
+            }
+            
+            return false;
         } catch (e) {
+            console.error('Dispatch error:', e.message);
             return false;
         }
     };
@@ -302,10 +313,8 @@ const YouTubeDownloaderPlugin = (() => {
         const dispatched = await dispatchWorkflow(requestId, submittedUrl, submittedQuality, submittedAudioOnly);
         if (dispatched === true) {
             startPolling(requestId);
-        } else if (dispatched === 'needs_token') {
-            updateHistoryItem(requestId, { status: 'awaiting_token', errorMessage: 'نیاز به توکن GitHub' });
         } else {
-            updateHistoryItem(requestId, { status: 'error', errorMessage: 'خطا در ارسال درخواست' });
+            updateHistoryItem(requestId, { status: 'error', errorMessage: 'خطا در ارسال درخواست — لطفاً دوباره تلاش کنید' });
         }
 
         state.isLoading = false;
@@ -443,7 +452,7 @@ const YouTubeDownloaderPlugin = (() => {
                                     <span class="yt-history-item-meta">${item.audioOnly ? '🎵 صوت' : '🎬 ' + item.quality} — ${isAwaitingToken ? 'نیاز به توکن' : isProcessing ? 'در حال پردازش...' : isCompleted ? (item.fileSize ? formatFileSize(item.fileSize) : 'تکمیل شد') : Utils.escapeHtml(item.errorMessage || 'خطا')}</span>
                                 </div>
                                 <span class="yt-history-time">${timeAgo}</span>
-                                ${isAwaitingToken ? `<button class="yt-history-download-btn" style="background:#f59e0b;">تنظیم توکن</button>` : ''}
+                                ${isAwaitingToken ? `<button class="yt-history-download-btn" style="background:#f59e0b;" onclick="window.location.hash='#/settings'">تنظیمات</button>` : ''}
                                 ${isError && item.errorMessage && !isAwaitingToken ? `<button class="yt-history-download-btn" style="background:#f87171;" onclick="this.nextElementSibling.style.display='block';this.nextElementSibling.nextElementSibling.style.display='flex';">علت خطا</button><div class="yt-error-popup-overlay" style="display:none;" onclick="this.style.display='none';this.nextElementSibling.style.display='none';"></div><div class="yt-error-popup" style="display:none;"><div class="yt-error-popup-title">❌ خطا در دانلود</div><div class="yt-error-popup-message">${Utils.escapeHtml(item.errorMessage)}</div><button class="yt-error-popup-close" onclick="this.parentElement.style.display='none';this.parentElement.previousElementSibling.style.display='none';">متوجه شدم</button></div>` : ''}
                                 ${isCompleted && hasParts ? `<div class="yt-parts-container">${item.parts.map(p => `<a href="${p.downloadUrl}" class="yt-part-btn" download>📥 پارت ${p.part}</a>`).join('')}</div>` : isCompleted && item.fileUrl ? `<a href="${item.fileUrl}" class="yt-history-download-btn" download><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> دانلود</a>` : isProcessing ? '<span style="color:var(--color-accent-primary);font-size:var(--font-size-xs);">در حال پردازش</span>' : ''}
                             </div>
