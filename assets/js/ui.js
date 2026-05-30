@@ -315,3 +315,22 @@ const UI = (() => {
         document.querySelectorAll('.topbar-nav-item').forEach(item => {
             item.classList.toggle('active', item.dataset.route === route);
         });
+        
+        // Bottom bar
+        document.querySelectorAll('.bottom-bar-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.route === route);
+        });
+    };
+
+    return {
+        toast,
+        modal,
+        skeleton,
+        renderWizard,
+        renderDashboard,
+        updateConnectionBadge,
+        updateActiveNav
+    };
+})();
+
+Object.freeze(UI);
