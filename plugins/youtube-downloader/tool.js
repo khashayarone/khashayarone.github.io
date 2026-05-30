@@ -1121,10 +1121,59 @@ const YouTubeDownloaderPlugin = (() => {
         state.activePolls = {};
         state.githubToken = loadToken();
 
+        // Resume polling for any unfinished requests
         state.history.forEach(item => {
             if (item.status === 'processing') {
                 startPolling(item.id);
             }
+        });
+
+        // Listen for token updates from Settings
+        EventBus.on('settings:token-updated', (data) => {
+            console.log('🔑 Token updated from Settings');
+            state.githubToken = data.token || loadToken();
+            
+            // Retry any awaiting_token requests
+            state.history.forEach(item => {
+                if (item.status === 'awaiting_token') {
+                    const entry = item;
+                    entry.status = 'processing';
+                    entry.errorMessage = null;
+                    saveHistory(state.history);
+                    
+                    dispatchWorkflow(entry.id, entry.url, entry.quality, entry.audioOnly)
+                        .then(result => {
+                            if (result === true) {
+                                startPolling(entry.id);
+                            } else if (result === 'needs_token') {
+                                entry.status = 'awaiting_token';
+                                entry.errorMessage = 'توکن نامعتبر — لطفاً دوباره تنظیم کنید';
+                                saveHistory(state.history);
+                            } else {
+                                entry.status = 'error';
+                                entry.errorMessage = 'خطا در ارسال درخواست';
+                                saveHistory(state.history);
+                            }
+                            renderView();
+                        });
+                }
+            });
+        });
+
+        // Listen for token clear events
+        EventBus.on('settings:token-cleared', () => {
+            console.log('🔑 Token cleared from Settings');
+            state.githubToken = null;
+            
+            // Mark all processing items as awaiting_token
+            state.history.forEach(item => {
+                if (item.status === 'processing') {
+                    item.status = 'awaiting_token';
+                    item.errorMessage = 'نیاز به توکن GitHub — لطفاً توکن خود را وارد کنید';
+                }
+            });
+            saveHistory(state.history);
+            renderView();
         });
 
         calculateLimits();
@@ -1142,6 +1191,10 @@ const YouTubeDownloaderPlugin = (() => {
             clearInterval(intervalId);
         });
         state.activePolls = {};
+
+        // Clean up event listeners to prevent memory leaks
+        EventBus.off('settings:token-updated');
+        EventBus.off('settings:token-cleared');
 
         EventBus.emit('tool:destroyed', { toolId: 'youtube-downloader' });
     };
