@@ -602,7 +602,15 @@
 
         // Register routes
         registerRoutes();
-
+        
+        // Register plugins
+        PluginLoader.register({
+            id: 'proxy-finder',
+            name: 'پروکسی‌یاب',
+            cssPath: 'plugins/proxy-finder/plugin.css',
+            jsPath: 'plugins/proxy-finder/plugin.js',
+            globalName: 'ProxyFinderPlugin'
+        });
         // Bind navigation
         bindNavigation();
 
