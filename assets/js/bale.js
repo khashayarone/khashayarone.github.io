@@ -9,7 +9,7 @@ const Bale = (() => {
     'use strict';
 
     const STORAGE_KEY = 'bale-connection';
-    const CONNECTIONS_PATH = 'https://fozogame.com/bale-bot/connections';
+    const CONNECTIONS_PATH = 'https://fozogame.com/bale-bot/get-connection.php?code=';
     const BOT_USERNAME = 'githubdlrobot'; // Change to 'khashayarbot' for production
     const POLL_INTERVAL = 3000; // 3 seconds
     const POLL_MAX_ATTEMPTS = 60; // 3 minutes
@@ -127,7 +127,6 @@ const Bale = (() => {
                 console.log('[Bale] Polling timed out after', POLL_MAX_ATTEMPTS, 'attempts');
                 stopPolling();
                 
-                // Mark connection as failed
                 const connection = getConnection();
                 if (connection && connection.status === 'pending') {
                     connection.status = 'timeout';
@@ -137,7 +136,7 @@ const Bale = (() => {
             }
 
             try {
-                const url = `${CONNECTIONS_PATH}/${code}.json`;
+                const url = `${CONNECTIONS_PATH}${code}`;
                 const response = await fetch(url, { cache: 'no-store' });
 
                 if (response.ok) {
@@ -145,7 +144,6 @@ const Bale = (() => {
                     consecutiveFailures = 0;
 
                     if (data.status === 'connected') {
-                        // Connection confirmed!
                         stopPolling();
                         
                         const connectionData = {
@@ -160,36 +158,30 @@ const Bale = (() => {
 
                         saveConnection(connectionData);
 
-                        // Update UI badge
                         if (typeof UI !== 'undefined') {
                             UI.updateConnectionBadge('connected', 'متصل');
                         }
 
-                        // Emit event
                         EventBus.emit(EventBus.Events.BALE_CONNECTED, connectionData);
 
                         console.log('[Bale] ✅ Connection confirmed:', data.first_name);
                         
-                        // Start periodic connection check
                         startConnectionCheck();
                         return;
                     }
                 } else if (response.status === 404) {
-                    // File not created yet — normal during pending
                     consecutiveFailures = 0;
                 } else {
                     consecutiveFailures++;
                     if (consecutiveFailures > 10) {
                         console.warn('[Bale] Too many consecutive failures, slowing down...');
                         stopPolling();
-                        // Restart with longer interval
                         pollTimer = setTimeout(() => startPolling(code), 10000);
                         return;
                     }
                 }
             } catch (e) {
                 consecutiveFailures++;
-                // Network error — continue polling
                 if (consecutiveFailures > 10) {
                     console.warn('[Bale] Network issues, slowing down polling...');
                     stopPolling();
@@ -198,11 +190,9 @@ const Bale = (() => {
                 }
             }
 
-            // Continue polling
             pollTimer = setTimeout(poll, POLL_INTERVAL);
         };
 
-        // Start first poll immediately
         poll();
     };
 
@@ -218,7 +208,6 @@ const Bale = (() => {
 
     /**
      * Start periodic connection check
-     * Verifies connection file still exists and is valid
      */
     const startConnectionCheck = () => {
         stopConnectionCheck();
@@ -231,16 +220,15 @@ const Bale = (() => {
             }
 
             try {
-                const url = `${CONNECTIONS_PATH}/${connection.code}.json`;
+                const url = `${CONNECTIONS_PATH}${connection.code}`;
                 const response = await fetch(url, { cache: 'no-store' });
                 
                 if (!response.ok) {
-                    // Connection file deleted — user may have disconnected
                     console.warn('[Bale] Connection file not found — marking as disconnected');
-                    disconnect(true); // Silent disconnect
+                    disconnect(true);
                 }
             } catch (e) {
-                // Network error — ignore, check again next interval
+                // Network error — ignore
             }
         }, CONNECTION_CHECK_INTERVAL);
     };
@@ -274,7 +262,6 @@ const Bale = (() => {
 
     /**
      * Resume polling for existing pending connection
-     * Called on page load
      */
     const resumePolling = () => {
         const connection = getConnection();
@@ -286,7 +273,6 @@ const Bale = (() => {
         } else if (connection.status === 'connected') {
             startConnectionCheck();
         }
-        // If timeout or other status, do nothing — user needs to create new code
     };
 
     /**
@@ -299,9 +285,8 @@ const Bale = (() => {
         if (!connection) return 'disconnected';
         
         if (connection.status === 'connected') {
-            // Verify connection still valid
             try {
-                const url = `${CONNECTIONS_PATH}/${connection.code}.json`;
+                const url = `${CONNECTIONS_PATH}${connection.code}`;
                 const response = await fetch(url, { cache: 'no-store' });
                 if (response.ok) {
                     const data = await response.json();
@@ -309,11 +294,9 @@ const Bale = (() => {
                         return 'connected';
                     }
                 }
-                // Connection invalid — clean up
                 disconnect(true);
                 return 'disconnected';
             } catch (e) {
-                // Can't verify — assume connected (offline mode)
                 return 'connected';
             }
         }
