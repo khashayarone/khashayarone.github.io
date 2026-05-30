@@ -596,3 +596,107 @@
         letter-spacing: 2px;
     }
 }
+/* ============================================
+   Wizard Step Transitions
+   ============================================ */
+
+.wizard-step {
+    animation: wizardStepIn 0.4s ease;
+}
+
+@keyframes wizardStepIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wizard-step.step-out {
+    animation: wizardStepOut 0.3s ease forwards;
+}
+
+@keyframes wizardStepOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+}
+
+/* Code display pulse when waiting */
+.wizard-code-display.pending {
+    border-color: var(--color-warning);
+    animation: codePulse 2s ease-in-out infinite;
+}
+
+@keyframes codePulse {
+    0%, 100% { border-color: var(--color-warning); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.2); }
+    50% { border-color: var(--color-accent-primary); box-shadow: 0 0 0 8px rgba(255, 107, 53, 0); }
+}
+
+/* Success checkmark animation */
+.wizard-icon.success svg {
+    animation: checkmarkDraw 0.5s ease forwards;
+}
+
+@keyframes checkmarkDraw {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+}
+
+/* Connection badge hover effect */
+.connection-badge {
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.connection-badge:hover {
+    transform: translateY(-1px);
+}
+
+.connection-badge.connected:hover {
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.2);
+}
+
+.connection-badge.disconnected:hover {
+    box-shadow: 0 0 12px rgba(248, 113, 113, 0.2);
+}
+
+/* Settings option transitions */
+.settings-option {
+    transition: all var(--transition-base);
+}
+
+.settings-option:active {
+    transform: scale(0.98);
+}
+
+/* Tool card entrance stagger */
+.tools-grid .tool-card {
+    opacity: 0;
+    animation: cardEntrance 0.4s ease forwards;
+}
+
+.tools-grid .tool-card:nth-child(1) { animation-delay: 0.05s; }
+.tools-grid .tool-card:nth-child(2) { animation-delay: 0.1s; }
+.tools-grid .tool-card:nth-child(3) { animation-delay: 0.15s; }
+.tools-grid .tool-card:nth-child(4) { animation-delay: 0.2s; }
+.tools-grid .tool-card:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
