@@ -87,10 +87,10 @@ const Bale = (() => {
      * @returns {string} The generated code
      */
     const createConnection = () => {
-        // Clear any existing connection
         stopPolling();
         
         const code = generateCode();
+        console.log('[Bale] Generated code:', code);
         
         saveConnection({
             code: code,
@@ -101,10 +101,9 @@ const Bale = (() => {
             created_at: Date.now()
         });
 
-        // Start polling for confirmation
+        console.log('[Bale] Starting polling...');
         startPolling(code);
         
-        // Emit event
         EventBus.emit(EventBus.Events.BALE_CODE_GENERATED, { code });
 
         return code;
