@@ -1,0 +1,153 @@
+name: "📥 Telegram Downloader"
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: "🆔 Unique Request ID"
+        required: true
+        type: string
+      telegram_urls:
+        description: "🔗 Telegram URL(s)"
+        required: true
+        type: string
+      file_type:
+        description: "📁 File type filter"
+        required: false
+        type: choice
+        default: "any"
+        options:
+          - any
+          - video
+          - audio
+          - document
+          - photo
+      bale_code:
+        description: "🔑 Bale connection code (optional)"
+        required: false
+        type: string
+        default: ""
+      bale_chat_id:
+        description: "🆔 Bale chat ID (optional)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  download:
+    name: "📥 Telegram Download"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: "⚙️ Configure Git"
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: "📦 Install Dependencies"
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3-pip ffmpeg curl jq
+          pip3 install --upgrade yt-dlp --quiet
+
+      - name: "🔧 Setup"
+        id: setup
+        run: |
+          REQUEST_ID="${{ github.event.inputs.request_id }}"
+          TG_URLS="${{ github.event.inputs.telegram_urls }}"
+          FILE_TYPE="${{ github.event.inputs.file_type }}"
+          
+          REQUEST_DIR="data/telegram-downloader/downloads/req_${REQUEST_ID}"
+          mkdir -p "$REQUEST_DIR"
+          
+          echo "REQUEST_ID=${REQUEST_ID}" >> $GITHUB_ENV
+          echo "TG_URLS=${TG_URLS}" >> $GITHUB_ENV
+          echo "FILE_TYPE=${FILE_TYPE}" >> $GITHUB_ENV
+          echo "REQUEST_DIR=${REQUEST_DIR}" >> $GITHUB_ENV
+          echo "✅ Setup complete"
+
+      - name: "📥 Download"
+        id: download
+        run: |
+          REQUEST_DIR="${{ env.REQUEST_DIR }}"
+          RESULTS="[]"
+          ERRORS="[]"
+          
+          for TG_URL in ${{ env.TG_URLS }}; do
+            echo "📥 Downloading: $TG_URL"
+            
+            # Download with yt-dlp
+            if yt-dlp --no-part --output "${REQUEST_DIR}/%(title)s.%(ext)s" "$TG_URL" 2>&1 | grep -q "100%"; then
+              # Find downloaded file
+              for FILE in "$REQUEST_DIR"/*; do
+                [ -f "$FILE" ] || continue
+                BASENAME=$(basename "$FILE")
+                SIZE=$(stat -c%s "$FILE" 2>/dev/null || echo 0)
+                RESULTS=$(echo "$RESULTS" | jq --arg name "$BASENAME" --argjson size "$SIZE" --arg url "$TG_URL" \
+                  '. + [{"file_name": $name, "file_size": $size, "url": $url, "status": "completed"}]')
+                echo "  ✅ $BASENAME — $SIZE bytes"
+              done
+            else
+              ERRORS=$(echo "$ERRORS" | jq --arg url "$TG_URL" --arg error "Download failed" \
+                '. + [{"url": $url, "error": $error}]')
+              echo "  ❌ Failed"
+            fi
+          done
+          
+          # Save result.json
+          COMPLETED=$(echo "$RESULTS" | jq '. | length')
+          FAILED=$(echo "$ERRORS" | jq '. | length')
+          OVERALL_STATUS="completed"
+          [ "$FAILED" -gt 0 ] && [ "$COMPLETED" -gt 0 ] && OVERALL_STATUS="partial"
+          [ "$FAILED" -gt 0 ] && [ "$COMPLETED" -eq 0 ] && OVERALL_STATUS="error"
+          
+          jq -n --arg id "$REQUEST_ID" --arg status "$OVERALL_STATUS" \
+            --argjson results "$RESULTS" --argjson errors "$ERRORS" \
+            --argjson total "$((COMPLETED + FAILED))" \
+            --argjson succeeded "$COMPLETED" --argjson failed "$FAILED" \
+            '{
+              request_id: $id,
+              status: $status,
+              results: $results,
+              errors: $errors,
+              summary: { total_urls: $total, succeeded: $succeeded, failed: $failed }
+            }' > "${REQUEST_DIR}/result.json"
+          
+          echo "✅ Done: $COMPLETED succeeded, $FAILED failed"
+
+      - name: "📬 Send Bale Notification"
+        if: success() && github.event.inputs.bale_chat_id != ''
+        env:
+          BALE_TOKEN: ${{ secrets.BALE_BOT_TOKEN }}
+        run: |
+          if [ -n "${{ github.event.inputs.bale_chat_id }}" ] && [ -n "$BALE_TOKEN" ]; then
+            curl -s -X POST "https://tapi.bale.ai/bot${BALE_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${{ github.event.inputs.bale_chat_id }}\",\"text\":\"📥 *دانلود تلگرام شما آماده است\\!*\\n\\n🔗 [مشاهده فایل‌ها](https://github.com/khashayarone/khashayarone.github.io/tree/main/data/telegram-downloader/downloads/req_${{ env.REQUEST_ID }})\",\"parse_mode\":\"MarkdownV2\"}"
+            echo "✅ Notification sent"
+          fi
+
+      - name: "📤 Commit & Push"
+        if: always()
+        run: |
+          git add data/telegram-downloader/downloads/ 2>/dev/null || true
+          find data/telegram-downloader/downloads/ -maxdepth 1 -type d -name "req_*" -mmin +1440 -exec rm -rf {} \; 2>/dev/null || true
+          git add -u data/telegram-downloader/downloads/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No files to commit"
+          else
+            git commit -m "📥 TG DL [${{ env.REQUEST_ID }}] — $(date -u +'%H:%M UTC')"
+            git pull --rebase origin main 2>/dev/null || true
+            git push origin main 2>/dev/null || true
+            echo "✅ Committed"
+          fi
