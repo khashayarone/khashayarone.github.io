@@ -155,10 +155,12 @@
             case 'internet-status':
                 renderPlaceholder(container, 'وضعیت اینترنت', 'این ابزار به زودی در دسترس قرار می‌گیرد.');
                 break;
+            case 'proxy-finder':
+                loadPluginView(container, 'proxy-finder');
+                break;
             case 'youtube':
             case 'telegram':
             case 'instagram':
-            case 'proxy-finder':
                 renderPlaceholder(container, getToolName(route), 'این ابزار در فازهای بعدی توسعه اضافه خواهد شد.');
                 break;
             default:
@@ -208,6 +210,39 @@
         `;
     };
 
+    /**
+     * Load a plugin into the view container
+     * @param {HTMLElement} container - View container
+     * @param {string} pluginId - Plugin ID
+     */
+    const loadPluginView = async (container, pluginId) => {
+        // Show skeleton
+        UI.skeleton(container, 'full');
+        
+        try {
+            // Create plugin container
+            container.innerHTML = '<div id="plugin-container"></div>';
+            const pluginContainer = document.getElementById('plugin-container');
+            
+            // Load and initialize plugin
+            await PluginLoader.load(pluginId, pluginContainer);
+        } catch (error) {
+            console.error(`Failed to load plugin "${pluginId}":`, error);
+            container.innerHTML = `
+                <div style="text-align:center;padding:var(--space-3xl);color:var(--color-error);">
+                    <div style="width:80px;height:80px;border-radius:50%;background:rgba(248,113,113,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-lg);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <p style="font-size:var(--font-size-lg);font-weight:var(--font-weight-bold);">⚠️ خطا در بارگذاری ابزار</p>
+                    <p style="font-size:var(--font-size-sm);color:var(--color-text-muted);margin-top:var(--space-sm);">${Utils.escapeHtml(error.message)}</p>
+                    <button class="btn btn-primary" onclick="window.location.hash='#/dashboard'" style="margin-top:var(--space-xl);">بازگشت به داشبورد</button>
+                </div>
+            `;
+        }
+    };
+
     // ============================================
     // Settings View
     // ============================================
@@ -218,6 +253,8 @@
      */
     const renderSettings = (container) => {
         const currentPref = Bale.getPreference();
+        const connection = Bale.getConnection();
+        const firstName = connection ? connection.first_name || 'کاربر' : 'کاربر';
 
         container.innerHTML = `
             <div class="settings-container">
@@ -272,7 +309,7 @@
                         </div>
                         <div class="settings-option-content">
                             <span class="settings-option-title">🟢 متصل به @${Bale.getBotUsername()}</span>
-                            <span class="settings-option-desc">فایل‌های دانلودی به ربات ارسال می‌شوند</span>
+                            <span class="settings-option-desc">${Utils.escapeHtml(firstName)} عزیز، فایل‌های دانلودی به ربات ارسال می‌شوند</span>
                         </div>
                     </div>
                 </div>
@@ -375,7 +412,7 @@
         const newCodeBtn = document.getElementById('wizard-new-code');
         if (newCodeBtn) {
             newCodeBtn.addEventListener('click', () => {
-                Bale.disconnect(true); // Silent disconnect
+                Bale.disconnect(true);
                 const code = Bale.createConnection();
                 const container = getViewContainer();
                 UI.renderWizard(container, 2, {
@@ -391,7 +428,6 @@
         const enterBtn = document.getElementById('wizard-enter');
         if (enterBtn) {
             enterBtn.addEventListener('click', () => {
-                // Animate button
                 enterBtn.innerHTML = `
                     <div class="wizard-status-spinner" style="width:20px;height:20px;border-color:rgba(255,255,255,0.2);border-top-color:white;"></div>
                     در حال انتقال...
@@ -454,7 +490,6 @@
                         Bale.disconnect();
                         overlay.remove();
                         UI.toast('🔌 اتصال ربات قطع شد', 'warning');
-                        // Redirect to wizard
                         Router.navigate('dashboard');
                     });
                 }
@@ -611,6 +646,7 @@
             jsPath: 'plugins/proxy-finder/plugin.js',
             globalName: 'ProxyFinderPlugin'
         });
+
         // Bind navigation
         bindNavigation();
 
