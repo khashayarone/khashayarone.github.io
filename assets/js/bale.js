@@ -9,7 +9,7 @@ const Bale = (() => {
     'use strict';
 
     const STORAGE_KEY = 'bale-connection';
-    const CONNECTIONS_PATH = 'data/bale-connections';
+    const CONNECTIONS_PATH = 'https://fozogame.com/bale-bot/connections';
     const BOT_USERNAME = 'githubdlrobot'; // Change to 'khashayarbot' for production
     const POLL_INTERVAL = 3000; // 3 seconds
     const POLL_MAX_ATTEMPTS = 60; // 3 minutes
