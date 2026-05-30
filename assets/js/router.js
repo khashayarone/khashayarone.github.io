@@ -10,8 +10,8 @@ const Router = (() => {
     // Route mapping: hash → view handler
     const routes = new Map();
 
-    // Current active route
-    let currentRoute = 'dashboard';
+    // Current active route — null ensures first render always happens
+    let currentRoute = null;
 
     /**
      * Register a route
@@ -50,6 +50,7 @@ const Router = (() => {
     const handleRoute = () => {
         const route = getCurrentRoute();
         
+        // Skip if same route (but not on first load)
         if (currentRoute === route) return;
         
         const previousRoute = currentRoute;
