@@ -154,6 +154,12 @@
                 width: window.innerWidth,
                 height: window.innerHeight
             });
+            
+            // Toggle collapse button visibility based on screen size
+            const collapseBtn = document.querySelector('.sidebar-collapse-btn');
+            if (collapseBtn) {
+                collapseBtn.style.display = Utils.isMobileDevice() ? 'none' : 'flex';
+            }
         }, 150);
 
         window.addEventListener('resize', handleResize);
@@ -230,7 +236,12 @@
             console.warn('⚠️ Sidebar Collapse — Elements not found');
             return;
         }
-
+        
+        // Hide collapse button on mobile
+        if (Utils.isMobileDevice()) {
+            collapseBtn.style.display = 'none';
+        }
+        
         // Update collapse button icon based on state
         const updateCollapseIcon = (isCollapsed) => {
             const icon = collapseBtn.querySelector('i');
