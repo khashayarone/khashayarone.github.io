@@ -9,7 +9,7 @@ const Bale = (() => {
     'use strict';
 
     const STORAGE_KEY = 'bale-connection';
-    const CONNECTIONS_PATH = 'https://fozogame.com/bale-bot/connections/get-connection.php?code=';
+    const CONNECTIONS_PATH = 'https://fozogame.com/bale-bot/connections';
     const BOT_USERNAME = 'githubdlrobot'; // Change to 'khashayarbot' for production
     const POLL_INTERVAL = 3000; // 3 seconds
     const POLL_MAX_ATTEMPTS = 60; // 3 minutes
@@ -136,7 +136,7 @@ const Bale = (() => {
             }
 
             try {
-                const url = `${CONNECTIONS_PATH}${code}`;
+                const url = `${CONNECTIONS_PATH}/${code}.json`;
                 const response = await fetch(url, { cache: 'no-store' });
 
                 if (response.ok) {
