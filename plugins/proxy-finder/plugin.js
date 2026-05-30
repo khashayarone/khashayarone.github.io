@@ -302,4 +302,46 @@ const ProxyFinderPlugin = (() => {
         });
 
         document.getElementById('proxy-sort')?.addEventListener('change', (e) => {
-            state.sort
+            state.sortBy = e.target.value;
+            applyFilters();
+            render();
+        });
+
+        document.querySelectorAll('.proxy-tab[data-tab]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                state.activeTab = tab.dataset.tab;
+                applyFilters();
+                render();
+            });
+        });
+
+        document.querySelectorAll('.proxy-copy-btn[data-copy]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyToClipboard(btn.dataset.copy, btn);
+            });
+        });
+    };
+
+    /**
+     * Initialize plugin
+     */
+    const init = async (container) => {
+        await fetchProxies();
+        EventBus.emit('tool:mounted', { toolId: 'proxy-finder' });
+    };
+
+    /**
+     * Destroy plugin
+     */
+    const destroy = () => {
+        state.proxies = [];
+        state.filtered = [];
+        EventBus.emit('tool:destroyed', { toolId: 'proxy-finder' });
+    };
+
+    return { init, destroy };
+})();
+
+window.ProxyFinderPlugin = ProxyFinderPlugin;
+Object.freeze(ProxyFinderPlugin);
