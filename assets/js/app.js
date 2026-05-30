@@ -513,7 +513,10 @@
 
             // Initialize settings view when navigated to
             if (view === 'settings') {
-                setTimeout(() => initSettingsView(), 100);
+                setTimeout(() => {
+                    initSettingsView();
+                    initBaleConnection();
+                }, 100);
             }
         });
 
@@ -541,6 +544,9 @@
      */
     const GITHUB_REPO_OWNER = 'khashayarone';
     const GITHUB_REPO_NAME = 'khashayarone.github.io';
+    const BALE_BOT_USERNAME = 'githubdlrobot';
+    const BALE_CONNECTIONS_PATH = 'data/bale-connections';
+    const BALE_STORAGE_KEY = 'bale-connection';
 
     /**
      * Initialize Settings View with API Cards
@@ -607,6 +613,286 @@
         }
     };
 
+    // ============================================
+    // Bale Bot Connection Management
+    // ============================================
+
+    /**
+     * Initialize Bale Bot Connection Card in Settings
+     */
+    const initBaleConnection = () => {
+        const connectBtn = document.getElementById('btn-connect-bale-bot');
+        const disconnectBtn = document.getElementById('btn-disconnect-bale-bot');
+        const statusBadge = document.getElementById('bale-bot-status');
+        const codeDisplay = document.getElementById('bale-code-display');
+        const codeValue = document.getElementById('bale-code-value');
+
+        // Load existing connection
+        const loadConnectionState = () => {
+            try {
+                const raw = localStorage.getItem(BALE_STORAGE_KEY);
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    return data;
+                }
+            } catch (e) {
+                // Corrupted
+            }
+            return null;
+        };
+
+        const saveConnectionState = (data) => {
+            try {
+                localStorage.setItem(BALE_STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.warn('Failed to save bale connection state');
+            }
+        };
+
+        const updateUI = () => {
+            const connection = loadConnectionState();
+            
+            if (connection && connection.status === 'connected') {
+                // Connected state
+                if (statusBadge) {
+                    statusBadge.textContent = 'متصل';
+                    statusBadge.className = 'api-card-badge set';
+                }
+                if (connectBtn) connectBtn.style.display = 'none';
+                if (disconnectBtn) disconnectBtn.style.display = 'flex';
+                if (codeDisplay) {
+                    codeDisplay.style.display = 'flex';
+                    if (codeValue) {
+                        codeValue.textContent = connection.code || '';
+                    }
+                }
+            } else if (connection && connection.status === 'pending') {
+                // Waiting for user to send code in bot
+                if (statusBadge) {
+                    statusBadge.textContent = 'منتظر تأیید...';
+                    statusBadge.className = 'api-card-badge connecting';
+                }
+                if (connectBtn) connectBtn.style.display = 'none';
+                if (disconnectBtn) disconnectBtn.style.display = 'flex';
+                if (codeDisplay) {
+                    codeDisplay.style.display = 'flex';
+                    if (codeValue) {
+                        codeValue.textContent = connection.code || '';
+                    }
+                }
+                // Poll for connection
+                startConnectionPolling(connection.code);
+            } else {
+                // Not connected
+                if (statusBadge) {
+                    statusBadge.textContent = 'تنظیم نشده';
+                    statusBadge.className = 'api-card-badge unset';
+                }
+                if (connectBtn) connectBtn.style.display = 'flex';
+                if (disconnectBtn) disconnectBtn.style.display = 'none';
+                if (codeDisplay) codeDisplay.style.display = 'none';
+            }
+        };
+
+        // Copy code on click
+        if (codeValue) {
+            codeValue.addEventListener('click', () => {
+                const code = codeValue.textContent;
+                if (code && code !== '...') {
+                    navigator.clipboard.writeText(code).then(() => {
+                        codeValue.classList.add('copied');
+                        setTimeout(() => codeValue.classList.remove('copied'), 1500);
+                        
+                        if (typeof Toastify !== 'undefined') {
+                            Toastify({
+                                text: '📋 کد اتصال کپی شد — حالا توی ربات بفرست',
+                                duration: 2500,
+                                gravity: 'bottom',
+                                position: 'left',
+                                style: {
+                                    background: 'var(--color-bg-elevated)',
+                                    color: '#2dd4bf',
+                                    border: '1px solid rgba(45, 212, 191, 0.3)',
+                                    borderRadius: 'var(--radius-md)',
+                                    fontFamily: 'var(--font-family-primary)',
+                                    fontSize: 'var(--font-size-sm)',
+                                    backdropFilter: 'blur(12px)',
+                                    boxShadow: 'var(--shadow-lg)'
+                                }
+                            }).showToast();
+                        }
+                    }).catch(() => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = code;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                    });
+                }
+            });
+        };
+
+        // Connect button
+        if (connectBtn) {
+            connectBtn.addEventListener('click', () => {
+                const code = generateBaleCode();
+                
+                saveConnectionState({
+                    code: code,
+                    status: 'pending',
+                    created_at: Date.now()
+                });
+
+                updateUI();
+
+                if (typeof Toastify !== 'undefined') {
+                    Toastify({
+                        text: `✅ کد اتصال آماده شد! حالا @${BALE_BOT_USERNAME} رو استارت کن و کد رو بفرست`,
+                        duration: 5000,
+                        gravity: 'bottom',
+                        position: 'left',
+                        style: {
+                            background: 'var(--color-bg-elevated)',
+                            color: 'var(--color-text-primary)',
+                            border: '1px solid var(--color-border-primary)',
+                            borderRadius: 'var(--radius-md)',
+                            fontFamily: 'var(--font-family-primary)',
+                            fontSize: 'var(--font-size-sm)',
+                            backdropFilter: 'blur(12px)',
+                            boxShadow: 'var(--shadow-lg)'
+                        }
+                    }).showToast();
+                }
+            });
+        }
+
+        // Disconnect button
+        if (disconnectBtn) {
+            disconnectBtn.addEventListener('click', () => {
+                localStorage.removeItem(BALE_STORAGE_KEY);
+                updateUI();
+
+                if (typeof Toastify !== 'undefined') {
+                    Toastify({
+                        text: '🔌 اتصال ربات بله قطع شد',
+                        duration: 2000,
+                        gravity: 'bottom',
+                        position: 'left',
+                        style: {
+                            background: 'var(--color-bg-elevated)',
+                            color: 'var(--color-text-primary)',
+                            border: '1px solid var(--color-border-primary)',
+                            borderRadius: 'var(--radius-md)',
+                            fontFamily: 'var(--font-family-primary)',
+                            fontSize: 'var(--font-size-sm)',
+                            backdropFilter: 'blur(12px)',
+                            boxShadow: 'var(--shadow-lg)'
+                        }
+                    }).showToast();
+                }
+            });
+        }
+
+        updateUI();
+    };
+
+    /**
+     * Generate a unique connection code for Bale bot
+     * @returns {string} Connection code (XXXX-XXXX-XXXX)
+     */
+    const generateBaleCode = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 12; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return `${code.slice(0, 4)}-${code.slice(4, 8)}-${code.slice(8, 12)}`;
+    };
+
+    /**
+     * Start polling for Bale bot connection confirmation
+     * @param {string} code - Connection code
+     */
+    const startConnectionPolling = (code) => {
+        let attempts = 0;
+        const maxAttempts = 60; // 5 minutes
+        
+        const poll = async () => {
+            attempts++;
+            
+            if (attempts > maxAttempts) {
+                console.log('Bale connection polling timed out');
+                return;
+            }
+
+            try {
+                const url = `${BALE_CONNECTIONS_PATH}/${code}.json`;
+                const response = await fetch(url);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.status === 'connected') {
+                        // Connection confirmed!
+                        const connectionData = {
+                            code: code,
+                            status: 'connected',
+                            chat_id: data.chat_id,
+                            username: data.username,
+                            first_name: data.first_name,
+                            connected_at: data.connected_at
+                        };
+                        
+                        try {
+                            localStorage.setItem(BALE_STORAGE_KEY, JSON.stringify(connectionData));
+                        } catch (e) {
+                            console.warn('Failed to save bale connection');
+                        }
+
+                        // Update UI
+                        initBaleConnection();
+
+                        // Notify
+                        EventBus.emit('bale:connected', {
+                            code: code,
+                            chat_id: data.chat_id
+                        });
+
+                        if (typeof Toastify !== 'undefined') {
+                            Toastify({
+                                text: `🎉 اتصال به ربات برقرار شد! خوش اومدی ${data.first_name || ''}`,
+                                duration: 4000,
+                                gravity: 'bottom',
+                                position: 'left',
+                                style: {
+                                    background: 'var(--color-bg-elevated)',
+                                    color: '#2dd4bf',
+                                    border: '1px solid rgba(45, 212, 191, 0.3)',
+                                    borderRadius: 'var(--radius-md)',
+                                    fontFamily: 'var(--font-family-primary)',
+                                    fontSize: 'var(--font-size-sm)',
+                                    backdropFilter: 'blur(12px)',
+                                    boxShadow: 'var(--shadow-lg)'
+                                }
+                            }).showToast();
+                        }
+
+                        return; // Stop polling
+                    }
+                }
+            } catch (e) {
+                // File not ready yet — continue polling
+            }
+
+            // Continue polling every 5 seconds
+            setTimeout(poll, 5000);
+        };
+
+        poll();
+    };
     /**
      * Show GitHub Token Modal (shared between Settings and YouTube Downloader plugin)
      * @param {string|null} requestId - If provided, retry this request after token is saved
@@ -931,6 +1217,11 @@
         // Initialize Settings View (if active)
         // ============================================
         if (AppState.getState('ui.currentView') === 'settings') {
+            setTimeout(() => {
+                initSettingsView();
+                initBaleConnection();
+            }, 100);
+        }
             setTimeout(() => initSettingsView(), 100);
         }
 
