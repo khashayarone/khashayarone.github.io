@@ -42,7 +42,16 @@ on:
         required: false
         type: boolean
         default: false
-
+      bale_code:
+        description: "🔑 Bale connection code (optional)"
+        required: false
+        type: string
+        default: ""
+      bale_chat_id:
+        description: "🆔 Bale chat ID for notification (optional)"
+        required: false
+        type: string
+        default: ""
 env:
   TARGET_SIZE_MB: 90
   TARGET_SIZE_BYTES: 94371840
