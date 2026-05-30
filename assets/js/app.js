@@ -153,6 +153,8 @@
                 renderSettings(container);
                 break;
             case 'internet-status':
+                loadPluginView(container, 'internet-status');
+                break;
                 renderPlaceholder(container, 'وضعیت اینترنت', 'این ابزار به زودی در دسترس قرار می‌گیرد.');
                 break;
             case 'proxy-finder':
@@ -675,6 +677,14 @@
             cssPath: 'plugins/instagram-downloader/plugin.css',
             jsPath: 'plugins/instagram-downloader/plugin.js',
             globalName: 'InstagramDownloaderPlugin'
+        });
+        // Register Internet Status Checker plugin
+        PluginLoader.register({
+            id: 'internet-status',
+            name: 'وضعیت اینترنت',
+            cssPath: 'plugins/internet-status/plugin.css',
+            jsPath: 'plugins/internet-status/plugin.js',
+            globalName: 'InternetStatusPlugin'
         });
         // Bind navigation
         bindNavigation();
