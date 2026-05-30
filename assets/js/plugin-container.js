@@ -1,6 +1,7 @@
 /**
  * plugin-container.js — Plugin Container & Skeleton Manager
  * Manages the workspace container, skeleton loading, and transitions
+ * Mobile-aware: adds bottom padding for bottom navigation bar
  * Part of Vanilla Micro-SPA Tool Platform — Phase 4 Plugin System
  */
 
@@ -33,6 +34,20 @@ const PluginContainer = (() => {
     };
 
     /**
+     * Apply mobile bottom padding to container
+     * Adds space for bottom navigation bar on mobile devices
+     * @param {HTMLElement} el - Container element
+     */
+    const applyMobilePadding = (el) => {
+        if (!el) return;
+        if (typeof Utils !== 'undefined' && Utils.isMobileDevice()) {
+            el.style.paddingBottom = '80px';
+        } else {
+            el.style.paddingBottom = '';
+        }
+    };
+
+    /**
      * Show skeleton loader in the container
      * @param {string} pluginTitle - Plugin title to show
      */
@@ -46,6 +61,9 @@ const PluginContainer = (() => {
             v.classList.remove('active');
             v.style.display = 'none';
         });
+
+        // Apply mobile padding before setting content
+        applyMobilePadding(containerEl);
 
         containerEl.innerHTML = `
             <div class="plugin-skeleton">
@@ -101,6 +119,9 @@ const PluginContainer = (() => {
             // Clear skeleton but keep container
             containerEl.innerHTML = '';
             
+            // Add extra bottom padding on mobile for bottom navigation bar
+            applyMobilePadding(containerEl);
+            
             // Initialize plugin — plugin is responsible for rendering into container
             await instance.init(containerEl);
 
@@ -151,6 +172,7 @@ const PluginContainer = (() => {
                 if (containerEl) {
                     containerEl.innerHTML = '';
                     containerEl.style.display = 'none';
+                    containerEl.style.paddingBottom = ''; // Reset mobile padding
                 }
 
                 // Update registry state
@@ -196,6 +218,9 @@ const PluginContainer = (() => {
         if (!containerEl) return;
 
         const pluginId = currentPlugin?.id || 'unknown';
+
+        // Apply mobile padding before setting content
+        applyMobilePadding(containerEl);
 
         containerEl.innerHTML = `
             <div class="plugin-error">
