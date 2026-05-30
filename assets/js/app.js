@@ -162,6 +162,8 @@
                 loadPluginView(container, 'youtube-downloader');
                 break;
             case 'telegram':
+                loadPluginView(container, 'telegram-downloader');
+                break;
             case 'instagram':
                 renderPlaceholder(container, getToolName(route), 'این ابزار در فازهای بعدی توسعه اضافه خواهد شد.');
                 break;
@@ -655,6 +657,14 @@
             cssPath: 'plugins/youtube-downloader/plugin.css',
             jsPath: 'plugins/youtube-downloader/plugin.js',
             globalName: 'YouTubeDownloaderPlugin'
+        });
+        // Register Telegram Downloader plugin
+        PluginLoader.register({
+            id: 'telegram-downloader',
+            name: 'دانلودر تلگرام',
+            cssPath: 'plugins/telegram-downloader/plugin.css',
+            jsPath: 'plugins/telegram-downloader/plugin.js',
+            globalName: 'TelegramDownloaderPlugin'
         });
         // Bind navigation
         bindNavigation();
