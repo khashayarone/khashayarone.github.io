@@ -1,7 +1,7 @@
 /**
  * app.js — Application Bootstrap & Runtime Verification
  * Initializes all libraries, verifies runtime, prepares SPA shell
- * Phase 4: Sidebar, Dashboard, Data Layer & Plugin System
+ * Phase 4: Sidebar, Dashboard, Data Layer, Plugin System & Settings API Management
  * Part of Vanilla Micro-SPA Tool Platform Foundation
  */
 
@@ -499,6 +499,11 @@
                     mainZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
+
+            // Initialize settings view when navigated to
+            if (view === 'settings') {
+                setTimeout(() => initSettingsView(), 100);
+            }
         });
 
         console.log('✅ View Switching — Active');
@@ -514,6 +519,325 @@
         initViewSwitching();
         refreshIcons();
         console.log('✅ Dashboard Module — Complete');
+    };
+
+    // ============================================
+    // Settings View — API Token Management
+    // ============================================
+
+    /**
+     * GitHub repo constants (used by settings and plugins)
+     */
+    const GITHUB_REPO_OWNER = 'khashayarone';
+    const GITHUB_REPO_NAME = 'khashayarone.github.io';
+
+    /**
+     * Initialize Settings View with API Cards
+     */
+    const initSettingsView = () => {
+        const setBtn = document.getElementById('btn-set-github-token');
+        const clearBtn = document.getElementById('btn-clear-github-token');
+        const statusBadge = document.getElementById('github-token-status');
+
+        const updateTokenUI = () => {
+            const token = localStorage.getItem('yt-downloader:gh-token');
+            if (token && token.startsWith('ghp_')) {
+                if (statusBadge) {
+                    statusBadge.textContent = 'فعال';
+                    statusBadge.className = 'api-card-badge set';
+                }
+                if (setBtn) setBtn.style.display = 'none';
+                if (clearBtn) clearBtn.style.display = 'flex';
+            } else {
+                if (statusBadge) {
+                    statusBadge.textContent = 'تنظیم نشده';
+                    statusBadge.className = 'api-card-badge unset';
+                }
+                if (setBtn) setBtn.style.display = 'flex';
+                if (clearBtn) clearBtn.style.display = 'none';
+            }
+        };
+
+        updateTokenUI();
+
+        if (setBtn) {
+            setBtn.addEventListener('click', () => {
+                showGitHubTokenModal(null, () => {
+                    updateTokenUI();
+                });
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                localStorage.removeItem('yt-downloader:gh-token');
+                localStorage.removeItem('yt-downloader:fork-repo');
+                updateTokenUI();
+                if (typeof Toastify !== 'undefined') {
+                    Toastify({
+                        text: '🗑️ توکن GitHub حذف شد',
+                        duration: 2000,
+                        gravity: 'bottom',
+                        position: 'left',
+                        style: {
+                            background: 'var(--color-bg-elevated)',
+                            color: 'var(--color-text-primary)',
+                            border: '1px solid var(--color-border-primary)',
+                            borderRadius: 'var(--radius-md)',
+                            fontFamily: 'var(--font-family-primary)',
+                            fontSize: 'var(--font-size-sm)',
+                            backdropFilter: 'blur(12px)',
+                            boxShadow: 'var(--shadow-lg)'
+                        }
+                    }).showToast();
+                }
+            });
+        }
+    };
+
+    /**
+     * Show GitHub Token Modal (shared between Settings and YouTube Downloader plugin)
+     * @param {string|null} requestId - If provided, retry this request after token is saved
+     * @param {Function|null} onSaved - Callback after token is saved
+     */
+    const showGitHubTokenModal = (requestId = null, onSaved = null) => {
+        const existingToken = localStorage.getItem('yt-downloader:gh-token') || '';
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'token-modal-overlay';
+        overlay.id = 'github-token-modal-overlay';
+        overlay.innerHTML = `
+            <div class="token-modal-box glass-base">
+                <h3 class="token-modal-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    تنظیم توکن GitHub
+                </h3>
+                <p class="token-modal-desc">
+                    برای دانلود خودکار نیاز به یک <strong>GitHub Personal Access Token (classic)</strong> دارید.
+                    <br><br>
+                    <strong>مراحل دریافت توکن:</strong>
+                    <br>۱. به 
+                    <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a> 
+                    بروید
+                    <br>۲. روی <strong>Generate new token</strong> → <strong>classic</strong> کلیک کنید
+                    <br>۳. فقط scope <code>workflow</code> را تیک بزنید
+                    <br>۴. توکن را کپی کرده و در کادر زیر وارد کنید
+                    <br><br>
+                    <small style="color: var(--color-text-muted);">توکن شما فقط در مرورگر خودتان ذخیره می‌شود و به جای دیگری ارسال نمی‌شود.</small>
+                </p>
+                <div class="token-modal-input-row">
+                    <input type="password" class="token-modal-input" id="token-modal-input" 
+                           placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" dir="ltr"
+                           value="${Utils.escapeHtml(existingToken)}">
+                    <button class="btn btn-primary" id="token-modal-save" style="white-space:nowrap;">
+                        ذخیره
+                    </button>
+                </div>
+                <div class="token-modal-checkboxes">
+                    <label class="token-modal-checkbox">
+                        <input type="checkbox" id="token-modal-fork" checked>
+                        <div class="token-modal-checkbox-label">
+                            <strong>فورک خودکار اکشن در اکانت من</strong>
+                            <span>یک ریپو جدید به نام <code>youtube-downloader-action</code> در اکانت شما ساخته می‌شود و workflow در آن اجرا می‌شود. این کار باعث می‌شود محدودیت درخواست نداشته باشید و فشاری به ریپوی عمومی وارد نشود.</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="token-modal-actions">
+                    <button class="btn btn-ghost" id="token-modal-cancel">انصراف</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const saveBtn = overlay.querySelector('#token-modal-save');
+        const cancelBtn = overlay.querySelector('#token-modal-cancel');
+        const input = overlay.querySelector('#token-modal-input');
+        const forkCheckbox = overlay.querySelector('#token-modal-fork');
+
+        const remove = () => overlay.remove();
+
+        saveBtn.addEventListener('click', async () => {
+            const token = input.value.trim();
+            if (!token || !token.startsWith('ghp_')) {
+                if (typeof Toastify !== 'undefined') {
+                    Toastify({
+                        text: '⚠️ لطفاً یک توکن معتبر GitHub وارد کنید (با ghp_ شروع شود)',
+                        duration: 3000,
+                        gravity: 'bottom',
+                        position: 'left',
+                        style: {
+                            background: 'var(--color-bg-elevated)',
+                            color: '#f59e0b',
+                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            fontFamily: 'var(--font-family-primary)',
+                            fontSize: 'var(--font-size-sm)',
+                            backdropFilter: 'blur(12px)',
+                            boxShadow: 'var(--shadow-lg)'
+                        }
+                    }).showToast();
+                }
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'در حال ذخیره...';
+
+            // Save token
+            localStorage.setItem('yt-downloader:gh-token', token);
+
+            // Fork workflow if checked
+            if (forkCheckbox.checked) {
+                try {
+                    const forkResult = await forkWorkflowToUser(token);
+                    if (forkResult) {
+                        localStorage.setItem('yt-downloader:fork-repo', forkResult);
+                        console.log('✅ Workflow forked to:', forkResult);
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Fork failed — will use original repo:', e.message);
+                }
+            }
+
+            remove();
+
+            if (onSaved) onSaved();
+
+            if (typeof Toastify !== 'undefined') {
+                Toastify({
+                    text: '✅ توکن با موفقیت ذخیره شد' + (forkCheckbox.checked ? ' — اکشن فورک شد' : ''),
+                    duration: 2500,
+                    gravity: 'bottom',
+                    position: 'left',
+                    style: {
+                        background: 'var(--color-bg-elevated)',
+                        color: '#2dd4bf',
+                        border: '1px solid rgba(45, 212, 191, 0.3)',
+                        borderRadius: 'var(--radius-md)',
+                        fontFamily: 'var(--font-family-primary)',
+                        fontSize: 'var(--font-size-sm)',
+                        backdropFilter: 'blur(12px)',
+                        boxShadow: 'var(--shadow-lg)'
+                    }
+                }).showToast();
+            }
+        });
+
+        cancelBtn.addEventListener('click', remove);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) remove();
+        });
+
+        setTimeout(() => input.focus(), 100);
+    };
+
+    /**
+     * Fork the YouTube Downloader workflow to user's GitHub account
+     * Creates a new repo named 'youtube-downloader-action' and copies the workflow file
+     * @param {string} token - GitHub Personal Access Token
+     * @returns {Promise<string|null>} Forked repo full name (username/repo) or null
+     */
+    const forkWorkflowToUser = async (token) => {
+        // Step 1: Get authenticated user info
+        const userResponse = await fetch('https://api.github.com/user', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        if (!userResponse.ok) {
+            console.error('❌ Failed to get user info');
+            return null;
+        }
+        
+        const user = await userResponse.json();
+        const username = user.login;
+        const repoFullName = `${username}/youtube-downloader-action`;
+        
+        // Step 2: Create new repository (or use existing)
+        const createRepoResponse = await fetch('https://api.github.com/user/repos', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: 'youtube-downloader-action',
+                description: 'Auto-forked YouTube Downloader workflow for Tool Platform — BYOK',
+                private: false,
+                auto_init: false
+            })
+        });
+
+        // Repo might already exist — that's OK
+        if (!createRepoResponse.ok) {
+            const err = await createRepoResponse.json().catch(() => ({}));
+            if (err.message && err.message.includes('already exists')) {
+                console.log('ℹ️ Repository already exists, using existing');
+            } else {
+                console.error('❌ Failed to create repo:', err);
+                return null;
+            }
+        }
+        
+        // Step 3: Fetch workflow file from original repo
+        const workflowUrl = `https://raw.githubusercontent.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/main/.github/workflows/youtube-downloader.yml`;
+        const workflowResponse = await fetch(workflowUrl);
+        
+        if (!workflowResponse.ok) {
+            console.error('❌ Failed to fetch workflow file from original repo');
+            return null;
+        }
+        
+        const workflowContent = await workflowResponse.text();
+        const contentEncoded = btoa(unescape(encodeURIComponent(workflowContent)));
+        
+        // Step 4: Create .github/workflows/youtube-downloader.yml in the user's repo
+        // First check if workflows directory exists by trying to get it
+        const getFileResponse = await fetch(`https://api.github.com/repos/${repoFullName}/contents/.github/workflows/youtube-downloader.yml`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        let sha = null;
+        if (getFileResponse.ok) {
+            const existingFile = await getFileResponse.json();
+            sha = existingFile.sha;
+        }
+        
+        const putBody = {
+            message: '🔄 Update YouTube Downloader workflow',
+            content: contentEncoded
+        };
+        
+        if (sha) {
+            putBody.sha = sha;
+        }
+        
+        const putResponse = await fetch(`https://api.github.com/repos/${repoFullName}/contents/.github/workflows/youtube-downloader.yml`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(putBody)
+        });
+        
+        if (!putResponse.ok) {
+            console.error('❌ Failed to push workflow file to user repo');
+            return null;
+        }
+        
+        console.log(`✅ Workflow successfully forked to: ${repoFullName}`);
+        return repoFullName;
     };
 
     // ============================================
@@ -584,6 +908,13 @@
         // Phase 4 — Initialize Plugin System
         // ============================================
         PluginRegistry.initDefaultPlugins();
+
+        // ============================================
+        // Initialize Settings View (if active)
+        // ============================================
+        if (AppState.getState('ui.currentView') === 'settings') {
+            setTimeout(() => initSettingsView(), 100);
+        }
 
         // Mark app as ready
         AppState.setState('app.ready', true);
