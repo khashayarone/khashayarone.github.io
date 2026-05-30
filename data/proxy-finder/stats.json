@@ -3,10 +3,10 @@
   "channels_failed": 4,
   "total_messages_scraped": 1214,
   "proxies_found": 0,
-  "proxies_new": 1317,
-  "proxies_duplicate": 164,
-  "proxies_alive": 1157,
-  "proxies_dead": 160,
-  "runs": 4,
-  "last_run": "2026-05-29T23:04:25.847221+00:00"
+  "proxies_new": 1327,
+  "proxies_duplicate": 158,
+  "proxies_alive": 1166,
+  "proxies_dead": 161,
+  "runs": 5,
+  "last_run": "2026-05-30T00:24:23.172574+00:00"
 }
