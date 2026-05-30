@@ -303,13 +303,23 @@
         const getCodeBtn = document.getElementById('wizard-get-code');
         if (getCodeBtn) {
             getCodeBtn.addEventListener('click', () => {
-                const code = Bale.createConnection();
-                const container = getViewContainer();
-                UI.renderWizard(container, 2, {
-                    code: code,
-                    botUsername: Bale.getBotUsername()
-                });
-                bindWizardEvents();
+                // Show loading state
+                getCodeBtn.disabled = true;
+                getCodeBtn.innerHTML = `
+                    <div class="wizard-status-spinner" style="width:20px;height:20px;border-color:rgba(255,255,255,0.2);border-top-color:white;"></div>
+                    در حال تولید کد...
+                `;
+                
+                setTimeout(() => {
+                    const code = Bale.createConnection();
+                    const container = getViewContainer();
+                    UI.renderWizard(container, 2, {
+                        code: code,
+                        botUsername: Bale.getBotUsername()
+                    });
+                    bindWizardEvents();
+                    UI.toast('🔑 کد اتصال آماده شد — برای ربات بفرست', 'success');
+                }, 600);
             });
         }
 
@@ -320,32 +330,60 @@
                 const codeText = document.getElementById('wizard-code-text');
                 if (codeText) {
                     const code = codeText.textContent;
-                    navigator.clipboard.writeText(code).then(() => {
-                        codeText.classList.add('copied');
-                        UI.toast('📋 کد اتصال کپی شد — حالا توی ربات بفرست', 'success');
-                        setTimeout(() => codeText.classList.remove('copied'), 2000);
-                    }).catch(() => {
-                        UI.toast('⚠️ خطا در کپی کردن — دستی کپی کن', 'error');
-                    });
+                    if (code && code !== '....-....-....') {
+                        navigator.clipboard.writeText(code).then(() => {
+                            codeText.classList.add('copied');
+                            copyBtn.innerHTML = `
+                                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                کپی شد!
+                            `;
+                            copyBtn.classList.add('btn-success');
+                            UI.toast('📋 کد کپی شد — حالا توی ربات @' + Bale.getBotUsername() + ' بفرست', 'success', 4000);
+                            
+                            setTimeout(() => {
+                                codeText.classList.remove('copied');
+                                copyBtn.innerHTML = `
+                                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                    </svg>
+                                    کپی کد
+                                `;
+                                copyBtn.classList.remove('btn-success');
+                            }, 2500);
+                        }).catch(() => {
+                            UI.toast('⚠️ خطا در کپی کردن — لطفاً دستی کپی کن', 'error');
+                        });
+                    }
                 }
             });
         }
 
-        // Step 2: Code display click to copy
+        // Step 2: Code display click to copy (fallback)
         const codeDisplay = document.getElementById('wizard-code-display');
-        if (codeDisplay && !copyBtn) {
+        if (codeDisplay) {
             codeDisplay.addEventListener('click', () => {
                 const codeText = document.getElementById('wizard-code-text');
-                if (codeText) {
-                    const code = codeText.textContent;
-                    navigator.clipboard.writeText(code).then(() => {
-                        codeText.classList.add('copied');
-                        UI.toast('📋 کد اتصال کپی شد — حالا توی ربات بفرست', 'success');
-                        setTimeout(() => codeText.classList.remove('copied'), 2000);
-                    }).catch(() => {
-                        UI.toast('⚠️ خطا در کپی کردن — دستی کپی کن', 'error');
-                    });
+                if (codeText && copyBtn) {
+                    copyBtn.click();
                 }
+            });
+        }
+
+        // Step 2: New code button
+        const newCodeBtn = document.getElementById('wizard-new-code');
+        if (newCodeBtn) {
+            newCodeBtn.addEventListener('click', () => {
+                Bale.disconnect(true); // Silent disconnect
+                const code = Bale.createConnection();
+                const container = getViewContainer();
+                UI.renderWizard(container, 2, {
+                    code: code,
+                    botUsername: Bale.getBotUsername()
+                });
+                bindWizardEvents();
+                UI.toast('🔑 کد جدید آماده شد', 'info');
             });
         }
 
@@ -353,7 +391,16 @@
         const enterBtn = document.getElementById('wizard-enter');
         if (enterBtn) {
             enterBtn.addEventListener('click', () => {
-                Router.navigate('dashboard');
+                // Animate button
+                enterBtn.innerHTML = `
+                    <div class="wizard-status-spinner" style="width:20px;height:20px;border-color:rgba(255,255,255,0.2);border-top-color:white;"></div>
+                    در حال انتقال...
+                `;
+                enterBtn.disabled = true;
+                
+                setTimeout(() => {
+                    Router.navigate('dashboard');
+                }, 500);
             });
         }
     };
