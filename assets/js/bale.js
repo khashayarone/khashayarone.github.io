@@ -220,7 +220,7 @@ const Bale = (() => {
             }
 
             try {
-                const url = `${CONNECTIONS_PATH}${connection.code}`;
+                const url = `${CONNECTIONS_PATH}/${connection.code}.json`;
                 const response = await fetch(url, { cache: 'no-store' });
                 
                 if (!response.ok) {
@@ -286,7 +286,7 @@ const Bale = (() => {
         
         if (connection.status === 'connected') {
             try {
-                const url = `${CONNECTIONS_PATH}${connection.code}`;
+                const url = `${CONNECTIONS_PATH}/${connection.code}.json`;
                 const response = await fetch(url, { cache: 'no-store' });
                 if (response.ok) {
                     const data = await response.json();
