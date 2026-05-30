@@ -344,26 +344,28 @@
      * Bind wizard step events
      */
     const bindWizardEvents = () => {
-        // Step 1: Get code button
+        console.log('[Wizard] Binding events...');
+        
         const getCodeBtn = document.getElementById('wizard-get-code');
+        console.log('[Wizard] Get code button found:', !!getCodeBtn);
+        
         if (getCodeBtn) {
             getCodeBtn.addEventListener('click', () => {
-                // Show loading state
+                console.log('[Wizard] Get code clicked');
                 getCodeBtn.disabled = true;
-                getCodeBtn.innerHTML = `
-                    <div class="wizard-status-spinner" style="width:20px;height:20px;border-color:rgba(255,255,255,0.2);border-top-color:white;"></div>
-                    در حال تولید کد...
-                `;
+                getCodeBtn.innerHTML = '...';
                 
                 setTimeout(() => {
+                    console.log('[Wizard] Creating connection...');
                     const code = Bale.createConnection();
+                    console.log('[Wizard] Connection created, code:', code);
                     const container = getViewContainer();
                     UI.renderWizard(container, 2, {
                         code: code,
                         botUsername: Bale.getBotUsername()
                     });
                     bindWizardEvents();
-                    UI.toast('🔑 کد اتصال آماده شد — برای ربات بفرست', 'success');
+                    UI.toast('کد اتصال آماده شد', 'success');
                 }, 600);
             });
         }
