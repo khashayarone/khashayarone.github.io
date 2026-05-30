@@ -110,7 +110,7 @@ const UI = (() => {
     };
 
     /**
-     * Render the onboarding wizard
+     * Render the onboarding wizard with transition animation
      * @param {HTMLElement} container - Container element
      * @param {number} step - Wizard step (1, 2, or 3)
      * @param {Object} data - Step-specific data
@@ -118,78 +118,108 @@ const UI = (() => {
     const renderWizard = (container, step, data = {}) => {
         if (!container) return;
 
-        const views = {
-            1: `
-                <div class="wizard-step active" data-step="1">
-                    <div class="wizard-icon welcome">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                        </svg>
+        // If there's an existing step, animate it out first
+        const existingStep = container.querySelector('.wizard-step.active');
+        
+        const renderNewStep = () => {
+            const views = {
+                1: `
+                    <div class="wizard-step active" data-step="1">
+                        <div class="wizard-icon welcome">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <h2 class="wizard-title">به Khashayar One خوش اومدی! 🚀</h2>
+                        <p class="wizard-description">
+                            ابزارهای قدرتمند دانلود و مدیریت محتوا در جیب شما.
+                            برای استفاده از دانلودرها، ابتدا باید به ربات بله متصل بشی.
+                        </p>
+                        <button class="btn btn-primary btn-lg" id="wizard-get-code">
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                            دریافت کد اتصال
+                        </button>
+                        <p style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin-top:var(--space-sm);">
+                            🔒 کد شما فقط در این مرورگر ذخیره می‌شود
+                        </p>
                     </div>
-                    <h2 class="wizard-title">به Khashayar One خوش اومدی! 🚀</h2>
-                    <p class="wizard-description">
-                        ابزارهای قدرتمند دانلود و مدیریت محتوا در جیب شما.
-                        برای استفاده از دانلودرها، ابتدا باید به ربات بله متصل بشی.
-                    </p>
-                    <button class="btn btn-primary btn-lg" id="wizard-get-code">
-                        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
-                        </svg>
-                        دریافت کد اتصال
-                    </button>
+                `,
+                2: `
+                    <div class="wizard-step active" data-step="2">
+                        <div class="wizard-icon code">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                        </div>
+                        <h2 class="wizard-title">کد اتصال شما</h2>
+                        <p class="wizard-description">
+                            این کد رو کپی کن و برای ربات<br>
+                            <strong>@${data.botUsername || 'khashayarbot'}</strong><br>
+                            توی بله بفرست.
+                        </p>
+                        <div class="wizard-code-display pending" id="wizard-code-display" title="کلیک کن تا کپی بشه">
+                            <span class="wizard-code-text" id="wizard-code-text">${data.code || '....-....-....'}</span>
+                        </div>
+                        <button class="btn btn-primary" id="wizard-copy-code">
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                            </svg>
+                            کپی کد
+                        </button>
+                        <div class="wizard-status" id="wizard-status">
+                            <div class="wizard-status-spinner"></div>
+                            <span>منتظر ارسال کد به ربات...</span>
+                        </div>
+                        <button class="btn btn-ghost" id="wizard-new-code" style="margin-top:var(--space-sm);font-size:var(--font-size-xs);">
+                            دریافت کد جدید
+                        </button>
+                    </div>
+                `,
+                3: `
+                    <div class="wizard-step active" data-step="3">
+                        <div class="wizard-icon success">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <h2 class="wizard-title">✅ اتصال برقرار شد!</h2>
+                        <p class="wizard-description">
+                            <strong>${Utils.escapeHtml(data.firstName || 'دوست')}</strong> جان، به Khashayar One خوش اومدی! 🎉
+                        </p>
+                        <p class="wizard-description" style="font-size:var(--font-size-sm);color:var(--color-text-muted);">
+                            از حالا می‌تونی از همه ابزارها استفاده کنی.
+                            فایل‌های دانلودی مستقیماً توی ربات بله برات ارسال میشه. 📥
+                        </p>
+                        <button class="btn btn-primary btn-lg" id="wizard-enter">
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12h18M13 5l7 7-7 7"/>
+                            </svg>
+                            ورود به داشبورد
+                        </button>
+                        <p style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin-top:var(--space-sm);">
+                            ⚙️ می‌تونی نحوه دریافت فایل‌ها رو از تنظیمات تغییر بدی
+                        </p>
+                    </div>
+                `,
+            };
+
+            container.innerHTML = `
+                <div class="wizard-container">
+                    ${views[step] || views[1]}
                 </div>
-            `,
-            2: `
-                <div class="wizard-step active" data-step="2">
-                    <div class="wizard-icon code">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
-                        </svg>
-                    </div>
-                    <h2 class="wizard-title">کد اتصال شما</h2>
-                    <p class="wizard-description">
-                        این کد رو کپی کن و برای ربات <strong>@${data.botUsername || 'khashayarbot'}</strong> توی بله بفرست.
-                    </p>
-                    <div class="wizard-code-display" id="wizard-code-display">
-                        <span class="wizard-code-text" id="wizard-code-text">${data.code || '....-....-....'}</span>
-                    </div>
-                    <button class="btn btn-primary" id="wizard-copy-code">
-                        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                        </svg>
-                        کپی کد
-                    </button>
-                    <div class="wizard-status" id="wizard-status">
-                        <div class="wizard-status-spinner"></div>
-                        <span>منتظر تأیید اتصال...</span>
-                    </div>
-                </div>
-            `,
-            3: `
-                <div class="wizard-step active" data-step="3">
-                    <div class="wizard-icon success">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                        </svg>
-                    </div>
-                    <h2 class="wizard-title">✅ اتصال برقرار شد!</h2>
-                    <p class="wizard-description">
-                        ${data.firstName || 'دوست'} جان، به Khashayar One خوش اومدی! 🎉
-                        از حالا می‌تونی از همه ابزارها استفاده کنی.
-                        فایل‌های دانلودی مستقیماً توی ربات بله برات ارسال میشه. 📥
-                    </p>
-                    <button class="btn btn-primary btn-lg" id="wizard-enter">
-                        ورود به داشبورد
-                    </button>
-                </div>
-            `,
+            `;
         };
 
-        container.innerHTML = `
-            <div class="wizard-container">
-                ${views[step] || views[1]}
-            </div>
-        `;
+        if (existingStep) {
+            existingStep.classList.add('step-out');
+            existingStep.addEventListener('animationend', () => {
+                renderNewStep();
+            }, { once: true });
+        } else {
+            renderNewStep();
+        }
     };
 
     /**
