@@ -159,6 +159,8 @@
                 loadPluginView(container, 'proxy-finder');
                 break;
             case 'youtube':
+                loadPluginView(container, 'youtube-downloader');
+                break;
             case 'telegram':
             case 'instagram':
                 renderPlaceholder(container, getToolName(route), 'این ابزار در فازهای بعدی توسعه اضافه خواهد شد.');
@@ -646,7 +648,14 @@
             jsPath: 'plugins/proxy-finder/plugin.js',
             globalName: 'ProxyFinderPlugin'
         });
-
+        // Register YouTube Downloader plugin
+        PluginLoader.register({
+            id: 'youtube-downloader',
+            name: 'دانلودر یوتوب',
+            cssPath: 'plugins/youtube-downloader/plugin.css',
+            jsPath: 'plugins/youtube-downloader/plugin.js',
+            globalName: 'YouTubeDownloaderPlugin'
+        });
         // Bind navigation
         bindNavigation();
 
