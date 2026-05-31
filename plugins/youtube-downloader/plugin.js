@@ -23,6 +23,7 @@ const YouTubeDownloaderPlugin = (() => {
     const GITHUB_REPO_NAME = 'khashayarone.github.io';
     const GITHUB_WORKFLOW_ID = 'youtube-downloader.yml';
     const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`;
+    const DISPATCH_URL = 'https://khashayar.one/bale-bot/dispatch-workflow.php';
 
     const QUALITY_OPTIONS = [
         { value: '2160p', label: '4K — 2160p' },
@@ -263,8 +264,10 @@ const YouTubeDownloaderPlugin = (() => {
 
     const dispatchWorkflow = async (requestId, url, quality, audioOnly) => {
         const bale = getBaleConnection();
+        
+        // Send to CPanel dispatcher instead of GitHub API directly
         const body = {
-            ref: 'main',
+            workflow_id: 'youtube-downloader.yml',
             inputs: {
                 request_id: requestId,
                 youtube_urls: url,
@@ -275,14 +278,20 @@ const YouTubeDownloaderPlugin = (() => {
             }
         };
 
-        const headers = { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' };
-
         try {
-            const response = await fetch(GITHUB_API_URL, {
-                method: 'POST', headers, body: JSON.stringify(body)
+            const response = await fetch(DISPATCH_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
-            if (response.ok) return true;
-            console.error('Dispatch failed:', response.status);
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.ok === true) return true;
+                console.error('Dispatch failed:', result);
+                return false;
+            }
+            
             return false;
         } catch (e) {
             console.error('Dispatch error:', e.message);
