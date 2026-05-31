@@ -1,7 +1,7 @@
 /**
  * Khashayar One — Bale Connection Manager
  * Connection code generation, polling, state management
- * Enhanced: retry logic, connection check on load, better error handling
+ * Enhanced: fast polling for plugins, connection check on load, better error handling
  * Part of Khashayar One Tool Platform
  */
 
@@ -11,7 +11,9 @@ const Bale = (() => {
     const STORAGE_KEY = 'bale-connection';
     const CONNECTIONS_PATH = 'https://fozogame.com/bale-bot/get-connection.php?code=';
     const BOT_USERNAME = 'githubdlrobot'; // Change to 'khashayarbot' for production
-    const POLL_INTERVAL = 3000; // 3 seconds
+    const POLL_INTERVAL = 3000; // 3 seconds — normal polling
+    const POLL_FAST_INTERVAL = 1000; // 1 second — fast polling (first 10 seconds)
+    const POLL_FAST_DURATION = 10000; // 10 seconds fast polling
     const POLL_MAX_ATTEMPTS = 60; // 3 minutes
     const CONNECTION_CHECK_INTERVAL = 30000; // 30 seconds — periodic check
 
@@ -83,7 +85,7 @@ const Bale = (() => {
     };
 
     /**
-     * Create a new connection code and start polling
+     * Create a new connection code and start fast polling
      * @returns {string} The generated code
      */
     const createConnection = () => {
@@ -102,8 +104,8 @@ const Bale = (() => {
             created_at: Date.now()
         });
 
-        console.log('[Bale] Starting polling...');
-        startPolling(code);
+        console.log('[Bale] Starting fast polling...');
+        startPolling(code, true); // true = fast polling
         
         // Emit event
         EventBus.emit(EventBus.Events.BALE_CODE_GENERATED, { code });
@@ -114,13 +116,15 @@ const Bale = (() => {
     /**
      * Start polling for connection confirmation
      * @param {string} code - Connection code to poll for
+     * @param {boolean} fastMode - Use fast polling interval (1s for 10s, then 3s)
      */
-    const startPolling = (code) => {
+    const startPolling = (code, fastMode = false) => {
         // Clear existing poll
         stopPolling();
         
         let attempts = 0;
         let consecutiveFailures = 0;
+        const startTime = Date.now();
 
         const poll = async () => {
             attempts++;
@@ -186,7 +190,7 @@ const Bale = (() => {
                         console.warn('[Bale] Too many consecutive failures, slowing down...');
                         stopPolling();
                         // Restart with longer interval
-                        pollTimer = setTimeout(() => startPolling(code), 10000);
+                        pollTimer = setTimeout(() => startPolling(code, false), 10000);
                         return;
                     }
                 }
@@ -196,13 +200,22 @@ const Bale = (() => {
                 if (consecutiveFailures > 10) {
                     console.warn('[Bale] Network issues, slowing down polling...');
                     stopPolling();
-                    pollTimer = setTimeout(() => startPolling(code), 10000);
+                    pollTimer = setTimeout(() => startPolling(code, false), 10000);
                     return;
                 }
             }
 
+            // Determine polling interval
+            // Fast mode: 1 second for first 10 seconds, then 3 seconds
+            // Normal mode: always 3 seconds
+            let interval = POLL_INTERVAL;
+            if (fastMode) {
+                const elapsed = Date.now() - startTime;
+                interval = elapsed < POLL_FAST_DURATION ? POLL_FAST_INTERVAL : POLL_INTERVAL;
+            }
+
             // Continue polling
-            pollTimer = setTimeout(poll, POLL_INTERVAL);
+            pollTimer = setTimeout(poll, interval);
         };
 
         // Start first poll immediately
@@ -234,7 +247,6 @@ const Bale = (() => {
             }
 
             try {
-                // Same URL format — get-connection.php?code=XXXX-XXXX-XXXX
                 const url = `${CONNECTIONS_PATH}${connection.code}`;
                 const response = await fetch(url, { cache: 'no-store' });
                 
@@ -286,7 +298,7 @@ const Bale = (() => {
         if (!connection) return;
         
         if (connection.status === 'pending') {
-            startPolling(connection.code);
+            startPolling(connection.code, true); // Fast mode on resume
         } else if (connection.status === 'connected') {
             startConnectionCheck();
         }
@@ -305,7 +317,6 @@ const Bale = (() => {
         if (connection.status === 'connected') {
             // Verify connection still valid
             try {
-                // Same URL format
                 const url = `${CONNECTIONS_PATH}${connection.code}`;
                 const response = await fetch(url, { cache: 'no-store' });
                 if (response.ok) {
@@ -354,6 +365,14 @@ const Bale = (() => {
      */
     const getBotUsername = () => BOT_USERNAME;
 
+    /**
+     * Quick check if connected — for use by plugins
+     * @returns {boolean}
+     */
+    const quickCheck = () => {
+        return isConnected();
+    };
+
     return {
         getConnection,
         isConnected,
@@ -367,7 +386,8 @@ const Bale = (() => {
         checkStatus,
         updatePreference,
         getPreference,
-        getBotUsername
+        getBotUsername,
+        quickCheck
     };
 })();
 
