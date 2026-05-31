@@ -507,3 +507,93 @@
     .yt-limit-card { padding: var(--space-sm) var(--space-md); gap: var(--space-sm); }
     .yt-limit-value { font-size: var(--font-size-base); }
 }
+/* ============================================
+   Inline Connection Prompt
+   ============================================ */
+
+.yt-submit-btn-disabled {
+    background: #f59e0b !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+}
+
+.yt-submit-btn-disabled:hover {
+    background: #d97706 !important;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.3) !important;
+}
+
+.yt-connection-prompt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    width: 100%;
+}
+
+.yt-connection-code-row {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: stretch;
+}
+
+.yt-connection-code-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-bg-tertiary);
+    border: 2px dashed var(--color-accent-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: all;
+}
+
+.yt-connection-code-box:hover {
+    border-color: var(--color-border-active);
+    background: var(--color-bg-elevated);
+}
+
+.yt-connection-code-text {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-accent-primary);
+    letter-spacing: 4px;
+}
+
+.yt-connection-code-text.copied {
+    color: var(--color-success);
+}
+
+.yt-connect-bot-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    background: #0088cc;
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    width: 100%;
+    text-align: center;
+}
+
+.yt-connect-bot-btn:hover {
+    background: #006699;
+    box-shadow: 0 0 16px rgba(0, 136, 204, 0.3);
+}
+
+.yt-connection-notice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: var(--space-sm) 0;
+}
