@@ -1,6 +1,7 @@
 /**
  * Khashayar One — Application Bootstrap
- * Orchestrates navigation, wizard, dashboard, settings, and plugin routing
+ * Orchestrates navigation, dashboard, settings, and plugin routing
+ * No more forced wizard — users can browse tools freely
  * Part of Khashayar One Tool Platform
  */
 
@@ -75,6 +76,7 @@
                 }
                 requestAnimationFrame(raf);
 
+                // Expose to global for future use
                 window.__lenis = lenis;
                 console.log('✅ Lenis Smooth Scroll — Initialized');
                 return true;
@@ -115,36 +117,15 @@
     };
 
     /**
-     * Render the appropriate view based on connection state and current route
+     * Render the appropriate view based on current route
+     * All routes accessible — no forced wizard
      * @param {string} route - Current route name
      */
     const renderView = (route) => {
         const container = getViewContainer();
         if (!container) return;
 
-        // Check Bale connection status
-        const isConnected = Bale.isConnected();
-        const isPending = Bale.isPending();
-
-        // If not connected and not on settings, show wizard
-        if (!isConnected && route !== 'settings') {
-            if (isPending) {
-                // Show step 2 (code sent, waiting for confirmation)
-                const connection = Bale.getConnection();
-                UI.renderWizard(container, 2, {
-                    code: connection.code,
-                    botUsername: Bale.getBotUsername()
-                });
-                bindWizardEvents();
-            } else {
-                // Show step 1 (welcome)
-                UI.renderWizard(container, 1);
-                bindWizardEvents();
-            }
-            return;
-        }
-
-        // Connected — render appropriate view
+        // Render appropriate view based on route
         switch (route) {
             case 'dashboard':
                 UI.renderDashboard(container);
@@ -154,8 +135,6 @@
                 break;
             case 'internet-status':
                 loadPluginView(container, 'internet-status');
-                break;
-                renderPlaceholder(container, 'وضعیت اینترنت', 'این ابزار به زودی در دسترس قرار می‌گیرد.');
                 break;
             case 'proxy-finder':
                 loadPluginView(container, 'proxy-finder');
@@ -168,8 +147,6 @@
                 break;
             case 'instagram':
                 loadPluginView(container, 'instagram-downloader');
-                break;
-                renderPlaceholder(container, getToolName(route), 'این ابزار در فازهای بعدی توسعه اضافه خواهد شد.');
                 break;
             default:
                 UI.renderDashboard(container);
@@ -263,6 +240,7 @@
         const currentPref = Bale.getPreference();
         const connection = Bale.getConnection();
         const firstName = connection ? connection.first_name || 'کاربر' : 'کاربر';
+        const isConnected = Bale.isConnected();
 
         container.innerHTML = `
             <div class="settings-container">
@@ -312,23 +290,32 @@
                 <div class="settings-section">
                     <h3 class="settings-section-title">وضعیت اتصال ربات</h3>
                     <div class="settings-option">
-                        <div class="settings-radio" style="border-color:var(--color-success);">
-                            <div class="settings-radio-inner" style="background:var(--color-success);"></div>
+                        <div class="settings-radio" style="border-color:${isConnected ? 'var(--color-success)' : 'var(--color-error)'};">
+                            <div class="settings-radio-inner" style="background:${isConnected ? 'var(--color-success)' : 'var(--color-error)'};"></div>
                         </div>
                         <div class="settings-option-content">
-                            <span class="settings-option-title">🟢 متصل به @${Bale.getBotUsername()}</span>
-                            <span class="settings-option-desc">${Utils.escapeHtml(firstName)} عزیز، فایل‌های دانلودی به ربات ارسال می‌شوند</span>
+                            <span class="settings-option-title">${isConnected ? '🟢 متصل به' : '🔴 عدم اتصال به'} @${Bale.getBotUsername()}</span>
+                            <span class="settings-option-desc">${isConnected ? `${Utils.escapeHtml(firstName)} عزیز، فایل‌های دانلودی به ربات ارسال می‌شوند` : 'برای استفاده از دانلودرها نیاز به اتصال دارید'}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="settings-disconnect">
-                    <button class="btn btn-danger" id="btn-disconnect">
-                        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                        </svg>
-                        قطع اتصال ربات
-                    </button>
+                    ${isConnected ? `
+                        <button class="btn btn-danger" id="btn-disconnect">
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            </svg>
+                            قطع اتصال ربات
+                        </button>
+                    ` : `
+                        <button class="btn btn-primary" id="btn-connect-settings">
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                            اتصال به ربات
+                        </button>
+                    `}
                 </div>
             </div>
         `;
@@ -339,117 +326,6 @@
     // ============================================
     // Event Binding
     // ============================================
-
-    /**
-     * Bind wizard step events
-     */
-    const bindWizardEvents = () => {
-        console.log('[Wizard] Binding events...');
-        
-        const getCodeBtn = document.getElementById('wizard-get-code');
-        console.log('[Wizard] Get code button found:', !!getCodeBtn);
-        
-        if (getCodeBtn) {
-            getCodeBtn.addEventListener('click', () => {
-                console.log('[Wizard] Get code clicked');
-                getCodeBtn.disabled = true;
-                getCodeBtn.innerHTML = '...';
-                
-                setTimeout(() => {
-                    console.log('[Wizard] Creating connection...');
-                    const code = Bale.createConnection();
-                    console.log('[Wizard] Connection created, code:', code);
-                    const container = getViewContainer();
-                    UI.renderWizard(container, 2, {
-                        code: code,
-                        botUsername: Bale.getBotUsername()
-                    });
-                    bindWizardEvents();
-                    UI.toast('کد اتصال آماده شد', 'success');
-                }, 600);
-            });
-        }
-
-        // Step 2: Copy code button
-        const copyBtn = document.getElementById('wizard-copy-code');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => {
-                const codeText = document.getElementById('wizard-code-text');
-                if (codeText) {
-                    const code = codeText.textContent;
-                    if (code && code !== '....-....-....') {
-                        navigator.clipboard.writeText(code).then(() => {
-                            codeText.classList.add('copied');
-                            copyBtn.innerHTML = `
-                                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                                کپی شد!
-                            `;
-                            copyBtn.classList.add('btn-success');
-                            UI.toast('📋 کد کپی شد — حالا توی ربات @' + Bale.getBotUsername() + ' بفرست', 'success', 4000);
-                            
-                            setTimeout(() => {
-                                codeText.classList.remove('copied');
-                                copyBtn.innerHTML = `
-                                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                                    </svg>
-                                    کپی کد
-                                `;
-                                copyBtn.classList.remove('btn-success');
-                            }, 2500);
-                        }).catch(() => {
-                            UI.toast('⚠️ خطا در کپی کردن — لطفاً دستی کپی کن', 'error');
-                        });
-                    }
-                }
-            });
-        }
-
-        // Step 2: Code display click to copy (fallback)
-        const codeDisplay = document.getElementById('wizard-code-display');
-        if (codeDisplay) {
-            codeDisplay.addEventListener('click', () => {
-                const codeText = document.getElementById('wizard-code-text');
-                if (codeText && copyBtn) {
-                    copyBtn.click();
-                }
-            });
-        }
-
-        // Step 2: New code button
-        const newCodeBtn = document.getElementById('wizard-new-code');
-        if (newCodeBtn) {
-            newCodeBtn.addEventListener('click', () => {
-                Bale.disconnect(true);
-                const code = Bale.createConnection();
-                const container = getViewContainer();
-                UI.renderWizard(container, 2, {
-                    code: code,
-                    botUsername: Bale.getBotUsername()
-                });
-                bindWizardEvents();
-                UI.toast('🔑 کد جدید آماده شد', 'info');
-            });
-        }
-
-        // Step 3: Enter dashboard button
-        const enterBtn = document.getElementById('wizard-enter');
-        if (enterBtn) {
-            enterBtn.addEventListener('click', () => {
-                enterBtn.innerHTML = `
-                    <div class="wizard-status-spinner" style="width:20px;height:20px;border-color:rgba(255,255,255,0.2);border-top-color:white;"></div>
-                    در حال انتقال...
-                `;
-                enterBtn.disabled = true;
-                
-                setTimeout(() => {
-                    Router.navigate('dashboard');
-                }, 500);
-            });
-        }
-    };
 
     /**
      * Bind settings events
@@ -503,6 +379,17 @@
                         Router.navigate('dashboard');
                     });
                 }
+            });
+        }
+
+        // Connect button (when not connected)
+        const connectBtn = document.getElementById('btn-connect-settings');
+        if (connectBtn) {
+            connectBtn.addEventListener('click', () => {
+                const code = Bale.createConnection();
+                UI.toast(`🔑 کد اتصال آماده شد — ${code} — برای @${Bale.getBotUsername()} بفرست`, 'success', 5000);
+                // Refresh settings to show new status
+                setTimeout(() => renderSettings(getViewContainer()), 300);
             });
         }
     };
@@ -561,16 +448,13 @@
         EventBus.on(EventBus.Events.BALE_CONNECTED, (data) => {
             UI.updateConnectionBadge('connected', 'متصل');
             
-            // If on wizard step 2, show step 3
-            const container = getViewContainer();
-            const wizardStep = container.querySelector('.wizard-step.active[data-step="2"]');
-            if (wizardStep) {
-                UI.renderWizard(container, 3, {
-                    firstName: data.first_name || 'دوست'
-                });
-                bindWizardEvents();
-                
-                UI.toast(`🎉 اتصال به ربات برقرار شد! خوش اومدی ${data.first_name || ''}`, 'success', 4000);
+            // Show toast notification
+            UI.toast(`🎉 اتصال به ربات برقرار شد! ${data.first_name ? 'خوش اومدی ' + data.first_name : ''}`, 'success', 4000);
+            
+            // Refresh settings view if currently on settings page
+            const currentRoute = Router.getCurrentRoute();
+            if (currentRoute === 'settings') {
+                setTimeout(() => renderSettings(getViewContainer()), 300);
             }
         });
 
@@ -656,7 +540,7 @@
             jsPath: 'plugins/proxy-finder/plugin.js',
             globalName: 'ProxyFinderPlugin'
         });
-        // Register YouTube Downloader plugin
+
         PluginLoader.register({
             id: 'youtube-downloader',
             name: 'دانلودر یوتوب',
@@ -664,7 +548,7 @@
             jsPath: 'plugins/youtube-downloader/plugin.js',
             globalName: 'YouTubeDownloaderPlugin'
         });
-        // Register Telegram Downloader plugin
+
         PluginLoader.register({
             id: 'telegram-downloader',
             name: 'دانلودر تلگرام',
@@ -672,7 +556,7 @@
             jsPath: 'plugins/telegram-downloader/plugin.js',
             globalName: 'TelegramDownloaderPlugin'
         });
-        // Register Instagram Downloader plugin
+
         PluginLoader.register({
             id: 'instagram-downloader',
             name: 'دانلودر اینستاگرام',
@@ -680,7 +564,7 @@
             jsPath: 'plugins/instagram-downloader/plugin.js',
             globalName: 'InstagramDownloaderPlugin'
         });
-        // Register Internet Status Checker plugin
+
         PluginLoader.register({
             id: 'internet-status',
             name: 'وضعیت اینترنت',
@@ -688,6 +572,7 @@
             jsPath: 'plugins/internet-status/plugin.js',
             globalName: 'InternetStatusPlugin'
         });
+
         // Bind navigation
         bindNavigation();
 
