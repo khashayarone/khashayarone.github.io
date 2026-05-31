@@ -2,6 +2,7 @@
  * YouTube Downloader Plugin — Khashayar One
  * Downloads YouTube videos via GitHub Action workflow dispatch
  * Rate limited: 10 requests/hour, 5 min cooldown
+ * Inline Bale connection prompt — no wizard, no page leave
  * Part of Khashayar One Tool Platform
  */
 
@@ -21,7 +22,7 @@ const YouTubeDownloaderPlugin = (() => {
     const GITHUB_REPO_OWNER = 'khashayarone';
     const GITHUB_REPO_NAME = 'khashayarone.github.io';
     const GITHUB_WORKFLOW_ID = 'youtube-downloader.yml';
-    const DISPATCH_URL = 'https://fozogame.com/bale-bot/dispatch-workflow.php';
+    const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`;
 
     const QUALITY_OPTIONS = [
         { value: '2160p', label: '4K — 2160p' },
@@ -49,7 +50,11 @@ const YouTubeDownloaderPlugin = (() => {
         isLoading: false,
         error: null,
         cooldownTimer: null,
-        activePolls: {}
+        activePolls: {},
+        showConnectionPrompt: false,
+        connectionCode: '',
+        isPollingConnection: false,
+        baleConnected: false
     };
 
     // ============================================
@@ -150,16 +155,116 @@ const YouTubeDownloaderPlugin = (() => {
         return null;
     };
 
+    const isBaleConnected = () => {
+        return !!getBaleConnection();
+    };
+
+    const getBaleBotUsername = () => {
+        try { return Bale.getBotUsername(); } catch (e) { return 'khashayarbot'; }
+    };
+
+    // ============================================
+    // Connection Code Generation (Inline)
+    // ============================================
+
+    const generateConnectionCode = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 12; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return `${code.slice(0, 4)}-${code.slice(4, 8)}-${code.slice(8, 12)}`;
+    };
+
+    const handleConnectClick = () => {
+        // Generate code and save pending state
+        const code = generateConnectionCode();
+        state.connectionCode = code;
+        state.showConnectionPrompt = true;
+        state.isPollingConnection = true;
+
+        // Save to localStorage
+        try {
+            localStorage.setItem('bale-connection', JSON.stringify({
+                code: code,
+                status: 'pending',
+                chat_id: null,
+                username: '',
+                first_name: '',
+                created_at: Date.now()
+            }));
+        } catch (e) { /* ignore */ }
+
+        render();
+
+        // Start polling for connection confirmation
+        pollForConnection(code);
+    };
+
+    const pollForConnection = (code) => {
+        let attempts = 0;
+        const maxAttempts = 120; // 2 minutes
+
+        const poll = async () => {
+            attempts++;
+
+            if (attempts > maxAttempts || !state.isPollingConnection) {
+                state.isPollingConnection = false;
+                return;
+            }
+
+            try {
+                const url = `https://fozogame.com/bale-bot/get-connection.php?code=${code}`;
+                const response = await fetch(url, { cache: 'no-store' });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.status === 'connected') {
+                        // Connection confirmed!
+                        state.isPollingConnection = false;
+                        state.baleConnected = true;
+
+                        // Save connected state
+                        try {
+                            localStorage.setItem('bale-connection', JSON.stringify({
+                                code: code,
+                                status: 'connected',
+                                chat_id: data.chat_id,
+                                username: data.username || '',
+                                first_name: data.first_name || '',
+                                output_preference: data.output_preference || 'file',
+                                connected_at: data.connected_at || new Date().toISOString()
+                            }));
+                        } catch (e) { /* ignore */ }
+
+                        // Update UI badge
+                        if (typeof UI !== 'undefined') {
+                            UI.updateConnectionBadge('connected', 'متصل');
+                        }
+
+                        render();
+                        return;
+                    }
+                }
+            } catch (e) { /* continue polling */ }
+
+            // Fast polling: every 1 second for first 10 seconds, then every 3 seconds
+            const interval = attempts <= 10 ? 1000 : 3000;
+            setTimeout(poll, interval);
+        };
+
+        poll();
+    };
+
     // ============================================
     // Dispatch & Polling
     // ============================================
 
     const dispatchWorkflow = async (requestId, url, quality, audioOnly) => {
         const bale = getBaleConnection();
-        
-        // New body format for CPanel dispatcher
         const body = {
-            workflow_id: 'youtube-downloader.yml',
+            ref: 'main',
             inputs: {
                 request_id: requestId,
                 youtube_urls: url,
@@ -170,21 +275,14 @@ const YouTubeDownloaderPlugin = (() => {
             }
         };
 
+        const headers = { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' };
+
         try {
-            // Send to CPanel dispatcher instead of GitHub API directly
-            const response = await fetch(DISPATCH_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+            const response = await fetch(GITHUB_API_URL, {
+                method: 'POST', headers, body: JSON.stringify(body)
             });
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.ok === true) return true;
-                console.error('Dispatch failed:', result);
-                return false;
-            }
-            
+            if (response.ok) return true;
+            console.error('Dispatch failed:', response.status);
             return false;
         } catch (e) {
             console.error('Dispatch error:', e.message);
@@ -255,7 +353,6 @@ const YouTubeDownloaderPlugin = (() => {
             entry.errorMessage = 'خطا در پردازش درخواست';
         }
 
-        // Log Bale notification
         if (entry.status === 'completed') {
             const bale = getBaleConnection();
             if (bale) console.log(`📬 Bale notification ready for ${bale.first_name || 'user'}`);
@@ -311,7 +408,7 @@ const YouTubeDownloaderPlugin = (() => {
         render();
 
         const dispatched = await dispatchWorkflow(requestId, submittedUrl, submittedQuality, submittedAudioOnly);
-        if (dispatched === true) {
+        if (dispatched) {
             startPolling(requestId);
         } else {
             updateHistoryItem(requestId, { status: 'error', errorMessage: 'خطا در ارسال درخواست — لطفاً دوباره تلاش کنید' });
@@ -375,8 +472,6 @@ const YouTubeDownloaderPlugin = (() => {
     const updateCooldownDisplay = () => {
         const el = document.getElementById('yt-cooldown-value');
         if (el) el.textContent = state.limits.cooldownRemaining > 0 ? formatCooldown(state.limits.cooldownRemaining) : 'آماده';
-        const btn = document.getElementById('yt-submit-btn');
-        if (btn) btn.disabled = !state.limits.canRequest || state.isLoading;
     };
 
     const renderFullView = () => `
@@ -402,6 +497,72 @@ const YouTubeDownloaderPlugin = (() => {
         </div>
     `;
 
+    const renderSubmitButton = () => {
+        const isConnected = state.baleConnected || isBaleConnected();
+        const canSubmit = state.limits.canRequest && !state.isLoading;
+
+        if (isConnected) {
+            // Connected — show normal download button
+            return `
+                <button class="yt-submit-btn" id="yt-submit-btn" ${!canSubmit ? 'disabled' : ''}>
+                    ${state.isLoading ? '<div class="yt-history-spinner" style="width:20px;height:20px;border-color:rgba(255,255,255,0.2);border-top-color:white;"></div> در حال ارسال...' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> شروع دانلود'}
+                </button>
+                <div class="yt-connection-notice" style="font-size:var(--font-size-xs);color:var(--color-success);margin-top:var(--space-sm);display:flex;align-items:center;gap:4px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--color-success);"></span>
+                    فایل‌ها به ربات بله ارسال می‌شوند
+                </div>
+            `;
+        }
+
+        if (state.showConnectionPrompt && state.connectionCode) {
+            // Show inline connection code
+            const botUsername = getBaleBotUsername();
+            return `
+                <div class="yt-connection-prompt">
+                    <div class="yt-connection-code-row">
+                        <div class="yt-connection-code-box" id="yt-connection-code-box" title="کلیک کن تا کپی بشه">
+                            <span class="yt-connection-code-text" id="yt-connection-code-text">${state.connectionCode}</span>
+                        </div>
+                        <button class="btn btn-primary" id="yt-copy-code-btn" style="white-space:nowrap;padding:var(--space-sm) var(--space-lg);">
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                            </svg>
+                            کپی
+                        </button>
+                    </div>
+                    <a href="https://ble.ir/${botUsername}" target="_blank" rel="noopener" class="yt-connect-bot-btn" id="yt-go-to-bot-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.441-.752-.245-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.331.016.123.034.335.02.56z"/>
+                        </svg>
+                        رفتن به ربات @${botUsername}
+                    </a>
+                    ${state.isPollingConnection ? `
+                        <div style="display:flex;align-items:center;gap:8px;font-size:var(--font-size-xs);color:var(--color-text-muted);margin-top:var(--space-sm);">
+                            <div class="yt-history-spinner"></div>
+                            <span>منتظر تأیید اتصال...</span>
+                        </div>
+                    ` : ''}
+                    <p style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin-top:var(--space-sm);">
+                        📌 کد رو کپی کن، ربات رو استارت کن و کد رو بفرست. بعد از اتصال، دکمه دانلود فعال میشه.
+                    </p>
+                </div>
+            `;
+        }
+
+        // Not connected — show connect button
+        return `
+            <button class="yt-submit-btn yt-submit-btn-disabled" id="yt-connect-btn" style="background:#f59e0b;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+                🔴 نیاز به اتصال ربات
+            </button>
+            <p style="font-size:var(--font-size-xs);color:var(--color-text-muted);margin-top:var(--space-sm);">
+                برای دانلود، ابتدا باید به ربات بله متصل شوید. کلیک کنید تا کد اتصال دریافت کنید.
+            </p>
+        `;
+    };
+
     const renderDownloadBox = () => `
         <div class="yt-download-box">
             <div class="yt-input-group">
@@ -423,9 +584,7 @@ const YouTubeDownloaderPlugin = (() => {
             ${state.error ? `<div class="yt-limit-warning"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ${Utils.escapeHtml(state.error)}</div>` : ''}
             ${!state.limits.canRequest && !state.error ? `<div class="yt-limit-warning"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ${state.limits.cooldownRemaining > 0 ? `${formatCooldown(state.limits.cooldownRemaining)} تا درخواست بعدی` : 'محدودیت ساعتی (۱۰ درخواست)'}</div>` : ''}
             <div class="yt-submit-row">
-                <button class="yt-submit-btn" id="yt-submit-btn" ${(!state.limits.canRequest || state.isLoading) ? 'disabled' : ''}>
-                    ${state.isLoading ? '<div class="yt-history-spinner" style="width:20px;height:20px;border-color:rgba(255,255,255,0.2);border-top-color:white;"></div> در حال ارسال...' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> شروع دانلود'}
-                </button>
+                ${renderSubmitButton()}
             </div>
         </div>
     `;
@@ -438,22 +597,20 @@ const YouTubeDownloaderPlugin = (() => {
                     ${state.history.slice(0, 20).map(item => {
                         const timeAgo = getRelativeTime(item.timestamp);
                         const isProcessing = item.status === 'processing';
-                        const isAwaitingToken = item.status === 'awaiting_token';
                         const isCompleted = item.status === 'completed';
                         const isError = item.status === 'error';
                         const hasParts = item.multipart && item.totalParts > 1 && item.parts;
                         return `
                             <div class="yt-history-item">
-                                <div class="yt-history-icon ${isProcessing || isAwaitingToken ? 'processing' : isCompleted ? 'completed' : 'error'}">
+                                <div class="yt-history-icon ${isProcessing ? 'processing' : isCompleted ? 'completed' : 'error'}">
                                     ${isProcessing ? '<div class="yt-history-spinner"></div>' : isCompleted ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'}
                                 </div>
                                 <div class="yt-history-content">
                                     <span class="yt-history-item-title">${Utils.escapeHtml(item.title)}</span>
-                                    <span class="yt-history-item-meta">${item.audioOnly ? '🎵 صوت' : '🎬 ' + item.quality} — ${isAwaitingToken ? 'نیاز به توکن' : isProcessing ? 'در حال پردازش...' : isCompleted ? (item.fileSize ? formatFileSize(item.fileSize) : 'تکمیل شد') : Utils.escapeHtml(item.errorMessage || 'خطا')}</span>
+                                    <span class="yt-history-item-meta">${item.audioOnly ? '🎵 صوت' : '🎬 ' + item.quality} — ${isProcessing ? 'در حال پردازش...' : isCompleted ? (item.fileSize ? formatFileSize(item.fileSize) : 'تکمیل شد') : Utils.escapeHtml(item.errorMessage || 'خطا')}</span>
                                 </div>
                                 <span class="yt-history-time">${timeAgo}</span>
-                                ${isAwaitingToken ? `<button class="yt-history-download-btn" style="background:#f59e0b;" onclick="window.location.hash='#/settings'">تنظیمات</button>` : ''}
-                                ${isError && item.errorMessage && !isAwaitingToken ? `<button class="yt-history-download-btn" style="background:#f87171;" onclick="this.nextElementSibling.style.display='block';this.nextElementSibling.nextElementSibling.style.display='flex';">علت خطا</button><div class="yt-error-popup-overlay" style="display:none;" onclick="this.style.display='none';this.nextElementSibling.style.display='none';"></div><div class="yt-error-popup" style="display:none;"><div class="yt-error-popup-title">❌ خطا در دانلود</div><div class="yt-error-popup-message">${Utils.escapeHtml(item.errorMessage)}</div><button class="yt-error-popup-close" onclick="this.parentElement.style.display='none';this.parentElement.previousElementSibling.style.display='none';">متوجه شدم</button></div>` : ''}
+                                ${isError && item.errorMessage ? `<button class="yt-history-download-btn" style="background:#f87171;" onclick="this.nextElementSibling.style.display='block';this.nextElementSibling.nextElementSibling.style.display='flex';">علت خطا</button><div class="yt-error-popup-overlay" style="display:none;" onclick="this.style.display='none';this.nextElementSibling.style.display='none';"></div><div class="yt-error-popup" style="display:none;"><div class="yt-error-popup-title">❌ خطا در دانلود</div><div class="yt-error-popup-message">${Utils.escapeHtml(item.errorMessage)}</div><button class="yt-error-popup-close" onclick="this.parentElement.style.display='none';this.parentElement.previousElementSibling.style.display='none';">متوجه شدم</button></div>` : ''}
                                 ${isCompleted && hasParts ? `<div class="yt-parts-container">${item.parts.map(p => `<a href="${p.downloadUrl}" class="yt-part-btn" download>📥 پارت ${p.part}</a>`).join('')}</div>` : isCompleted && item.fileUrl ? `<a href="${item.fileUrl}" class="yt-history-download-btn" download><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> دانلود</a>` : isProcessing ? '<span style="color:var(--color-accent-primary);font-size:var(--font-size-xs);">در حال پردازش</span>' : ''}
                             </div>
                         `;
@@ -468,10 +625,12 @@ const YouTubeDownloaderPlugin = (() => {
     // ============================================
 
     const bindEvents = () => {
+        // URL input
         document.getElementById('yt-url-input')?.addEventListener('input', Utils.debounce((e) => { state.url = e.target.value; state.error = null; }, 300));
         document.getElementById('yt-quality-select')?.addEventListener('change', (e) => { state.quality = e.target.value; });
         document.getElementById('yt-url-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && state.limits.canRequest && !state.isLoading) submitRequest(); });
 
+        // Audio checkbox
         const audioCheck = document.getElementById('yt-audio-checkbox');
         const audioGroup = document.getElementById('yt-audio-only');
         if (audioCheck && audioGroup) {
@@ -479,7 +638,38 @@ const YouTubeDownloaderPlugin = (() => {
             audioGroup.addEventListener('click', (e) => { if (e.target !== audioCheck) { audioCheck.checked = !audioCheck.checked; state.audioOnly = audioCheck.checked; audioGroup.classList.toggle('checked', state.audioOnly); render(); } });
         }
 
+        // Submit button (for connected users)
         document.getElementById('yt-submit-btn')?.addEventListener('click', submitRequest);
+
+        // Connect button (for unconnected users)
+        document.getElementById('yt-connect-btn')?.addEventListener('click', handleConnectClick);
+
+        // Copy code button
+        const copyBtn = document.getElementById('yt-copy-code-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const codeText = document.getElementById('yt-connection-code-text');
+                if (codeText) {
+                    const code = codeText.textContent;
+                    navigator.clipboard.writeText(code).then(() => {
+                        copyBtn.innerHTML = '✅ کپی شد';
+                        copyBtn.classList.add('btn-success');
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> کپی';
+                            copyBtn.classList.remove('btn-success');
+                        }, 2000);
+                    }).catch(() => { /* fallback */ });
+                }
+            });
+        }
+
+        // Code box click to copy
+        const codeBox = document.getElementById('yt-connection-code-box');
+        if (codeBox) {
+            codeBox.addEventListener('click', () => {
+                if (copyBtn) copyBtn.click();
+            });
+        }
     };
 
     // ============================================
@@ -494,6 +684,20 @@ const YouTubeDownloaderPlugin = (() => {
         state.error = null;
         state.isLoading = false;
         state.activePolls = {};
+        state.showConnectionPrompt = false;
+        state.connectionCode = '';
+        state.isPollingConnection = false;
+        state.baleConnected = isBaleConnected();
+
+        // Check if pending connection exists and resume polling
+        const baleData = getBaleConnection();
+        if (baleData && baleData.status === 'pending') {
+            state.connectionCode = baleData.code;
+            state.showConnectionPrompt = true;
+            state.isPollingConnection = true;
+            pollForConnection(baleData.code);
+        }
+
         state.history.forEach(item => { if (item.status === 'processing') startPolling(item.id); });
         calculateLimits();
         render();
@@ -504,6 +708,7 @@ const YouTubeDownloaderPlugin = (() => {
         if (state.cooldownTimer) { clearInterval(state.cooldownTimer); state.cooldownTimer = null; }
         Object.values(state.activePolls).forEach(id => clearInterval(id));
         state.activePolls = {};
+        state.isPollingConnection = false;
         EventBus.emit('tool:destroyed', { toolId: 'youtube-downloader' });
     };
 
