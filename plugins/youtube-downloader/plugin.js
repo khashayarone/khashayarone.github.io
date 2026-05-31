@@ -23,7 +23,7 @@ const YouTubeDownloaderPlugin = (() => {
     const GITHUB_REPO_NAME = 'khashayarone.github.io';
     const GITHUB_WORKFLOW_ID = 'youtube-downloader.yml';
     const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/${GITHUB_WORKFLOW_ID}/dispatches`;
-    const DISPATCH_URL = 'https://khashayar.one/bale-bot/dispatch-workflow.php';
+    const DISPATCH_URL = 'https://dispatch.webmaster-mazyar.workers.dev/';
 
     const QUALITY_OPTIONS = [
         { value: '2160p', label: '4K — 2160p' },
