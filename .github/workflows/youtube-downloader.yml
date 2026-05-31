@@ -51,17 +51,26 @@ jobs:
     timeout-minutes: 120
 
     steps:
+      # ═══════════════════════════════════════════
+      # Step 1: Checkout with PAT for push access
+      # ═══════════════════════════════════════════
       - name: "📥 Checkout Repository"
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
           fetch-depth: 1
 
+      # ═══════════════════════════════════════════
+      # Step 2: Configure Git
+      # ═══════════════════════════════════════════
       - name: "⚙️ Configure Git"
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      # ═══════════════════════════════════════════
+      # Step 3: Cloudflare WARP (bypass YouTube restrictions)
+      # ═══════════════════════════════════════════
       - name: "🌐 Setup Cloudflare WARP"
         run: |
           docker network create warp-net 2>/dev/null || true
@@ -75,11 +84,21 @@ jobs:
           WARP_OK=false
           for i in $(seq 1 8); do
             RESULT=$(curl -s --max-time 5 --socks5-hostname 127.0.0.1:1080 https://cloudflare.com/cdn-cgi/trace 2>/dev/null || echo "failed")
-            if echo "$RESULT" | grep -qE "warp=(on|plus)"; then echo "✅ WARP connected after ${i} attempts"; WARP_OK=true; break; fi
-            echo "⏳ WARP attempt ${i}/8..."; sleep 5
+            if echo "$RESULT" | grep -qE "warp=(on|plus)"; then
+              echo "✅ WARP connected after ${i} attempts"
+              WARP_OK=true
+              break
+            fi
+            echo "⏳ WARP attempt ${i}/8..."
+            sleep 5
           done
-          if [ "$WARP_OK" = false ]; then echo "⚠️ WARP failed to connect — downloads may be slower"; fi
+          if [ "$WARP_OK" = false ]; then
+            echo "⚠️ WARP failed to connect — downloads may be slower"
+          fi
 
+      # ═══════════════════════════════════════════
+      # Step 4: Install Dependencies
+      # ═══════════════════════════════════════════
       - name: "📦 Install Dependencies"
         run: |
           sudo apt-get update -qq
@@ -91,6 +110,9 @@ jobs:
           pip3 install --upgrade yt-dlp --quiet
           echo "✅ All dependencies installed"
 
+      # ═══════════════════════════════════════════
+      # Step 5: Setup Parameters
+      # ═══════════════════════════════════════════
       - name: "🔧 Setup"
         id: setup
         env:
@@ -98,22 +120,28 @@ jobs:
           YT_URLS: ${{ github.event.inputs.youtube_urls }}
           YT_QUALITY: ${{ github.event.inputs.quality }}
           YT_AUDIO: ${{ github.event.inputs.audio_only }}
+          BALE_CODE: ${{ github.event.inputs.bale_code }}
+          BALE_CHAT_ID: ${{ github.event.inputs.bale_chat_id }}
         run: |
           REQUEST_ID="${REQUEST_ID}"
           YT_URLS="${YT_URLS}"
           QUALITY="${YT_QUALITY}"
           AUDIO_ONLY="${YT_AUDIO}"
-          
+          BALE_CODE="${BALE_CODE}"
+          BALE_CHAT_ID="${BALE_CHAT_ID}"
+
           echo "REQUEST_ID=${REQUEST_ID}" >> $GITHUB_ENV
           echo "YT_URLS=${YT_URLS}" >> $GITHUB_ENV
           echo "QUALITY=${QUALITY}" >> $GITHUB_ENV
           echo "AUDIO_ONLY=${AUDIO_ONLY}" >> $GITHUB_ENV
-          
+          echo "BALE_CODE=${BALE_CODE}" >> $GITHUB_ENV
+          echo "BALE_CHAT_ID=${BALE_CHAT_ID}" >> $GITHUB_ENV
+
           REQUEST_DIR="data/youtube-downloader/downloads/req_${REQUEST_ID}"
           mkdir -p "$REQUEST_DIR"
           echo "REQUEST_DIR=${REQUEST_DIR}" >> $GITHUB_ENV
-          
-          # Quality format mapping
+
+          # Quality format mapping for yt-dlp
           if [ "$AUDIO_ONLY" = "true" ]; then
             FORMAT="bestaudio/bestaudio*/best"
             QUALITY="audio"
@@ -130,15 +158,27 @@ jobs:
             esac
           fi
           echo "FORMAT=${FORMAT}" >> $GITHUB_ENV
-          echo "✅ Setup complete — Request: ${REQUEST_ID}, Quality: ${QUALITY}, Audio: ${AUDIO_ONLY}"
 
+          echo "============================================"
+          echo "  🎬 YouTube Downloader"
+          echo "============================================"
+          echo "  Request ID : ${REQUEST_ID}"
+          echo "  Quality    : ${QUALITY}"
+          echo "  Audio Only : ${AUDIO_ONLY}"
+          echo "  Bale Code  : ${BALE_CODE}"
+          echo "  Bale Chat  : ${BALE_CHAT_ID}"
+          echo "============================================"
+
+      # ═══════════════════════════════════════════
+      # Step 6: Download & Process
+      # ═══════════════════════════════════════════
       - name: "🎬 Download & Process"
         id: download
         run: |
           #!/bin/bash
           shopt -s nullglob
           set +e
-          
+
           REQUEST_DIR="${{ env.REQUEST_DIR }}"
           REQUEST_ID="${{ env.REQUEST_ID }}"
           TARGET_SIZE_MB=90
@@ -146,7 +186,8 @@ jobs:
           MAX_PARTS=20
           RESULTS="[]"
           ERRORS="[]"
-          
+
+          # ── Helper: Sanitize filename ─────────────────
           sanitize_name() {
             local name="$1"
             name=$(echo "$name" | sed 's/[()（）]/_/g' | sed 's/[][{}\/\\<>|:;\"'"'"']/_/g')
@@ -154,7 +195,8 @@ jobs:
             [ -z "$name" ] && name="unknown"
             echo "$name"
           }
-          
+
+          # ── Download function with 6 bypass methods ────
           download_video() {
             local METHOD=$1 URL=$2 TMP_DIR=$3
             if [ "$AUDIO_ONLY" = "true" ] || [ "$QUALITY" = "audio" ]; then
@@ -162,6 +204,7 @@ jobs:
             else
               COMMON_FLAGS="--merge-output-format mp4 --write-thumbnail --convert-thumbnails jpg --no-cache-dir --output ${TMP_DIR}/%(title)s.%(ext)s --no-part --no-playlist --retries 5 --fragment-retries 5 --no-check-certificates --concurrent-fragments 8 --buffer-size 16K --http-chunk-size 10M --progress --newline"
             fi
+
             case $METHOD in
               1) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "${FORMAT}" $COMMON_FLAGS --extractor-args "youtube:player_client=web" --js-runtimes deno --remote-components ejs:github --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36" "$URL" 2>&1 ;;
               2) yt-dlp --proxy "socks5://127.0.0.1:1080" --format "${FORMAT}" $COMMON_FLAGS --extractor-args "youtube:player_client=web,mweb,android_vr" --js-runtimes deno --remote-components ejs:github "$URL" 2>&1 ;;
@@ -172,114 +215,255 @@ jobs:
               *) return 1 ;;
             esac
           }
-          
+
+          # ═══════════════════════════════════════════════
+          # MAIN PROCESSING LOOP
+          # ═══════════════════════════════════════════════
           read -ra URL_ARRAY <<< "$YT_URLS"
-          
+
           for YT_URL in "${URL_ARRAY[@]}"; do
+            # Normalize youtu.be short links
             if [[ "$YT_URL" =~ youtu\.be/([a-zA-Z0-9_-]+) ]]; then
               YT_URL="https://www.youtube.com/watch?v=${BASH_REMATCH[1]%%\?*}"
             fi
-            
-            echo "🔍 Processing: $YT_URL"
-            
+
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🔍 Processing: ${YT_URL}"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+            # Get video metadata
             INFO_JSON=$(yt-dlp --proxy "socks5://127.0.0.1:1080" --dump-json --skip-download "$YT_URL" 2>/dev/null || echo "{}")
             CREATOR=$(echo "$INFO_JSON" | jq -r '.uploader // .channel // "Unknown"')
             TITLE=$(echo "$INFO_JSON" | jq -r '.title // "Untitled"')
-            echo "  📝 $TITLE"
-            
+            DURATION=$(echo "$INFO_JSON" | jq -r '.duration // 0')
+
+            echo "  👤 Creator : ${CREATOR}"
+            echo "  📝 Title   : ${TITLE}"
+            echo "  ⏱ Duration : ${DURATION}s"
+
             TMP_DIR="tmp_yt_${REQUEST_ID}_${RANDOM}"
             mkdir -p "$TMP_DIR"
-            
+
+            # Try all 6 bypass methods
             DOWNLOAD_SUCCESS=false
             for METHOD in 1 2 3 4 5 6; do
+              echo "  🎯 Trying bypass method ${METHOD}/6..."
               if download_video $METHOD "$YT_URL" "$TMP_DIR" | grep -q "100%"; then
-                DOWNLOAD_SUCCESS=true; break
+                echo "  ✅ Downloaded successfully (method ${METHOD})"
+                DOWNLOAD_SUCCESS=true
+                break
+              else
+                echo "  ❌ Method ${METHOD} failed"
+                sleep 2
               fi
-              sleep 2
             done
-            
+
             if [ "$DOWNLOAD_SUCCESS" = false ]; then
-              ERRORS=$(echo "$ERRORS" | jq --arg url "$YT_URL" --arg title "$TITLE" --arg error "Download failed" '. + [{"url":$url,"title":$title,"error":$error}]')
-              rm -rf "$TMP_DIR"; continue
+              ERRORS=$(echo "$ERRORS" | jq \
+                --arg url "$YT_URL" \
+                --arg title "$TITLE" \
+                --arg error "All 6 download methods failed" \
+                '. + [{"url":$url,"title":$title,"error":$error}]')
+              rm -rf "$TMP_DIR"
+              continue
             fi
-            
+
+            # ═══════════════════════════════════════════════
+            # Process Downloaded Files
+            # ═══════════════════════════════════════════════
             for MEDIA_FILE in "$TMP_DIR"/*.mp4 "$TMP_DIR"/*.webm "$TMP_DIR"/*.mkv "$TMP_DIR"/*.mp3 "$TMP_DIR"/*.m4a; do
               [ -f "$MEDIA_FILE" ] || continue
+
               BASENAME=$(basename "$MEDIA_FILE")
               SAFE_NAME=$(sanitize_name "${BASENAME%.*}")
               EXT="${BASENAME##*.}"
               FILE_SIZE=$(stat -c%s "$MEDIA_FILE" 2>/dev/null || echo 0)
               FILE_SIZE_MB=$(( FILE_SIZE / 1024 / 1024 ))
-              
-              echo "  📦 ${SAFE_NAME}.${EXT} — ${FILE_SIZE_MB}MB"
-              
+
+              echo "  📦 File: ${SAFE_NAME}.${EXT} — ${FILE_SIZE_MB}MB"
+
+              # ── SIZE CHECK: >90MB needs RAR splitting ──
               if [ "$FILE_SIZE" -gt "$TARGET_SIZE_BYTES" ]; then
+                echo "  ⚠️ File exceeds ${TARGET_SIZE_MB}MB — splitting with RAR..."
+
                 SPLIT_DIR="/tmp/rar_${REQUEST_ID}_${RANDOM}"
                 mkdir -p "$SPLIT_DIR"
+
+                # Copy file to split directory
                 cp "$MEDIA_FILE" "${SPLIT_DIR}/${SAFE_NAME}.${EXT}"
+
+                # Create RAR split volumes
                 cd "$SPLIT_DIR"
                 rar a -v${TARGET_SIZE_MB}m -ep1 -m0 -idq "${SAFE_NAME}.part.rar" "${SAFE_NAME}.${EXT}"
                 rm -f "${SAFE_NAME}.${EXT}"
                 cd - > /dev/null
+
+                # Count parts
                 TOTAL_PARTS=$(ls "${SPLIT_DIR}/${SAFE_NAME}.part"*.rar 2>/dev/null | wc -l)
-                
+                echo "  📦 Split into ${TOTAL_PARTS} RAR parts"
+
+                # Move parts to request directory
                 for PART_FILE in $(ls "${SPLIT_DIR}/${SAFE_NAME}.part"*.rar | sort); do
-                  mv "$PART_FILE" "${REQUEST_DIR}/"
+                  [ -f "$PART_FILE" ] || continue
+                  PART_NAME=$(basename "$PART_FILE")
+                  mv "$PART_FILE" "${REQUEST_DIR}/${PART_NAME}"
+                  echo "    ✅ Part saved: ${PART_NAME}"
                 done
-                
-                RESULTS=$(echo "$RESULTS" | jq --arg title "$TITLE" --arg name "${SAFE_NAME}.${EXT}" --argjson size "$FILE_SIZE" --argjson parts "$TOTAL_PARTS" '. + [{"title":$title,"file_name":$name,"file_size":$size,"multipart":true,"total_parts":$parts,"status":"completed"}]')
+
+                RESULTS=$(echo "$RESULTS" | jq \
+                  --arg title "$TITLE" \
+                  --arg name "${SAFE_NAME}.${EXT}" \
+                  --argjson size "$FILE_SIZE" \
+                  --argjson parts "$TOTAL_PARTS" \
+                  '. + [{"title":$title,"file_name":$name,"file_size":$size,"multipart":true,"total_parts":$parts,"status":"completed"}]')
+
                 rm -rf "$SPLIT_DIR"
+
               else
-                mv "$MEDIA_FILE" "${REQUEST_DIR}/${SAFE_NAME}.${EXT}"
+                # ── File within size limit: direct save ──
+                DEST_FILE="${REQUEST_DIR}/${SAFE_NAME}.${EXT}"
+                mv "$MEDIA_FILE" "$DEST_FILE"
+                echo "  ✅ Saved: ${SAFE_NAME}.${EXT}"
+
+                # Copy thumbnail if exists
                 for THUMB in "$TMP_DIR"/*.jpg "$TMP_DIR"/*.webp; do
-                  [ -f "$THUMB" ] && cp "$THUMB" "${REQUEST_DIR}/${SAFE_NAME}.${THUMB##*.}" && break
+                  [ -f "$THUMB" ] || continue
+                  THUMB_EXT="${THUMB##*.}"
+                  cp "$THUMB" "${REQUEST_DIR}/${SAFE_NAME}.${THUMB_EXT}"
+                  echo "  🖼 Thumbnail saved: ${SAFE_NAME}.${THUMB_EXT}"
+                  break
                 done
-                RESULTS=$(echo "$RESULTS" | jq --arg title "$TITLE" --arg name "${SAFE_NAME}.${EXT}" --argjson size "$FILE_SIZE" '. + [{"title":$title,"file_name":$name,"file_size":$size,"multipart":false,"total_parts":1,"status":"completed"}]')
+
+                RESULTS=$(echo "$RESULTS" | jq \
+                  --arg title "$TITLE" \
+                  --arg name "${SAFE_NAME}.${EXT}" \
+                  --argjson size "$FILE_SIZE" \
+                  '. + [{"title":$title,"file_name":$name,"file_size":$size,"multipart":false,"total_parts":1,"status":"completed"}]')
               fi
             done
+
             rm -rf "$TMP_DIR"
           done
-          
+
+          # ═══════════════════════════════════════════════
+          # Generate Final result.json
+          # ═══════════════════════════════════════════════
           COMPLETED=$(echo "$RESULTS" | jq '. | length')
           FAILED=$(echo "$ERRORS" | jq '. | length')
-          OVERALL_STATUS="completed"
-          [ "$FAILED" -gt 0 ] && [ "$COMPLETED" -gt 0 ] && OVERALL_STATUS="partial"
-          [ "$FAILED" -gt 0 ] && [ "$COMPLETED" -eq 0 ] && OVERALL_STATUS="error"
-          
-          jq -n --arg id "$REQUEST_ID" --arg status "$OVERALL_STATUS" --argjson results "$RESULTS" --argjson errors "$ERRORS" --argjson total "$((COMPLETED+FAILED))" --argjson succeeded "$COMPLETED" --argjson failed "$FAILED" '{request_id:$id,status:$status,results:$results,errors:$errors,summary:{total_urls:$total,succeeded:$succeeded,failed:$failed}}' > "${REQUEST_DIR}/result.json"
-          
-          echo "✅ Done: $COMPLETED succeeded, $FAILED failed"
+          TOTAL_COUNT=$(( COMPLETED + FAILED ))
 
+          if [ "$FAILED" -gt 0 ]; then
+            if [ "$COMPLETED" -gt 0 ]; then
+              OVERALL_STATUS="partial"
+            else
+              OVERALL_STATUS="error"
+            fi
+          else
+            OVERALL_STATUS="completed"
+          fi
+
+          jq -n \
+            --arg request_id "$REQUEST_ID" \
+            --arg status "$OVERALL_STATUS" \
+            --argjson results "$RESULTS" \
+            --argjson errors "$ERRORS" \
+            --argjson total "$TOTAL_COUNT" \
+            --argjson succeeded "$COMPLETED" \
+            --argjson failed "$FAILED" \
+            '{
+              request_id: $request_id,
+              status: $status,
+              results: $results,
+              errors: $errors,
+              summary: {
+                total_urls: $total,
+                succeeded: $succeeded,
+                failed: $failed
+              }
+            }' > "${REQUEST_DIR}/result.json"
+
+          echo ""
+          echo "============================================"
+          echo "📊 FINAL RESULT"
+          echo "============================================"
+          echo "  Request ID : ${REQUEST_ID}"
+          echo "  Status     : ${OVERALL_STATUS}"
+          echo "  Succeeded  : ${COMPLETED}"
+          echo "  Failed     : ${FAILED}"
+          echo "  Output     : ${REQUEST_DIR}/result.json"
+          echo "============================================"
+
+      # ═══════════════════════════════════════════
+      # Step 7: Stop Cloudflare WARP
+      # ═══════════════════════════════════════════
       - name: "🛑 Stop WARP"
         if: always()
         run: |
           docker stop warp 2>/dev/null || true
           docker rm warp 2>/dev/null || true
 
+      # ═══════════════════════════════════════════
+      # Step 8: Send Bale Notification to User
+      # ═══════════════════════════════════════════
       - name: "📬 Send Bale Notification"
         if: success() && github.event.inputs.bale_chat_id != ''
         env:
           BALE_TOKEN: ${{ secrets.BALE_BOT_TOKEN }}
+          BALE_CHAT_ID: ${{ env.BALE_CHAT_ID }}
+          REQUEST_ID: ${{ env.REQUEST_ID }}
         run: |
-          if [ -n "${{ github.event.inputs.bale_chat_id }}" ] && [ -n "$BALE_TOKEN" ]; then
-            DOWNLOAD_URL="https://github.com/khashayarone/khashayarone.github.io/tree/main/data/youtube-downloader/downloads/req_${{ env.REQUEST_ID }}"
-            curl -s -X POST "https://tapi.bale.ai/bot${BALE_TOKEN}/sendMessage" \
-              -H "Content-Type: application/json" \
-              -d "{\"chat_id\":\"${{ github.event.inputs.bale_chat_id }}\",\"text\":\"🎬 *دانلود یوتوب شما آماده است\\!*\n\n📁 [مشاهده و دانلود فایل‌ها](${DOWNLOAD_URL})\",\"parse_mode\":\"MarkdownV2\"}"
-            echo "✅ Bale notification sent"
+          if [ -n "${BALE_CHAT_ID}" ] && [ -n "${BALE_TOKEN}" ]; then
+            echo "📬 Sending Bale notification to chat_id: ${BALE_CHAT_ID}"
+
+            # Read result to get file info
+            RESULT_FILE="data/youtube-downloader/downloads/req_${REQUEST_ID}/result.json"
+            if [ -f "$RESULT_FILE" ]; then
+              FILE_COUNT=$(jq '.results | length' "$RESULT_FILE" 2>/dev/null || echo "0")
+              FIRST_FILE=$(jq -r '.results[0].file_name // "Unknown"' "$RESULT_FILE" 2>/dev/null || echo "Unknown")
+              FIRST_SIZE=$(jq -r '.results[0].file_size // 0' "$RESULT_FILE" 2>/dev/null || echo "0")
+              FIRST_SIZE_MB=$(( FIRST_SIZE / 1024 / 1024 ))
+
+              DOWNLOAD_URL="https://github.com/khashayarone/khashayarone.github.io/tree/main/data/youtube-downloader/downloads/req_${REQUEST_ID}"
+
+              MESSAGE="🎬 *دانلود یوتوب شما آماده است\\!*
+
+          📁 *${FIRST_FILE}*
+          📦 *حجم:* ${FIRST_SIZE_MB}MB
+          📊 *تعداد فایل‌ها:* ${FILE_COUNT}
+
+          🔗 [مشاهده و دانلود فایل‌ها](${DOWNLOAD_URL})"
+
+              curl -s -X POST "https://tapi.bale.ai/bot${BALE_TOKEN}/sendMessage" \
+                -H "Content-Type: application/json" \
+                -d "{\"chat_id\":\"${BALE_CHAT_ID}\",\"text\":\"${MESSAGE}\",\"parse_mode\":\"MarkdownV2\"}"
+
+              echo "✅ Bale notification sent"
+            else
+              echo "⚠️ Result file not found, skipping notification"
+            fi
+          else
+            echo "ℹ️ No Bale chat ID provided, skipping notification"
           fi
 
+      # ═══════════════════════════════════════════
+      # Step 9: Commit & Push Results
+      # ═══════════════════════════════════════════
       - name: "📤 Commit & Push"
         if: always()
         run: |
           git add data/youtube-downloader/downloads/ 2>/dev/null || true
+
+          # Cleanup old request folders (older than 24 hours)
           find data/youtube-downloader/downloads/ -maxdepth 1 -type d -name "req_*" -mmin +1440 -exec rm -rf {} \; 2>/dev/null || true
           git add -u data/youtube-downloader/downloads/ 2>/dev/null || true
+
           if git diff --staged --quiet; then
             echo "No files to commit"
           else
-            git commit -m "🎬 YT DL [${{ env.REQUEST_ID }}] — $(date -u +'%H:%M UTC')"
+            FILE_COUNT=$(git diff --staged --name-only | wc -l)
+            git commit -m "🎬 YT DL [${REQUEST_ID}]: ${FILE_COUNT} file(s) — $(date -u +'%H:%M UTC')"
             git pull --rebase origin main 2>/dev/null || true
             git push origin main 2>/dev/null || true
-            echo "✅ Committed and pushed"
+            echo "✅ Committed and pushed ${FILE_COUNT} file(s)"
           fi
