@@ -653,3 +653,64 @@ textarea {
 
     font-size: .9rem;
 }
+.section {
+
+    padding:
+        40px 0;
+}
+
+.section-header {
+
+    text-align: center;
+
+    margin-bottom: 32px;
+}
+
+.section-header h2 {
+
+    margin-bottom: 12px;
+}
+
+.section-header p {
+
+    color:
+        var(--text-soft);
+}
+.pagination {
+
+    margin-top: 30px;
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 10px;
+}
+
+.pagination button {
+
+    width: 42px;
+
+    height: 42px;
+
+    border: none;
+
+    cursor: pointer;
+
+    border-radius: 12px;
+
+    background:
+        var(--surface);
+
+    color:
+        var(--text);
+
+    transition:
+        var(--transition);
+}
+
+.pagination button.active {
+
+    background:
+        var(--primary);
+}
