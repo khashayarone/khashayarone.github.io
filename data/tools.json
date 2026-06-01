@@ -1,13 +1,14 @@
 [
   {
-    "id": "youtube",
-    "title": "YouTube Downloader",
-    "icon": "youtube",
-    "description": "دانلود ویدیو، صدا و زیرنویس از یوتیوب",
-    "route": "tool-youtube",
-    "category": "download",
-    "featured": true,
-    "enabled": true
+  "id": "youtube",
+  "title": "YouTube Downloader",
+  "icon": "youtube",
+  "description": "...",
+  "route": "tool-youtube",
+  "category": "download",
+  "featured": true,
+  "enabled": true,
+  "version": "1.0.0"
   },
 
   {
