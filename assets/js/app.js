@@ -1,66 +1,27 @@
 /**
  * ========================================================
  * KHASHAYAR.ONE
- * Bootstrap Engine v1
+ * Bootstrap Engine v2 Production
  * ========================================================
  */
 
 (() => {
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        () => {
+    class App {
+
+        init() {
 
             try {
 
-                if (
-                    typeof Storage !==
-                    "undefined"
-                ) {
+                this.initStorage();
 
-                    Storage.init?.();
+                this.initUI();
 
-                }
+                this.initRouter();
 
-                if (
-                    typeof UI !==
-                    "undefined"
-                ) {
+                this.initEvents();
 
-                    UI.init();
-
-                }
-
-                if (
-                    typeof Router !==
-                    "undefined"
-                ) {
-
-                    Router.init();
-if (
-    typeof Tools !==
-    "undefined"
-) {
-
-    document.addEventListener(
-        "page:loaded",
-        () => {
-
-            Tools.init();
-
-        }
-    );
-
-}
-                }
-
-                if (
-                    window.lucide
-                ) {
-
-                    lucide.createIcons();
-
-                }
+                this.initIcons();
 
                 console.log(
                     "🚀 Khashayar.one Ready"
@@ -71,13 +32,196 @@ if (
             catch (error) {
 
                 console.error(
-                    "Bootstrap Error",
+                    "[APP INIT ERROR]",
                     error
                 );
 
             }
 
         }
+
+        initStorage() {
+
+            if (
+                typeof Storage !==
+                "undefined"
+            ) {
+
+                Storage.init?.();
+
+            }
+
+        }
+
+        initUI() {
+
+            if (
+                typeof UI !==
+                "undefined"
+            ) {
+
+                UI.init?.();
+
+            }
+
+        }
+
+        initRouter() {
+
+            if (
+                typeof Router !==
+                "undefined"
+            ) {
+
+                Router.init?.();
+
+            }
+
+        }
+
+        initIcons() {
+
+            if (
+                window.lucide
+            ) {
+
+                lucide.createIcons();
+
+            }
+
+        }
+
+        initEvents() {
+
+            document.addEventListener(
+
+                "page:loaded",
+
+                () => {
+
+                    this.onPageLoaded();
+
+                }
+
+            );
+
+        }
+
+        onPageLoaded() {
+
+            try {
+
+                this.initIcons();
+
+                this.initTools();
+
+                this.initToolPages();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "[PAGE LOAD ERROR]",
+                    error
+                );
+
+            }
+
+        }
+
+        initTools() {
+
+            if (
+                typeof Tools !==
+                "undefined"
+            ) {
+
+                Tools.init?.();
+
+            }
+
+        }
+
+        initToolPages() {
+
+            const page =
+                document.body.dataset.page ||
+                "";
+
+            switch (page) {
+
+                case "youtube":
+
+                    if (
+                        typeof Youtube !==
+                        "undefined"
+                    ) {
+
+                        Youtube.init?.();
+
+                    }
+
+                    break;
+
+                case "instagram":
+
+                    if (
+                        typeof Instagram !==
+                        "undefined"
+                    ) {
+
+                        Instagram.init?.();
+
+                    }
+
+                    break;
+
+                case "telegram":
+
+                    if (
+                        typeof Telegram !==
+                        "undefined"
+                    ) {
+
+                        Telegram.init?.();
+
+                    }
+
+                    break;
+
+                case "github":
+
+                    if (
+                        typeof GithubTool !==
+                        "undefined"
+                    ) {
+
+                        GithubTool.init?.();
+
+                    }
+
+                    break;
+
+            }
+
+        }
+
+    }
+
+    window.App =
+        new App();
+
+    document.addEventListener(
+
+        "DOMContentLoaded",
+
+        () => {
+
+            App.init();
+
+        }
+
     );
 
 })();
