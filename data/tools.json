@@ -2,7 +2,7 @@
   {
   "id": "youtube",
   "title": "YouTube Downloader",
-  "icon": "youtube",
+  "icon": "video",
   "description": "...",
   "route": "tool-youtube",
   "category": "download",
@@ -14,7 +14,7 @@
   {
     "id": "instagram",
     "title": "Instagram Downloader",
-    "icon": "instagram",
+    "icon": "image",
     "description": "دانلود پست، ریلز، استوری و پروفایل",
     "route": "tool-instagram",
     "category": "download",
@@ -36,7 +36,7 @@
   {
     "id": "github",
     "title": "GitHub Downloader",
-    "icon": "github",
+    "icon": "code-xml",
     "description": "دانلود ریپازیتوری و فایل‌های گیت‌هاب",
     "route": "tool-github",
     "category": "developer",
@@ -47,7 +47,7 @@
   {
     "id": "tiktok",
     "title": "TikTok Downloader",
-    "icon": "music-4",
+    "icon": "video",
     "description": "دانلود ویدیوهای TikTok بدون واترمارک",
     "route": "tool-tiktok",
     "category": "download",
@@ -58,7 +58,7 @@
   {
     "id": "twitter",
     "title": "X Downloader",
-    "icon": "twitter",
+    "icon": "badge-check",
     "description": "دانلود ویدیو و رسانه از X",
     "route": "tool-twitter",
     "category": "download",
@@ -69,7 +69,7 @@
   {
     "id": "facebook",
     "title": "Facebook Downloader",
-    "icon": "facebook",
+    "icon": "badge-check",
     "description": "دانلود ویدیوهای Facebook",
     "route": "tool-facebook",
     "category": "download",
@@ -80,7 +80,7 @@
   {
     "id": "threads",
     "title": "Threads Downloader",
-    "icon": "at-sign",
+    "icon": "badge-check",
     "description": "دانلود محتوا از Threads",
     "route": "tool-threads",
     "category": "download",
