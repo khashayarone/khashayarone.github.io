@@ -209,19 +209,22 @@
 
     }
 
-    window.App =
-        new App();
+const app =
+    new App();
 
-    document.addEventListener(
+window.App =
+    app;
 
-        "DOMContentLoaded",
+document.addEventListener(
 
-        () => {
+    "DOMContentLoaded",
 
-            App.init();
+    () => {
 
-        }
+        app.init();
 
-    );
+    }
+
+);
 
 })();
