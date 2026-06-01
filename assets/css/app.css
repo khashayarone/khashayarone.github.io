@@ -738,3 +738,155 @@ textarea {
 
     height: 22px;
 }
+.settings-group {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 16px;
+
+    margin-bottom: 20px;
+}
+
+.settings-group label {
+
+    color: var(--text);
+}
+.settings-group input {
+
+    width: 320px;
+
+    max-width: 100%;
+
+    border: none;
+
+    outline: none;
+
+    border-radius: 14px;
+
+    padding: 12px 14px;
+
+    background: rgba(255,255,255,.05);
+
+    color: var(--text);
+}
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+
+    border: none;
+
+    cursor: pointer;
+
+    border-radius: 14px;
+
+    padding: 12px 18px;
+
+    transition: var(--transition);
+}
+
+.btn-primary {
+
+    background: var(--primary);
+
+    color: white;
+}
+
+.btn-secondary {
+
+    background: rgba(255,255,255,.06);
+
+    color: var(--text);
+}
+
+.btn-danger {
+
+    background: rgba(255,70,70,.2);
+
+    color: #ff7b7b;
+}
+.settings-actions {
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+.switch {
+
+    position: relative;
+
+    width: 52px;
+
+    height: 30px;
+}
+
+.switch input {
+
+    display: none;
+}
+
+.slider {
+
+    position: absolute;
+
+    inset: 0;
+
+    cursor: pointer;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.08);
+
+    transition: .25s;
+}
+
+.slider::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 22px;
+
+    height: 22px;
+
+    left: 4px;
+
+    top: 4px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    transition: .25s;
+}
+
+.switch input:checked + .slider {
+
+    background: var(--primary);
+}
+
+.switch input:checked + .slider::before {
+
+    transform: translateX(22px);
+}
+@media (max-width:768px) {
+
+    .settings-group {
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .settings-group input {
+
+        width: 100%;
+    }
+
+}
