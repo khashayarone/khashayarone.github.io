@@ -1,0 +1,206 @@
+<section class="tool-page">
+
+    <div class="container">
+
+        <!-- Hero -->
+
+        <div class="tool-hero glass-card">
+
+            <div class="tool-hero-content">
+
+                <div class="tool-icon-large">
+
+                    <i data-lucide="youtube"></i>
+
+                </div>
+
+                <div>
+
+                    <h1>
+                        YouTube Downloader
+                    </h1>
+
+                    <p>
+                        دانلود ویدیو، صدا و ترنسکریپت از یوتیوب
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Download Form -->
+
+        <div class="glass-card tool-form-card">
+
+            <h2>
+                شروع دانلود
+            </h2>
+
+            <div class="form-group">
+
+                <label>
+                    لینک ویدیو
+                </label>
+
+                <input
+                    id="yt-url"
+                    type="url"
+                    placeholder="https://youtube.com/watch?v=...">
+
+            </div>
+
+            <div class="tool-grid-2">
+
+                <div class="form-group">
+
+                    <label>
+                        کیفیت
+                    </label>
+
+                    <select id="yt-quality">
+
+                        <option value="720">
+                            720p
+                        </option>
+
+                        <option value="480">
+                            480p
+                        </option>
+
+                        <option value="audio">
+                            Audio
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        نوع خروجی
+                    </label>
+
+                    <select id="yt-media-type">
+
+                        <option value="video">
+                            Video
+                        </option>
+
+                        <option value="audio">
+                            Audio
+                        </option>
+
+                        <option value="transcript">
+                            Transcript
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <button
+                id="start-download"
+                class="btn-primary tool-submit">
+
+                شروع دانلود
+
+            </button>
+
+        </div>
+
+        <!-- Job Status -->
+
+        <div
+            id="job-status-card"
+            class="glass-card tool-status-card hidden">
+
+            <h2>
+                وضعیت پردازش
+            </h2>
+
+            <div class="job-timeline">
+
+                <div
+                    class="job-step active"
+                    data-step="queued">
+
+                    Queued
+
+                </div>
+
+                <div
+                    class="job-step"
+                    data-step="running">
+
+                    Running
+
+                </div>
+
+                <div
+                    class="job-step"
+                    data-step="uploading">
+
+                    Uploading
+
+                </div>
+
+                <div
+                    class="job-step"
+                    data-step="completed">
+
+                    Completed
+
+                </div>
+
+            </div>
+
+            <div
+                id="job-message"
+                class="job-message">
+
+                درخواست شما ثبت شد...
+
+            </div>
+
+        </div>
+
+        <!-- Result -->
+
+        <div
+            id="result-card"
+            class="glass-card result-card hidden">
+
+            <h2>
+                نتیجه دانلود
+            </h2>
+
+            <div id="result-content">
+
+            </div>
+
+        </div>
+
+        <!-- History -->
+
+        <div
+            id="history-card"
+            class="glass-card">
+
+            <h2>
+                دانلودهای اخیر
+            </h2>
+
+            <div id="history-list">
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
