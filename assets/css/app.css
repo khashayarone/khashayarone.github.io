@@ -993,3 +993,171 @@ textarea {
     }
 
 }
+.tool-page {
+
+    padding: 30px 0 60px;
+}
+.tool-hero {
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+}
+
+.tool-hero-content {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.tool-icon-large {
+
+    width: 64px;
+
+    height: 64px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 18px;
+
+    background:
+        rgba(255,255,255,.05);
+}
+.tool-form-card {
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+}
+
+.form-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+.form-group input,
+.form-group select {
+
+    border: none;
+
+    outline: none;
+
+    border-radius: 14px;
+
+    padding: 14px;
+
+    background:
+        rgba(255,255,255,.05);
+
+    color:
+        var(--text);
+}
+.tool-grid-2 {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap: 16px;
+}
+
+@media(max-width:768px){
+
+    .tool-grid-2{
+
+        grid-template-columns:
+            1fr;
+    }
+
+}
+.tool-submit {
+
+    width: 100%;
+
+    margin-top: 10px;
+}
+.tool-status-card {
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+}
+
+.job-timeline {
+
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    margin-top: 18px;
+}
+
+.job-step {
+
+    padding: 10px 14px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,.05);
+
+    opacity: .5;
+}
+
+.job-step.active {
+
+    opacity: 1;
+
+    background:
+        var(--primary);
+}
+
+.job-message {
+
+    margin-top: 18px;
+
+    color:
+        var(--text-soft);
+}
+.result-card {
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+}
+#history-card {
+
+    padding: 24px;
+}
+
+.history-item {
+
+    padding: 14px;
+
+    margin-top: 12px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,.04);
+}
+.hidden {
+
+    display: none !important;
+}
