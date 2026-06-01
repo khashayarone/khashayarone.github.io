@@ -1,0 +1,100 @@
+[
+  {
+    "id": "youtube",
+    "title": "YouTube Downloader",
+    "icon": "youtube",
+    "description": "دانلود ویدیو، صدا و زیرنویس از یوتیوب",
+    "route": "tool-youtube",
+    "category": "download",
+    "featured": true,
+    "enabled": true
+  },
+
+  {
+    "id": "instagram",
+    "title": "Instagram Downloader",
+    "icon": "instagram",
+    "description": "دانلود پست، ریلز، استوری و پروفایل",
+    "route": "tool-instagram",
+    "category": "download",
+    "featured": true,
+    "enabled": false
+  },
+
+  {
+    "id": "telegram",
+    "title": "Telegram Downloader",
+    "icon": "send",
+    "description": "دانلود فایل و رسانه از تلگرام",
+    "route": "tool-telegram",
+    "category": "download",
+    "featured": true,
+    "enabled": false
+  },
+
+  {
+    "id": "github",
+    "title": "GitHub Downloader",
+    "icon": "github",
+    "description": "دانلود ریپازیتوری و فایل‌های گیت‌هاب",
+    "route": "tool-github",
+    "category": "developer",
+    "featured": true,
+    "enabled": false
+  },
+
+  {
+    "id": "tiktok",
+    "title": "TikTok Downloader",
+    "icon": "music-4",
+    "description": "دانلود ویدیوهای TikTok بدون واترمارک",
+    "route": "tool-tiktok",
+    "category": "download",
+    "featured": false,
+    "enabled": false
+  },
+
+  {
+    "id": "twitter",
+    "title": "X Downloader",
+    "icon": "twitter",
+    "description": "دانلود ویدیو و رسانه از X",
+    "route": "tool-twitter",
+    "category": "download",
+    "featured": false,
+    "enabled": false
+  },
+
+  {
+    "id": "facebook",
+    "title": "Facebook Downloader",
+    "icon": "facebook",
+    "description": "دانلود ویدیوهای Facebook",
+    "route": "tool-facebook",
+    "category": "download",
+    "featured": false,
+    "enabled": false
+  },
+
+  {
+    "id": "threads",
+    "title": "Threads Downloader",
+    "icon": "at-sign",
+    "description": "دانلود محتوا از Threads",
+    "route": "tool-threads",
+    "category": "download",
+    "featured": false,
+    "enabled": false
+  },
+
+  {
+    "id": "pinterest",
+    "title": "Pinterest Downloader",
+    "icon": "image",
+    "description": "دانلود تصاویر و ویدیوهای Pinterest",
+    "route": "tool-pinterest",
+    "category": "download",
+    "featured": false,
+    "enabled": false
+  }
+]
