@@ -623,3 +623,33 @@ textarea {
         align-items: center;
     }
 }
+.hero-tags {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    margin-top: 24px;
+}
+
+.hero-tag {
+
+    padding: 10px 14px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,.05);
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    color:
+        var(--text-soft);
+
+    font-size: .9rem;
+}
