@@ -37,7 +37,21 @@
                 ) {
 
                     Router.init();
+if (
+    typeof Tools !==
+    "undefined"
+) {
 
+    document.addEventListener(
+        "page:loaded",
+        () => {
+
+            Tools.init();
+
+        }
+    );
+
+}
                 }
 
                 if (
