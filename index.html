@@ -1,115 +1,217 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-theme="dark">
+<html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="Khashayar One — ابزارهای قدرتمند در جیب شما">
-    <meta name="theme-color" content="#0a0a0f">
-    <title>Khashayar One</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Khashayar.one | مرجع ابزارهای کاربردی</title>
+
+    <meta name="description"
+        content="مرجع ابزارهای کاربردی برای دانلود، تبدیل، پردازش محتوا و سرویس‌های آنلاین.">
+
+    <meta name="keywords"
+        content="youtube downloader, instagram downloader, telegram downloader, github downloader, tools">
+
+    <meta name="author" content="Khashayar.one">
+
+    <meta name="theme-color" content="#09090b">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Khashayar.one">
+    <meta property="og:description"
+        content="مرجع ابزارهای کاربردی برای دانلود و پردازش محتوا">
+    <meta property="og:url" content="https://khashayar.one">
+
+    <meta name="twitter:card" content="summary_large_image">
 
     <!-- Vazirmatn Font -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lenis -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.css">
 
-    <!-- GSAP Animation Engine -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+    <!-- Toastify -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
 
-    <!-- Lenis Smooth Scrolling -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.js"></script>
-
-    <!-- Toastify Notifications -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
-
-    <!-- Design System -->
-    <link rel="stylesheet" href="assets/css/tokens.css">
-    <link rel="stylesheet" href="assets/css/base.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="./assets/css/app.css">
 </head>
+
 <body>
-    <!-- Application Shell -->
+
+    <!-- Aurora Background -->
+    <div id="aurora-background"></div>
+
+    <!-- App Layout -->
     <div id="app">
-        
-        <!-- Top Navigation Bar -->
-        <header class="topbar" role="banner">
-            <div class="topbar-brand">
-                <span>⚡</span> Khashayar One
+
+        <!-- Header -->
+        <header class="site-header">
+
+            <div class="container">
+
+                <div class="header-inner">
+
+                    <a href="/" class="brand" data-route="home">
+
+                        <span class="brand-mark">✦</span>
+
+                        <span class="brand-text">
+                            Khashayar.one
+                        </span>
+
+                    </a>
+
+                    <nav class="desktop-nav">
+
+                        <a href="/" data-route="home">
+                            خانه
+                        </a>
+
+                        <a href="?page=tools" data-route="tools">
+                            ابزارها
+                        </a>
+
+                        <a href="?page=blog" data-route="blog">
+                            بلاگ
+                        </a>
+
+                        <a href="?page=settings" data-route="settings">
+                            تنظیمات
+                        </a>
+
+                    </nav>
+
+                    <div class="header-actions">
+
+                        <button
+                            id="theme-toggle"
+                            class="icon-btn"
+                            aria-label="Theme Toggle">
+
+                            <i data-lucide="moon-star"></i>
+
+                        </button>
+
+                        <button
+                            id="mobile-menu-toggle"
+                            class="icon-btn mobile-only"
+                            aria-label="Menu">
+
+                            <i data-lucide="menu"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
-            
-            <nav class="topbar-nav" id="topbar-nav" aria-label="Main Navigation">
-                <button class="topbar-nav-item active" data-route="dashboard">
-                    ابزارها
-                </button>
-                <button class="topbar-nav-item" data-route="internet-status">
-                    وضعیت اینترنت
-                </button>
-                <button class="topbar-nav-item" data-route="settings">
-                    تنظیمات
-                </button>
-            </nav>
-            
-            <div class="connection-badge disconnected" id="connection-badge">
-                <span class="connection-dot"></span>
-                <span id="connection-text">قطع</span>
-            </div>
+
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content" id="main-content" aria-label="Main Content">
-            <!-- Content rendered dynamically by app.js -->
-            <div id="view-container">
-                <!-- Default: Loading -->
-                <div style="display: flex; align-items: center; justify-content: center; min-height: 50vh;">
-                    <div style="text-align: center; color: var(--color-text-muted);">
-                        <p style="font-size: var(--font-size-lg);">در حال بارگذاری...</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Mobile Menu -->
+        <aside id="mobile-menu">
+
+            <nav>
+
+                <a href="/" data-route="home">
+                    خانه
+                </a>
+
+                <a href="?page=tools" data-route="tools">
+                    ابزارها
+                </a>
+
+                <a href="?page=blog" data-route="blog">
+                    بلاگ
+                </a>
+
+                <a href="?page=settings" data-route="settings">
+                    تنظیمات
+                </a>
+
+            </nav>
+
+        </aside>
+
+        <!-- Main View -->
+        <main id="view">
+
+            <!-- Skeleton -->
+            <section class="page-skeleton">
+
+                <div class="skeleton hero"></div>
+
+                <div class="skeleton card"></div>
+                <div class="skeleton card"></div>
+                <div class="skeleton card"></div>
+
+            </section>
+
         </main>
 
-        <!-- Bottom Navigation (Mobile Only) -->
-        <nav class="bottom-bar" id="bottom-bar" aria-label="Mobile Navigation">
-            <div class="bottom-bar-nav">
-                <button class="bottom-bar-item active" data-route="dashboard">
-                    <svg class="bottom-bar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-                    </svg>
-                    ابزارها
-                </button>
-                <button class="bottom-bar-item" data-route="internet-status">
-                    <svg class="bottom-bar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-                        <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-                    </svg>
-                    اینترنت
-                </button>
-                <button class="bottom-bar-item" data-route="settings">
-                    <svg class="bottom-bar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
-                    </svg>
-                    تنظیمات
-                </button>
+        <!-- Footer -->
+        <footer class="site-footer">
+
+            <div class="container">
+
+                <div class="footer-inner">
+
+                    <div class="footer-brand">
+
+                        <strong>
+                            Khashayar.one
+                        </strong>
+
+                        <p>
+                            مرجع ابزارهای کاربردی برای وب مدرن
+                        </p>
+
+                    </div>
+
+                    <div class="footer-links">
+
+                        <a href="?page=settings">
+                            تنظیمات
+                        </a>
+
+                        <a href="?page=blog">
+                            بلاگ
+                        </a>
+
+                    </div>
+
+                </div>
+
             </div>
-        </nav>
+
+        </footer>
 
     </div>
 
-    <!-- Core JS -->
-    <script src="assets/js/core.js"></script>
-    
-    <!-- UI Layer -->
-    <link rel="stylesheet" href="assets/css/components.css">
-    <script src="assets/js/ui.js"></script>
-    <script src="assets/js/router.js"></script>
-    <script src="assets/js/bale.js"></script>
-    
-    <!-- Plugin System -->
-    <script src="assets/js/plugin-loader.js"></script>
-    
-    <!-- App -->
-    <script src="assets/js/app.js"></script>
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+
+    <!-- Lenis -->
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.js"></script>
+
+    <!-- Toastify -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+
+    <!-- Core Scripts -->
+    <script src="./assets/js/storage.js"></script>
+    <script src="./assets/js/router.js"></script>
+    <script src="./assets/js/ui.js"></script>
+    <script src="./assets/js/app.js"></script>
+
 </body>
+
 </html>
