@@ -714,3 +714,27 @@ textarea {
     background:
         var(--primary);
 }
+.settings-card {
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+}
+
+.settings-card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 24px;
+}
+
+.settings-card-header i {
+
+    width: 22px;
+
+    height: 22px;
+}
