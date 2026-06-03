@@ -1,32 +1,44 @@
 /**
- * Data Loader Module
- * مسئول دریافت داده‌ها از فایل‌های JSON برای تغذیه داشبورد
+ * Advanced Data Infrastructure Layer (Production V1)
+ * مدیریت ارتباطات ناهمگام با انبارهای داده استاتیک و بدون دیتای دمو
  */
 
-const DATA_PATH = './data/system';
-
-// متد کمکی برای Fetch با هندل کردن خطاها
-async function fetchJSON(filename) {
-    try {
-        // برای شبیه‌سازی تاخیر شبکه و دیدن انیمیشن Loading (Skeleton) در لوکال
-        // می‌توانید خط زیر را از کامنت در بیاورید:
-        // await new Promise(resolve => setTimeout(resolve, 800));
-
-        const response = await fetch(`${DATA_PATH}/${filename}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(`Error loading ${filename}:`, error);
-        return null; // برگرداندن null برای مدیریت خطا در کامپوننت‌ها
-    }
-}
-
-// اکسپورت آبجکت DataLoader برای استفاده در سایر کامپوننت‌ها
 export const DataLoader = {
-    getStats: async () => await fetchJSON('stats.json'),
-    getFeed: async () => await fetchJSON('feed.json'),
-    getTools: async () => await fetchJSON('tools.json'),
-    getRoadmap: async () => await fetchJSON('roadmap.json')
+    cache: new Map(),
+
+    async fetchFile(path) {
+        if (this.cache.has(path)) return this.cache.get(path);
+        try {
+            const response = await fetch(path);
+            if (!response.ok) throw new Error(`HTTP Error Code: ${response.status} on ${path}`);
+            const data = await response.json();
+            this.cache.set(path, data);
+            return data;
+        } catch (error) {
+            console.error(`| Data Infra Alert | Failed to fetch target data file [${path}]:`, error);
+            return null;
+        }
+    },
+
+    // --- PROXY FINDER DATA SUBSYSTEM ---
+    async getProxyRawData() { return await this.fetchFile('/data/proxy-finder/proxy.json'); },
+    async getProxyStats() { return await this.fetchFile('/data/proxy-finder/stats.json'); },
+
+    // --- SYSTEM CORE TELEMETRY SUBSYSTEM ---
+    async getSystemStats() { return await this.fetchFile('/data/system/stats.json'); },
+    async getSystemFeed() { return await this.fetchFile('/data/system/feed.json'); },
+    async getSystemTelemetry() { return await this.fetchFile('/data/system/telemetry.json'); },
+    async getSystemSources() { return await this.fetchFile('/data/system/sources.json'); },
+    async getSystemProtocols() { return await this.fetchFile('/data/system/protocols.json'); },
+
+    // --- SNAPSHOT USER ANALYTICS SUBSYSTEM ---
+    async getAnalyticsVisits() { return await this.fetchFile('/data/analytics/visits.json'); },
+    async getAnalyticsPopularity() { return await this.fetchFile('/data/analytics/popularity.json'); },
+    async getAnalyticsEvents() { return await this.fetchFile('/data/analytics/events.json'); },
+
+    // --- COMPONENT SYSTEM CONFIGS ---
+    async getToolsRegistry() { return await this.fetchFile('/data/system/tools.json'); },
+    
+    // پاکسازی کش جهت پیاده‌سازی پولینگ لایو یا رفرش‌های دستی پلتفرم
+    clearCache() { this.cache.clear(); }
 };
