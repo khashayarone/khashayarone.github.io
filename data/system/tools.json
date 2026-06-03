@@ -1,37 +1,23 @@
 [
   {
-    "id": "proxy-intelligence",
-    "name": "Proxy Intelligence",
-    "description": "مدیریت هوشمند پروکسی‌ها، رصد زنده فیدها و کانفیگ‌ها.",
-    "status": "active",
-    "color": "orange"
+    "id": "home",
+    "name": "داشبورد نظارتی هسته پلتفرم",
+    "description": "مرکز پایش تلمتری سیستم، گزارش رویدادها و اسنپ‌شات‌های انالیتیکس GA4",
+    "route": "/",
+    "status": "active"
   },
   {
-    "id": "telegram-downloader",
-    "name": "Telegram Downloader",
-    "description": "دانلودر مستقیم و بدون محدودیت از کانال‌های تلگرامی.",
-    "status": "active",
-    "color": "blue"
-  },
-  {
-    "id": "analytics",
-    "name": "Analytics",
-    "description": "مانیتورینگ و تحلیل ترافیک عبوری.",
-    "status": "active",
-    "color": "purple"
-  },
-  {
-    "id": "ai-utilities",
-    "name": "AI Utilities",
-    "description": "ابزارهای پردازش مبتنی بر هوش مصنوعی.",
-    "status": "active",
-    "color": "teal"
+    "id": "proxy",
+    "name": "Proxy Intelligence System",
+    "description": "هسته پایش، فیلترینگ و اعتبارسنجی تاخیر کانفیگ‌های شبکه ارتباطی",
+    "route": "/proxy",
+    "status": "active"
   },
   {
     "id": "settings",
-    "name": "System Settings",
-    "description": "پیکربندی هسته پلتفرم.",
-    "status": "active",
-    "color": "gray"
+    "name": "تنظیمات زیرساخت لوکال",
+    "description": "مدیریت و پیکربندی متغیرهای هسته پردازش فرانت‌پروژه در LocalStorage",
+    "route": "/settings",
+    "status": "active"
   }
 ]
