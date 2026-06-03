@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Advanced Proxy Intelligence & Telemetry Aggregation Engine (Production V1)
+Advanced Proxy Intelligence & Telemetry Aggregation Engine (Production V1 - Fixed)
 Core backend component for KHASHAYAR.ONE Platform.
 Handles: Base64 Decodes, Protocols Extraction, Parallel Socket Ping,
 and Front-end Data Contract Synthesizing.
@@ -58,7 +58,7 @@ PROXY_DIR = "data/proxy-finder"
 SYSTEM_DIR = "data/system"
 
 MESSAGES_PER_CHANNEL = 25
-DB_MAX_LIMIT = 300  # سقف نگهداری کانفیگ‌های باکیفیت در کل سیستم جهت کنترل رم فرانت
+DB_MAX_LIMIT = 300
 FETCH_TIMEOUT = 10
 PING_TIMEOUT = 2
 MAX_WORKERS = 15
@@ -90,7 +90,7 @@ def parse_proxy_endpoint(url):
         url_lower = url.lower()
         if url_lower.startswith("vmess://"):
             b64_str = url[8:].strip()
-            b64_str += "=" * ((4 - len(b64_str) % 4) % 4) # اصلاح تراز لایه بایت‌ها
+            b64_str += "=" * ((4 - len(b64_str) % 4) % 4)
             decoded = base64.b64decode(b64_str).decode('utf-8', errors='ignore')
             config = json.loads(decoded)
             return config.get("add"), int(config.get("port", 443))
@@ -102,7 +102,6 @@ def parse_proxy_endpoint(url):
                 return server_match.group(1), int(port_match.group(1))
             
         else:
-            # ساختار استاندارد VLESS / Trojan / Shadowsocks -> scheme://uuid@host:port
             match = re.search(r'@([^:/]+):(\d+)', url)
             if match:
                 return match.group(1), int(match.group(2))
@@ -157,7 +156,7 @@ def process_channel_stream(channel_url, cached_ids, cached_urls):
     
     try:
         res = requests.get(channel_url, headers=headers, timeout=FETCH_TIMEOUT)
-        if res.status_with != 200:
+        if res.status_code != 200: # رفع خطای تایپی (status_with به status_code اصلاح شد)
             res.raise_for_status()
             
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -205,8 +204,10 @@ def process_channel_stream(channel_url, cached_ids, cached_urls):
                 "status": "active" if is_alive else "dead",
                 "latency_ms": latency if is_alive else None
             })
-    except Exception:
-        with _lock: engine_stats['channels_failed'] += 1
+    except Exception as e:
+        with _lock: 
+            engine_stats['channels_failed'] += 1
+        print(f"⚠️ Error checking channel @{channel_name}: {str(e)}")
     return discovered
 
 # ============================================
@@ -218,7 +219,6 @@ def main():
     os.makedirs(PROXY_DIR, exist_ok=True)
     os.makedirs(SYSTEM_DIR, exist_ok=True)
 
-    # ۱. خواندن حافظه و کش کلاینت قدیمی برای مکانیزم Merge
     old_proxies = []
     proxy_file_path = f"{PROXY_DIR}/proxy.json"
     if os.path.exists(proxy_file_path):
@@ -230,24 +230,20 @@ def main():
     cached_ids = {p['id'] for p in old_proxies}
     cached_urls = {p['url'] for p in old_proxies}
 
-    # ۲. فعال‌سازی واکشی چندنخی لایه دیتا
     newly_discovered = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(process_channel_stream, url, cached_ids, cached_urls) for url in CHANNELS]
         for fut in as_completed(futures):
             newly_discovered.extend(fut.result())
 
-    # ۳. تجمیع هوشمند داده‌ها (Smart Database Re-Validation)
     combined_matrix = newly_discovered + old_proxies
     
-    # تفکیک و مرتب‌سازی: اکتیوها با کمترین پینگ در بالای ماتریس قرار می‌گیرند
     actives = [p for p in combined_matrix if p['status'] == 'active']
     deads = [p for p in combined_matrix if p['status'] != 'active']
     
     actives.sort(key=lambda x: x.get('latency_ms', 9999))
     final_database = (actives + deads)[:DB_MAX_LIMIT]
 
-    # ۴. ذخیره‌سازی داده‌های توزیع‌شده برای ابزار Proxy Intelligence
     with open(proxy_file_path, 'w', encoding='utf-8') as f:
         json.dump(final_database, f, ensure_ascii=False, indent=2)
 
@@ -255,7 +251,6 @@ def main():
         runtime_stats = {**engine_stats, "last_run": datetime.now(timezone.utc).isoformat()}
         json.dump(runtime_stats, f, ensure_ascii=False, indent=2)
 
-    # ۵. تولید متادیتای سیستم و پایش رویدادها برای داشبورد اصلی فرانت (Home/Ribbon)
     system_stats_path = f"{SYSTEM_DIR}/stats.json"
     with open(system_stats_path, 'w', encoding='utf-8') as f:
         json.dump({
@@ -264,7 +259,6 @@ def main():
             "last_update": datetime.now(timezone.utc).strftime('%H:%M UTC')
         }, f, ensure_ascii=False, indent=2)
 
-    # شلیک گزارش زنده به تایم‌لاین رویدادهای داشبورد
     system_feed_path = f"{SYSTEM_DIR}/feed.json"
     current_time_str = datetime.now(timezone.utc).strftime('%H:%M')
     live_feeds = [
