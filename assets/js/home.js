@@ -1,14 +1,16 @@
 /**
  * Application Main Entry Point (home.js)
- * مدیریت لود و ارکستراسیون کامپوننت‌های فرانت‌اند
+ * مدیریت لود، هماهنگ‌سازی و ارکستراسیون کامل معماری پلتفرم
  */
 
 import { AuroraEngine } from './aurora-engine.js';
+import { CommandPalette } from './command-palette.js'; // ایمپورت سیستم پلت فرمان هوشمند
 import { Navbar } from './components/navbar.js';
 import { Ribbon } from './components/ribbon.js';
 import { Metrics } from './components/metrics.js';
 import { Bento } from './components/bento.js';
-import { Timeline } from './components/timeline.js'; // لود ماژول جدید تایم‌لاین رویدادها
+import { Timeline } from './components/timeline.js';
+import { Footer } from './components/footer.js'; // ایمپورت پاورقی پلتفرم
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('⚡ KHASHAYAR.ONE Core Engine V2 Initializing...');
@@ -16,20 +18,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ۱. راه‌اندازی موتور بک‌گراند واکنش‌گرا به حرکت موس
     AuroraEngine.init();
 
-    // ۲. راه‌اندازی بخش‌های ثابت سربرگ (Header)
+    // ۲. راه‌اندازی شورتکات‌ها و کش سیستم پلت فرمان (Command Palette)
+    CommandPalette.init();
+
+    // ۳. راه‌اندازی بخش‌های ثابت سربرگ سیستم (Header Navigation)
     Navbar.init();
     Ribbon.init();
 
-    // ۳. راه‌اندازی بخش شاخص‌های آماری داشبورد
+    // ۴. راه‌اندازی بخش شاخص‌های آماری و ریاضی داشبورد متریک
     Metrics.init();
 
-    // ۴. راه‌اندازی ساختار بنتو گرید ابزارها و کانواس اکتیویتی گراف
+    // ۵. راه‌اندازی ساختار بنتو گرید ۲.۰ ابزارها و انیمیشن لایو کانواس
     Bento.init();
 
-    // ۵. راه‌اندازی تایم‌لاین عمودی فیدهای زنده مرکز کنترل عملیات
+    // ۶. راه‌اندازی ریل تایم‌لاین رویدادهای زنده هسته پلتفرم
     Timeline.init();
 
-    // کامپوننت‌های نهایی (کامند پلت سیستم و فوتر) در گام‌های بعد متصل می‌شوند.
+    // ۷. راه‌اندازی پاورقی پایانی سیستم
+    Footer.init();
     
-    console.log('✅ Core Layout Components & Aurora V2 Loaded Successfully.');
+    console.log('🏁 [10/10] KHASHAYAR.ONE Command Center V2 Deployment Complete.');
 });
