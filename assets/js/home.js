@@ -38,12 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     Router.register('/settings', async (container) => {
-        container.innerHTML = `
-            <div class="bg-[#0f0f10] border border-[#151517] p-[32px] rounded-[28px] text-right font-mono">
-                <h2 class="text-white text-[20px] font-bold mb-2">System Core Configuration</h2>
-                <p class="text-[#7d8290] text-[14px]">تنظیمات هسته پلتفرم به صورت محلی در لایه LocalStorage در این بخش ذخیره خواهد شد.</p>
-            </div>
-        `;
+        container.innerHTML = `<div class="text-neutral-500 font-mono text-[13px]">Loading Settings Module...</div>`;
+        const { SettingsView } = await import('./views/settings-view.js');
+        await SettingsView.render(container);
     });
 
     // ۳. شتاب‌دهی و راه‌اندازی نهایی موتور آدرس‌دهی
