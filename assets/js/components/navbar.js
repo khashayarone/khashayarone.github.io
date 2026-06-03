@@ -1,91 +1,82 @@
 /**
- * Navbar Component
- * ناوبری دسکتاپ + منوی بتم‌شیت موبایل + انیمیشن اسکرول شیشه‌ای
+ * Dynamic Navbar Component (Production V1)
+ * منوی ناوبری داینامیک پلتفرم - ۱۰۰٪ متصل به رجیستری ابزارها و هماهنگ با SPA Router
  */
 
+import { DataLoader } from '../data-loader.js';
+
 export const Navbar = {
-    render() {
-        return `
-        <nav id="nav-container" class="h-[64px] transition-all duration-300 bg-transparent flex items-center px-[24px] lg:px-[48px]">
-            <div class="container-custom flex items-center justify-between">
-                
-                <div class="text-white font-bold tracking-wider text-[18px] cursor-pointer hover:opacity-80 transition-opacity">
-                    KHASHAYAR.ONE
-                </div>
-                
-                <div class="hidden md:flex items-center gap-[32px] text-[14px]">
-                    <a href="#tools" class="text-[#b9bcc7] hover:text-white transition-colors duration-200 font-medium">Tools</a>
-                    <a href="#updates" class="text-[#b9bcc7] hover:text-white transition-colors duration-200 font-medium">Updates</a>
-                    <a href="https://github.com" target="_blank" class="text-[#b9bcc7] hover:text-white transition-colors duration-200 font-medium">GitHub</a>
-                    <a href="#settings" class="text-[#b9bcc7] hover:text-white transition-colors duration-200 font-medium">Settings</a>
-                </div>
-
-                <button id="menu-toggle" class="md:hidden flex flex-col gap-1.5 justify-center items-center w-8 h-8 text-white focus:outline-none" aria-label="منو">
-                    <span class="w-6 h-0.5 bg-white transition-all duration-200 rounded-full"></span>
-                    <span class="w-6 h-0.5 bg-white transition-all duration-200 rounded-full"></span>
-                </button>
-            </div>
-        </nav>
-
-        <div id="mobile-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
-        <div id="mobile-sheet" class="fixed bottom-0 inset-x-0 z-50 p-[32px] md:hidden transform translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] bg-[#0f0f10] border-t border-[#151517] rounded-t-[28px]">
-            <div class="w-12 h-1 bg-[#151517] rounded-full mx-auto mb-[24px]"></div>
-            <div class="flex flex-col gap-[20px] text-right text-[16px] font-medium">
-                <a href="#tools" class="mobile-link text-[#b9bcc7] hover:text-white py-2 border-b border-[#151517]/50">Tools</a>
-                <a href="#updates" class="mobile-link text-[#b9bcc7] hover:text-white py-2 border-b border-[#151517]/50">Updates</a>
-                <a href="https://github.com" target="_blank" class="mobile-link text-[#b9bcc7] hover:text-white py-2 border-b border-[#151517]/50">GitHub</a>
-                <a href="#settings" class="mobile-link text-[#b9bcc7] hover:text-white py-2">Settings</a>
-            </div>
-        </div>
-        `;
-    },
-
-    init() {
+    async init() {
         const root = document.getElementById('navbar-root');
         if (!root) return;
-        
-        root.innerHTML = this.render();
-        this.bindEvents();
+
+        // واکشی ابزارهای فعال سیستم از Single Source of Truth
+        const tools = await DataLoader.getToolsRegistry() || [];
+
+        // فیلتر کردن ابزارهای فعال برای نمایش در منو
+        const activeTools = tools.filter(tool => tool.status === 'active');
+
+        root.innerHTML = `
+        <nav class="w-full bg-[#0f0f10]/80 backdrop-blur-md border-b border-[#151517] sticky top-[36px] z-40 transition-all duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[64px] flex items-center justify-between">
+                
+                <a href="#/" class="flex items-center gap-2.5 group">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#ff8a1f] to-[#ffb366] flex items-center justify-center shadow-lg shadow-[#ff8a1f]/10 group-hover:scale-105 transition-transform">
+                        <span class="text-[#080808] font-black font-mono text-[14px]">K</span>
+                    </div>
+                    <span class="text-white font-mono font-black text-[15px] tracking-wider group-hover:text-[#ff8a1f] transition-colors">KHASHAYAR.ONE</span>
+                </a>
+
+                <div class="flex items-center gap-1 sm:gap-2" id="nav-links-container">
+                    ${activeTools.map(tool => {
+                        // استخراج نام انگلیسی برای شناسه یا آیکون‌سازی ساده
+                        const isHome = tool.route === '/';
+                        const displayName = isHome ? 'داشبورد' : tool.name.replace(' System', '');
+                        
+                        return `
+                        <a href="#${tool.route}" 
+                           class="nav-link-item text-[#7d8290] hover:text-white text-[13px] font-medium px-4 py-2 rounded-xl transition-all duration-200 hover:bg-[#151517]/50"
+                           data-route="${tool.route}">
+                            ${displayName}
+                        </a>
+                        `;
+                    }).join('')}
+                </div>
+
+                <div class="hidden sm:flex items-center gap-3">
+                    <div class="text-[10px] font-mono text-[#7d8290] bg-[#080808] border border-[#151517] px-2.5 py-1 rounded-lg select-none">
+                        Press <kbd class="text-white font-bold bg-[#151517] px-1 rounded">Ctrl + K</kbd>
+                    </div>
+                </div>
+
+            </div>
+        </nav>
+        `;
+
+        this.listenToRouteChanges();
     },
 
-    bindEvents() {
-        const navContainer = document.getElementById('nav-container');
-        const menuToggle = document.getElementById('menu-toggle');
-        const mobileSheet = document.getElementById('mobile-sheet');
-        const mobileOverlay = document.getElementById('mobile-overlay');
-        const mobileLinks = document.querySelectorAll('.mobile-link');
+    listenToRouteChanges() {
+        // متد هایلایت کردن لینک فعال بر اساس هش جاری مرورگر
+        const updateActiveState = () => {
+            let hash = window.location.hash || '#/';
+            let currentPath = hash.replace('#', '');
+            if (!currentPath.startsWith('/')) currentPath = '/' + currentPath;
 
-        // ۱. افکت Glassmorphic هوشمند مانیتورینگ اسکرول صفحه
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) {
-                navContainer.classList.add('glass-panel');
-            } else {
-                navContainer.classList.remove('glass-panel');
-            }
-        });
+            document.querySelectorAll('.nav-link-item').forEach(link => {
+                const linkRoute = link.getAttribute('data-route');
+                if (linkRoute === currentPath) {
+                    link.classList.remove('text-[#7d8290]', 'hover:bg-[#151517]/50');
+                    link.classList.add('text-[#ff8a1f]', 'bg-[#ff8a1f]/5', 'font-bold');
+                } else {
+                    link.classList.remove('text-[#ff8a1f]', 'bg-[#ff8a1f]/5', 'font-bold');
+                    link.classList.add('text-[#7d8290]', 'hover:bg-[#151517]/50');
+                }
+            });
+        };
 
-        // ۲. هندل کردن باز و بسته‌شدن بتم‌شیت موبایل
-        function toggleMobileMenu() {
-            const isOpen = mobileSheet.classList.contains('translate-y-0');
-            if (isOpen) {
-                mobileSheet.classList.remove('translate-y-0');
-                mobileSheet.classList.add('translate-y-full');
-                mobileOverlay.classList.remove('opacity-100');
-                setTimeout(() => mobileOverlay.classList.add('hidden'), 300);
-            } else {
-                mobileOverlay.classList.remove('hidden');
-                setTimeout(() => {
-                    mobileSheet.classList.remove('translate-y-full');
-                    mobileSheet.classList.add('translate-y-0');
-                    mobileOverlay.classList.add('opacity-100');
-                }, 10);
-            }
-        }
-
-        if (menuToggle && mobileSheet && mobileOverlay) {
-            menuToggle.addEventListener('click', toggleMobileMenu);
-            mobileOverlay.addEventListener('click', toggleMobileMenu);
-            mobileLinks.forEach(link => link.addEventListener('click', toggleMobileMenu));
-        }
+        // مانیتور تغییرات هش برای اصلاح هایلایت‌ها
+        window.addEventListener('hashchange', updateActiveState);
+        updateActiveState();
     }
 };
