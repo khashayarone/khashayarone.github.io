@@ -1,0 +1,32 @@
+[
+  {
+    "id": "f1",
+    "type": "sync",
+    "title": "Proxy feed synchronized",
+    "time": "Just Now"
+  },
+  {
+    "id": "f2",
+    "type": "update",
+    "title": "Telegram source updated",
+    "time": "14m ago"
+  },
+  {
+    "id": "f3",
+    "type": "success",
+    "title": "New dataset processed",
+    "time": "1h ago"
+  },
+  {
+    "id": "f4",
+    "type": "warning",
+    "title": "High latency on Node 4",
+    "time": "2h ago"
+  },
+  {
+    "id": "f5",
+    "type": "error",
+    "title": "Connection drop detected",
+    "time": "5h ago"
+  }
+]
