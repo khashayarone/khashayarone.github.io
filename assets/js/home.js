@@ -7,7 +7,8 @@ import { AuroraEngine } from './aurora-engine.js';
 import { Navbar } from './components/navbar.js';
 import { Ribbon } from './components/ribbon.js';
 import { Metrics } from './components/metrics.js';
-import { Bento } from './components/bento.js'; // لود ماژول جدید بنتو گرید ۲
+import { Bento } from './components/bento.js';
+import { Timeline } from './components/timeline.js'; // لود ماژول جدید تایم‌لاین رویدادها
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('⚡ KHASHAYAR.ONE Core Engine V2 Initializing...');
@@ -25,7 +26,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ۴. راه‌اندازی ساختار بنتو گرید ابزارها و کانواس اکتیویتی گراف
     Bento.init();
 
-    // کامپوننت‌های نهایی (تایم‌لاین عمودی رویدادها، کامند پلت سیستم) در گام‌های بعد متصل می‌شوند.
+    // ۵. راه‌اندازی تایم‌لاین عمودی فیدهای زنده مرکز کنترل عملیات
+    Timeline.init();
+
+    // کامپوننت‌های نهایی (کامند پلت سیستم و فوتر) در گام‌های بعد متصل می‌شوند.
     
     console.log('✅ Core Layout Components & Aurora V2 Loaded Successfully.');
 });
