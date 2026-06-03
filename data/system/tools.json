@@ -1,0 +1,37 @@
+[
+  {
+    "id": "proxy-intelligence",
+    "name": "Proxy Intelligence",
+    "description": "مدیریت هوشمند پروکسی‌ها، رصد زنده فیدها و کانفیگ‌ها.",
+    "status": "active",
+    "color": "orange"
+  },
+  {
+    "id": "telegram-downloader",
+    "name": "Telegram Downloader",
+    "description": "دانلودر مستقیم و بدون محدودیت از کانال‌های تلگرامی.",
+    "status": "active",
+    "color": "blue"
+  },
+  {
+    "id": "analytics",
+    "name": "Analytics",
+    "description": "مانیتورینگ و تحلیل ترافیک عبوری.",
+    "status": "active",
+    "color": "purple"
+  },
+  {
+    "id": "ai-utilities",
+    "name": "AI Utilities",
+    "description": "ابزارهای پردازش مبتنی بر هوش مصنوعی.",
+    "status": "active",
+    "color": "teal"
+  },
+  {
+    "id": "settings",
+    "name": "System Settings",
+    "description": "پیکربندی هسته پلتفرم.",
+    "status": "active",
+    "color": "gray"
+  }
+]
