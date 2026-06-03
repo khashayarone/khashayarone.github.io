@@ -1,38 +1,33 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHASHAYAR.ONE - Command Center</title>
+    <title>KHASHAYAR.ONE — Utility Intelligence Platform</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <link rel="stylesheet" href="./assets/css/app.css">
+    <link rel="stylesheet" href="assets/css/app.css">
 </head>
-<body class="relative min-h-screen bg-[#080808] text-white overflow-x-hidden antialiased">
-    
-    <div id="aurora-root" class="fixed inset-0 pointer-events-none z-0"></div>
+<body class="bg-[#080808] text-white antialiased selection:bg-[#ff8a1f]/30 selection:text-white min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+    <div id="aurora-root" class="fixed inset-0 z-0 overflow-hidden pointer-events-none"></div>
+
+    <div class="relative z-10 flex flex-col min-h-screen">
+        
+        <header class="sticky top-0 z-40 w-full">
+            <div id="navbar-root"></div>
+            <div id="ribbon-root"></div>
+        </header>
+
+        <main id="app-root" class="flex-grow container-custom py-[48px] px-4 sm:px-6 lg:px-8 relative z-10 transition-all duration-300">
+            </main>
+
+        <div id="footer-root"></div>
+    </div>
 
     <div id="command-palette-root"></div>
 
-    <header class="fixed top-0 inset-x-0 z-50 transition-all duration-300">
-        <div id="navbar-root"></div>
-        <div id="ribbon-root"></div>
-    </header>
-
-    <main class="container-custom px-[16px] sm:px-[24px] lg:px-[48px] pt-[140px] relative z-10">
-        
-        <section id="metrics-root" class="mb-[64px]"></section>
-
-        <section id="bento-root" class="mb-[80px]"></section>
-
-        <section id="timeline-root" class="mb-[80px]"></section>
-
-    </main>
-
-    <div id="footer-root"></div>
-
-    <script type="module" src="./assets/js/home.js"></script>
-
+    <script type="module" src="assets/js/home.js"></script>
 </body>
 </html>
