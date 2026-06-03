@@ -1,41 +1,53 @@
 /**
- * Application Main Entry Point (home.js)
- * مدیریت لود، هماهنگ‌سازی و ارکستراسیون کامل معماری پلتفرم
+ * Application Core Bootloader (home.js)
+ * هماهنگ‌سازی معماری Production V1 و ثبت روت‌های ماژولار برنامه
  */
 
 import { AuroraEngine } from './aurora-engine.js';
-import { CommandPalette } from './command-palette.js'; // ایمپورت سیستم پلت فرمان هوشمند
+import { CommandPalette } from './command-palette.js';
 import { Navbar } from './components/navbar.js';
 import { Ribbon } from './components/ribbon.js';
-import { Metrics } from './components/metrics.js';
-import { Bento } from './components/bento.js';
-import { Timeline } from './components/timeline.js';
-import { Footer } from './components/footer.js'; // ایمپورت پاورقی پلتفرم
+import { Footer } from './components/footer.js';
+import { Router } from './router.js';
+
+// ایمپورت نماها (در گام‌های بعدی کدهای داخل این دو فایل را توسعه می‌دهیم)
+// import { HomeView } from './views/home-view.js';
+// import { ProxyView } from './views/proxy-view.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('⚡ KHASHAYAR.ONE Core Engine V2 Initializing...');
+    console.log('⚡ KHASHAYAR.ONE Command Center — Production V1 Initializing...');
 
-    // ۱. راه‌اندازی موتور بک‌گراند واکنش‌گرا به حرکت موس
+    // ۱. استارت لایه‌های زیرساختی و ثابت بستر فرانت‌پروژه
     AuroraEngine.init();
-
-    // ۲. راه‌اندازی شورتکات‌ها و کش سیستم پلت فرمان (Command Palette)
     CommandPalette.init();
-
-    // ۳. راه‌اندازی بخش‌های ثابت سربرگ سیستم (Header Navigation)
     Navbar.init();
     Ribbon.init();
-
-    // ۴. راه‌اندازی بخش شاخص‌های آماری و ریاضی داشبورد متریک
-    Metrics.init();
-
-    // ۵. راه‌اندازی ساختار بنتو گرید ۲.۰ ابزارها و انیمیشن لایو کانواس
-    Bento.init();
-
-    // ۶. راه‌اندازی ریل تایم‌لاین رویدادهای زنده هسته پلتفرم
-    Timeline.init();
-
-    // ۷. راه‌اندازی پاورقی پایانی سیستم
     Footer.init();
-    
-    console.log('🏁 [10/10] KHASHAYAR.ONE Command Center V2 Deployment Complete.');
+
+    // ۲. ثبت مسیرهای هدایت پلتفرم در لایه مسیریاب (SPA Engine Routing Matrix)
+    Router.register('/', async (container) => {
+        container.innerHTML = `<div class="text-neutral-500 font-mono text-[13px]">Loading Dashboard Core Module...</div>`;
+        const { HomeView } = await import('./views/home-view.js');
+        await HomeView.render(container);
+    });
+
+    Router.register('/proxy', async (container) => {
+        container.innerHTML = `<div class="text-neutral-500 font-mono text-[13px]">Loading Proxy Intelligence System...</div>`;
+        const { ProxyView } = await import('./views/proxy-view.js');
+        await ProxyView.render(container);
+    });
+
+    Router.register('/settings', async (container) => {
+        container.innerHTML = `
+            <div class="bg-[#0f0f10] border border-[#151517] p-[32px] rounded-[28px] text-right font-mono">
+                <h2 class="text-white text-[20px] font-bold mb-2">System Core Configuration</h2>
+                <p class="text-[#7d8290] text-[14px]">تنظیمات هسته پلتفرم به صورت محلی در لایه LocalStorage در این بخش ذخیره خواهد شد.</p>
+            </div>
+        `;
+    });
+
+    // ۳. شتاب‌دهی و راه‌اندازی نهایی موتور آدرس‌دهی
+    Router.init();
+
+    console.log('✅ Underlaying Infrastructure Is Fully Operational.');
 });
