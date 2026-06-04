@@ -1,10 +1,10 @@
 {
   "channels_checked": 71,
   "channels_failed": 4,
-  "total_messages_scraped": 1286,
-  "proxies_new": 1423,
-  "proxies_duplicate": 331,
-  "proxies_alive": 1189,
-  "proxies_dead": 234,
-  "last_run": "2026-06-04T20:23:55.923291+00:00"
+  "total_messages_scraped": 1296,
+  "proxies_new": 1444,
+  "proxies_duplicate": 332,
+  "proxies_alive": 1241,
+  "proxies_dead": 203,
+  "last_run": "2026-06-04T21:59:13.312405+00:00"
 }
