@@ -1,41 +1,364 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" class="scroll-smooth">
+<html lang="fa" dir="rtl" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHASHAYAR.ONE — خشایار.وان</title>
+    <title>پایگاه هوشمند پایش پراکسی | KHASHAYAR.ONE</title>
+    <meta name="description" content="سیستم تلمتری و پایش آنی کانال‌های ارتباطی آزاد، مجهز به لایه سنجش تاخیر شبکه و فیلترینگ هوشمند پروتکل‌ها.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-CSFX8S33FG"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'shimmer': 'shimmer 2s infinite linear',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #080C14;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.03) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.03) 0px, transparent 50%);
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-effect {
+            background: linear-gradient(90deg, #111827 25%, #1f2937 50%, #111827 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        /* اسکرول‌بار لوکس دارک */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #080C14; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+    </style>
 
-  gtag('config', 'G-CSFX8S33FG');
-</script>
-    <link rel="stylesheet" href="assets/css/app.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Proxy Intelligence Engine",
+        "operatingSystem": "Web",
+        "applicationCategory": "NetworkingApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
 </head>
-<body class="bg-[#080808] text-white antialiased selection:bg-[#ff8a1f]/30 selection:text-white min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+<body class="text-slate-200 antialiased font-sans min-h-screen flex flex-col pb-12">
 
-    <div id="aurora-root" class="fixed inset-0 z-0 overflow-hidden pointer-events-none"></div>
+    <header class="border-b border-slate-900 bg-slate-950/40 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                    <svg class="w-5 h-5 text-black stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-base font-black tracking-tight text-white">PROXY//INTELLIGENCE</h1>
+                    <p class="text-[10px] text-slate-500 font-mono">KHASHAYAR.ONE CORE V1</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-900/60 border border-slate-800/80 px-3 py-1.5 rounded-lg text-[11px] font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="sync-timer" class="text-slate-400">SYNCED</span>
+            </div>
+        </div>
+    </header>
 
-    <div class="relative z-10 flex flex-col min-h-screen">
-        
-        <header class="sticky top-0 z-40 w-full">
-            <div id="navbar-root"></div>
-            <div id="ribbon-root"></div>
-        </header>
+    <main class="max-w-7xl mx-auto w-full px-4 mt-6 flex-grow space-y-6">
 
-        <main id="app-root" class="flex-grow container-custom py-[48px] px-4 sm:px-6 lg:px-8 relative z-10 transition-all duration-300">
-            </main>
+        <section id="stats-container" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div class="shimmer-effect h-20 rounded-xl border border-slate-800/40"></div>
+            <div class="shimmer-effect h-20 rounded-xl border border-slate-800/40"></div>
+            <div class="shimmer-effect h-20 rounded-xl border border-slate-800/40 md:col-span-1 col-span-2"></div>
+        </section>
 
-        <div id="footer-root"></div>
-    </div>
+        <section class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-4 shadow-xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="relative flex-grow max-w-md">
+                    <span class="absolute inset-y-0 right-3 flex items-center pr-1 text-slate-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </span>
+                    <input id="search-input" type="text" placeholder="جستجوی سورس کانال یا پروتکل..." class="w-full bg-[#0c1220] border border-slate-800/80 focus:border-emerald-500/50 rounded-xl pr-10 pl-4 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all font-sans">
+                </div>
+                <div class="text-[11px] text-slate-500 font-mono text-left" id="total-badge">Matrix Capacitance: 000</div>
+            </div>
 
-    <div id="command-palette-root"></div>
+            <div id="filter-tabs" class="flex flex-wrap gap-1.5 border-t border-slate-900/60 pt-3">
+                </div>
+        </section>
 
-    <script type="module" src="assets/js/home.js"></script>
+        <section class="bg-slate-950/20 border border-slate-900/80 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="hidden md:grid grid-cols-12 gap-2 bg-slate-950/80 border-b border-slate-900 px-6 py-3.5 text-xs font-bold text-slate-400 tracking-wider">
+                <div class="col-span-2">پروتکل</div>
+                <div class="col-span-4">نشانی اتصال (URL)</div>
+                <div class="col-span-2 text-center">تاخیر (Latency)</div>
+                <div class="col-span-2">منبع شبکه</div>
+                <div class="col-span-2 text-left">اکشن</div>
+            </div>
+
+            <div id="proxy-matrix-container" class="divide-y divide-slate-900/60">
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center justify-between"><div class="shimmer-effect h-5 w-24 rounded-md"></div><div class="shimmer-effect h-5 w-48 rounded-md"></div><div class="shimmer-effect h-5 w-16 rounded-md"></div></div>
+                    <div class="flex items-center justify-between pt-4"><div class="shimmer-effect h-5 w-20 rounded-md"></div><div class="shimmer-effect h-5 w-56 rounded-md"></div><div class="shimmer-effect h-5 w-16 rounded-md"></div></div>
+                    <div class="flex items-center justify-between pt-4"><div class="shimmer-effect h-5 w-28 rounded-md"></div><div class="shimmer-effect h-5 w-40 rounded-md"></div><div class="shimmer-effect h-5 w-16 rounded-md"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-black/80 border border-slate-900 rounded-2xl overflow-hidden shadow-2xl font-mono">
+            <div class="bg-slate-950 border-b border-slate-900 px-4 py-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="flex gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500/40"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/40"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500/40"></span>
+                    </div>
+                    <span class="text-[10px] text-slate-500 font-bold mr-2">SYSTEM TELEMETRY FEED</span>
+                </div>
+                <span class="text-[9px] text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 animate-pulse">LIVE STREAMS</span>
+            </div>
+            <div id="terminal-logs" class="p-4 text-[11px] leading-relaxed space-y-2 max-h-48 overflow-y-auto text-cyan-400/80">
+                <div class="text-slate-600">&gt; Initializing telemetry interface cluster...</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // کانفیگ آدرس‌های لایه داده استاتیک
+        const PATHS = {
+            proxies: 'data/proxy-finder/proxy.json',
+            stats: 'data/proxy-finder/stats.json',
+            system: 'data/system/stats.json',
+            feed: 'data/system/feed.json'
+        };
+
+        // مدیریت وضعیت متمرکز برنامه (State Management)
+        let AppState = {
+            proxies: [],
+            stats: {},
+            systemStats: {},
+            feeds: [],
+            filter: 'all',
+            search: ''
+        };
+
+        // هوک شروع به کار اپلیکیشن
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchClusterData();
+            
+            // بایند کردن رویداد سرچ باکس
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                AppState.search = e.target.value.toLowerCase().trim();
+                renderProxyMatrix();
+            });
+        });
+
+        // واکشی همزمان داده‌ها از پورت‌های استاتیک JSON
+        async function fetchClusterData() {
+            try {
+                // تاخیر فیک ۱ ثانیه‌ای صرفاً جهت نمایش شکوه متحرک Skeleton Loader شما!
+                await new Promise(resolve => setTimeout(resolve, 1200));
+
+                const [resProxies, resStats, resSystem, resFeed] = await Promise.all([
+                    fetch(PATHS.proxies).then(r => r.json()).catch(() => []),
+                    fetch(PATHS.stats).then(r => r.json()).catch(() => ({})),
+                    fetch(PATHS.system).then(r => r.json()).catch(() => ({})),
+                    fetch(PATHS.feed).then(r => r.json()).catch(() => [])
+                ]);
+
+                AppState.proxies = resProxies;
+                AppState.stats = resStats;
+                AppState.systemStats = resSystem;
+                AppState.feeds = resFeed;
+
+                // رندر مجدد لایه‌های یو‌آی
+                renderTelemetryCounters();
+                renderFilterTabs();
+                renderProxyMatrix();
+                renderTerminalStreams();
+                
+                if(AppState.systemStats.last_update) {
+                    document.getElementById('sync-timer').innerText = `UPDATED ${AppState.systemStats.last_update}`;
+                }
+
+            } catch (error) {
+                console.error("Fatal Sync Error: ", error);
+                document.getElementById('proxy-matrix-container').innerHTML = `
+                    <div class="p-8 text-center text-red-400 text-xs font-mono">
+                        ⚠️ CRITICAL DATA DESYNC: FAILED TO FETCH Packets From Cloud Nodes.
+                    </div>`;
+            }
+        }
+
+        // ۱. رندر باکس‌های آماری هوشمند
+        function renderTelemetryCounters() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="bg-slate-950/50 border border-slate-900 p-4 rounded-xl shadow-lg relative overflow-hidden group">
+                    <div class="text-[10px] text-slate-500 font-bold tracking-wider">سورس‌های اسکن شده</div>
+                    <div class="text-xl font-black text-white font-mono mt-1">${AppState.stats.channels_checked || AppState.systemStats.sources || 0} <span class="text-xs text-slate-600 font-normal">منبع</span></div>
+                    <div class="absolute bottom-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent"></div>
+                </div>
+                <div class="bg-slate-950/50 border border-slate-900 p-4 rounded-xl shadow-lg relative overflow-hidden group">
+                    <div class="text-[10px] text-slate-500 font-bold tracking-wider">کانفیگ‌های فعال (Active)</div>
+                    <div class="text-xl font-black text-emerald-400 font-mono mt-1">${AppState.systemStats.configs || AppState.stats.proxies_alive || 0} <span class="text-xs text-slate-600 font-normal">کلید</span></div>
+                    <div class="absolute bottom-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent"></div>
+                </div>
+                <div class="bg-slate-950/50 border border-slate-900 p-4 rounded-xl shadow-lg relative overflow-hidden md:col-span-1 col-span-2 group">
+                    <div class="text-[10px] text-slate-500 font-bold tracking-wider">نرخ تکرار / افزونگی شبکه</div>
+                    <div class="text-xl font-black text-amber-500 font-mono mt-1">${AppState.stats.proxies_duplicate || 0} <span class="text-xs text-slate-600 font-normal">پکت</span></div>
+                    <div class="absolute bottom-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
+                </div>
+            `;
+        }
+
+        // ۲. ساخت تب‌های فاکتورگیری داینامیک و شمارنده داخلی آن‌ها
+        function renderFilterTabs() {
+            const container = document.getElementById('filter-tabs');
+            
+            // استخراج انواع کدهای موجود در دیتا سورس
+            const types = ['all', ...new Set(AppState.proxies.map(p => p.type))];
+            
+            container.innerHTML = types.map(t => {
+                const count = t === 'all' ? AppState.proxies.length : AppState.proxies.filter(p => p.type === t).length;
+                const isActive = AppState.filter === t;
+                return `
+                    <button onclick="setFilter('${t}')" class="px-3 py-1.5 rounded-lg text-[11px] font-mono transition-all uppercase flex items-center gap-2 border ${
+                        isActive 
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+                        : 'bg-[#0b101b] text-slate-400 border-slate-900 hover:border-slate-800'
+                    }">
+                        <span>${t}</span>
+                        <span class="px-1.5 py-0.2 rounded bg-slate-950 text-[9px] ${isActive ? 'text-emerald-400' : 'text-slate-500'}">${count}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setFilter(type) {
+            AppState.filter = type;
+            renderFilterTabs();
+            renderProxyMatrix();
+        }
+
+        // ۳. ساخت ماتریس یا ردیف کارت‌های اتصال پروکسی (Mobile-First Card + Desktop Grid)
+        function renderProxyMatrix() {
+            const container = document.getElementById('proxy-matrix-container');
+            
+            // فیلترینگ ترکیبی (دکمه تب + فیلد جستجو)
+            const filtered = AppState.proxies.filter(p => {
+                const matchesTab = AppState.filter === 'all' || p.type === AppState.filter;
+                const matchesSearch = p.source.toLowerCase().includes(AppState.search) || p.type.toLowerCase().includes(AppState.search);
+                return matchesTab && matchesSearch;
+            });
+
+            document.getElementById('total-badge').innerText = `Matrix Capacitance: ${filtered.length}/${AppState.proxies.length}`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="p-12 text-center text-slate-600 text-xs font-mono">
+                        &gt; NO NODES MATCHING CURRENT FILTER CRITERIA.
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => {
+                const isDead = p.status !== 'active';
+                const latencyText = isDead ? 'Timeout' : `${p.latency_ms}ms`;
+                const latencyColor = isDead ? 'text-red-500' : p.latency_ms < 300 ? 'text-emerald-400' : 'text-yellow-400';
+                const badgeColor = p.type === 'vless' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-2 px-6 py-4 items-center hover:bg-slate-950/40 transition-colors text-xs">
+                        <div class="md:col-span-2 flex items-center justify-between md:justify-start gap-2">
+                            <span class="px-2 py-0.5 rounded border text-[10px] font-mono tracking-wider uppercase ${badgeColor}">${p.type}</span>
+                            <span class="text-[10px] text-slate-500 font-mono md:hidden">ID: ${p.id}</span>
+                        </div>
+                        
+                        <div class="md:col-span-4 font-mono text-slate-400 truncate select-all bg-[#090f1a] md:bg-transparent p-2 md:p-0 rounded border border-slate-900 md:border-none" title="${p.url}">
+                            ${p.url}
+                        </div>
+
+                        <div class="md:col-span-2 flex md:justify-center items-center gap-2 text-right md:text-center">
+                            <span class="text-slate-500 md:hidden text-[10px]">تاخیر لایه انتقال:</span>
+                            <span class="font-mono font-bold ${latencyColor} text-xs">${latencyText}</span>
+                        </div>
+
+                        <div class="md:col-span-2 flex items-center gap-1.5 text-slate-400">
+                            <svg class="w-3.5 h-3.5 text-slate-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                            <span class="truncate font-mono text-[11px] text-slate-500 hover:text-cyan-400 transition-colors">@${p.source}</span>
+                        </div>
+
+                        <div class="md:col-span-2 text-left mt-2 md:mt-0">
+                            <button onclick="copyToClipboard('${p.url}', this)" class="w-full md:w-auto px-3 py-1.5 bg-slate-900 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-400 border border-slate-800 hover:border-emerald-500/30 rounded-xl font-medium tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.524 2.25h-3.048a2.25 2.25 0 00-2.143 1.638L6.145 9.143a2.25 2.25 0 002.143 2.857h4.305v-3.75h1.5v3.75h4.305a2.25 2.25 0 002.143-2.857l-1.83-5.255z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25v8.25a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5v-8.25"/></svg>
+                                <span>Copy Link</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ۴. شبیه‌سازی و تزریق داده‌های کدهای ترمینال پایانی
+        function renderTerminalStreams() {
+            const container = document.getElementById('terminal-logs');
+            if(AppState.feeds.length === 0) return;
+
+            let logHtml = '';
+            AppState.feeds.forEach(f => {
+                const colorClass = f.type === 'sync' ? 'text-emerald-400' : 'text-cyan-400';
+                logHtml += `
+                    <div class="flex items-start gap-2">
+                        <span class="text-slate-600 font-bold">[${f.timestamp}]</span>
+                        <span class="${colorClass}">&gt; ${f.title}:</span>
+                        <span class="text-slate-400">${f.description}</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = logHtml + `<div class="text-slate-500 animate-pulse">&gt; Waiting for next automated cluster sync cronjob...</div>`;
+        }
+
+        // 📋 یوزر اکسپرینس لوکس دکمه کپی کدهای اتصال
+        function copyToClipboard(text, buttonElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalContent = buttonElement.innerHTML;
+                buttonElement.innerHTML = `
+                    <svg class="w-3.5 h-3.5 text-emerald-400 animate-bounce" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    <span class="text-emerald-400">Copied!</span>
+                `;
+                buttonElement.classList.add('bg-emerald-500/10', 'border-emerald-500/40');
+                
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalContent;
+                    buttonElement.classList.remove('bg-emerald-500/10', 'border-emerald-500/40');
+                }, 1800);
+            }).catch(err => {
+                console.error('Could not copy link: ', err);
+            });
+        }
+    </script>
 </body>
 </html>
