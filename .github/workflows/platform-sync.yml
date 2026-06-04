@@ -6,6 +6,9 @@ on:
     - cron: '0 0 * * *'    # اجرای روزانه راس ساعت 00:00 UTC برای آنالیتیکس
   workflow_dispatch:      # امکان اجرای دستی هر زمان که بخواهید از پنل گیت‌هاب
 
+permissions:
+  contents: write
+
 jobs:
   platform-sync:
     runs-on: ubuntu-latest
