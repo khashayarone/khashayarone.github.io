@@ -22,7 +22,7 @@ jobs:
       - name: Install Core Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests aiohttp google-analytics-data
+          pip install requests aiohttp google-analytics-data beautifulsoup4
 
       - name: 🌐 Run Proxy Finder Script
         run: |
