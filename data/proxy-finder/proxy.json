@@ -110,6 +110,216 @@
     "latency_ms": 0
   },
   {
+    "id": "c1277d26eab4",
+    "url": "trojan://humanity@104.19.229.21:443?path=%2Fassignment&security=tls&insecure=0&host=www.ignitelimit.com&type=ws&allowInsecure=0&sni=www.ignitelimit.com#%40Maznet%20-SOS461",
+    "type": "trojan",
+    "source": "Maznet",
+    "added_at": "2026-06-04T18:07:59Z",
+    "last_check": "2026-06-04T18:07:59Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "a681170f7cf0",
+    "url": "ss://Telegram-Parsashonam-2@192.200.160.253:443?mode=auto&path=%2Fp4r34m&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=1&host=p4r34m.hendevaneh.sbs&fp=chrome&type=xhttp&allowInsecure=1&sni=p4r34m.hendevaneh.sbs#%40Parsashonam-Test-3",
+    "type": "shadowsocks",
+    "source": "Parsashonam",
+    "added_at": "2026-06-04T18:08:00Z",
+    "last_check": "2026-06-04T18:08:00Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "9d025f04494f",
+    "url": "ss://Telegram-Parsashonam-2@27.50.48.49:443?mode=auto&path=%2Fp4r34m&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=1&host=p4r34m.hendevaneh.sbs&fp=chrome&type=xhttp&allowInsecure=1&sni=p4r34m.hendevaneh.sbs#%40Parsashonam-Test-6",
+    "type": "shadowsocks",
+    "source": "Parsashonam",
+    "added_at": "2026-06-04T18:08:06Z",
+    "last_check": "2026-06-04T18:08:06Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "e9c959cb45f1",
+    "url": "vless://fc965ad9-bdd7-4815-ad71-b39ec5972dc1@188.114.97.6:443?path=%2Ftsghdws&security=tls&encryption=none&insecure=0&host=octopusss4.com&fp=chrome&type=ws&allowInsecure=0&sni=octopusss4.com#All-%40TeleProxyTele--4",
+    "type": "vless",
+    "source": "TeleProxyTele",
+    "added_at": "2026-06-04T18:08:30Z",
+    "last_check": "2026-06-04T18:08:30Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "5d038b91e5a8",
+    "url": "ss://06ef598c-1555-4887-b3f9-08214a2f6792@104.17.72.206:443?path=%2F222.167.202.31%3A7443&security=tls&encryption=none&echfq=none&host=2026.hhhhh.eu.org&fp=chrome&allowinsecure=0&type=ws&sni=2026.hhhhh.eu.org#",
+    "type": "shadowsocks",
+    "source": "v2ray_dalghak",
+    "added_at": "2026-06-04T18:08:16Z",
+    "last_check": "2026-06-04T18:08:16Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "03c16ad9a00f",
+    "url": "vless://d2992c0d-53cb-489c-85af-5eb80e6d9e79@141.193.213.30:443?path=%2Fin-do&security=tls&encryption=none&insecure=0&host=blog.webex.com.cyylr.eu.cc&type=ws&allowInsecure=0&sni=blog.webex.com.cyylr.eu.cc#",
+    "type": "vless",
+    "source": "v2ray_dalghak",
+    "added_at": "2026-06-04T18:08:27Z",
+    "last_check": "2026-06-04T18:08:27Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "6362431eed10",
+    "url": "ss://96eec36e-2c44-5b09-898e-6f0f0526e57f@151.101.65.57:80?mode=auto&path=%2Flogin&security=none&encryption=none&host=shangulin.global.ssl.fastly.net&type=xhttp#",
+    "type": "shadowsocks",
+    "source": "v2ray_dalghak",
+    "added_at": "2026-06-04T18:08:32Z",
+    "last_check": "2026-06-04T18:08:32Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "7d87b0d639b8",
+    "url": "ss://fdf376b1-4df5-4bd3-a7c7-1ce76ec4e3f1@165.215.250.12:2086?mode=packet-up&path=%2F&security=&encryption=none&host=xvh.andishehparenting.com&type=xhttp#",
+    "type": "shadowsocks",
+    "source": "v2ray_dalghak",
+    "added_at": "2026-06-04T18:08:32Z",
+    "last_check": "2026-06-04T18:08:32Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "abb9d365f8bc",
+    "url": "ss://d87234a4-2a6c-4f0c-87f0-300942338207@151.101.110.219:443?path=%2F&security=tls&encryption=none&insecure=1&host=jookeji.global.ssl.fastly.neT&type=ws&allowInsecure=1&sni=speedtest.net#",
+    "type": "shadowsocks",
+    "source": "v2ray_dalghak",
+    "added_at": "2026-06-04T18:08:32Z",
+    "last_check": "2026-06-04T18:08:32Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "0afd89b1c5a4",
+    "url": "vless://96eec36e-2c44-5b09-898e-6f0f0526e57f@151.101.65.57:80?mode=auto&path=%2Flogin&security=none&encryption=none&host=shangulin.global.ssl.fastly.net&type=xhttp#",
+    "type": "vless",
+    "source": "v2ray_dalghak",
+    "added_at": "2026-06-04T18:08:37Z",
+    "last_check": "2026-06-04T18:08:37Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "a668aa8d3b1a",
+    "url": "ss://ae0dd58e-e222-40bf-84ae-365a97532737@162.159.152.119:443?path=%2Fdownloads%2Fredirect.html&security=tls&encryption=none&insecure=0&host=pagescm.freen36.cc.cd&fp=chrome&type=ws&allowInsecure=0&sni=pagescm.freen36.cc.cd#Free%208%20%40Outline_Vpn",
+    "type": "shadowsocks",
+    "source": "Outline_vpn",
+    "added_at": "2026-06-04T18:08:26Z",
+    "last_check": "2026-06-04T18:08:26Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "06bf48ce2792",
+    "url": "vless://44036b76-ecd4-488b-83ce-108d94583cf3@104.18.32.47:2096?mode=gun&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&fp=chrome&type=grpc&serviceName=farsnews.ir.mizanonline.com.eghtesadonline.com.tasnimnews.com.irdiplomacy.ir.sharghdaily.com.donya-e-eqtesad.com&allowInsecure=0&sni=FAt-CORNEr1twsv3GlGF.WIndleR.Co.UK#Free%2054%20%40Outline_Vpn",
+    "type": "vless",
+    "source": "Outline_vpn",
+    "added_at": "2026-06-04T18:08:26Z",
+    "last_check": "2026-06-04T18:08:26Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "a65d82834c6f",
+    "url": "ss://228639b0-48de-4162-a818-d5651ee297b3@27.50.48.49:443?path=%2Fin-do&security=tls&encryption=none&insecure=0&host=investors.spotify.com.cyylr.eu.cc&fp=chrome&type=ws&allowInsecure=0&sni=investors.spotify.com.cyylr.eu.cc#Free%2073%20%40Outline_Vpn",
+    "type": "shadowsocks",
+    "source": "Outline_vpn",
+    "added_at": "2026-06-04T18:08:34Z",
+    "last_check": "2026-06-04T18:08:34Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "4be360effeba",
+    "url": "ss://cc752a3e-1537-4e86-bb50-1b897bf7b33c@104.19.229.21:443?path=%2Fsg-melbi&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host=cyylr.eu.cc&type=ws&allowInsecure=0&sni=cyylr.eu.cc#Free%2090%20%40Outline_Vpn",
+    "type": "shadowsocks",
+    "source": "Outline_vpn",
+    "added_at": "2026-06-04T18:08:37Z",
+    "last_check": "2026-06-04T18:08:37Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "c576db10a02f",
+    "url": "vless://228639b0-48de-4162-a818-d5651ee297b3@27.50.48.49:443?path=%2Fin-do&security=tls&encryption=none&insecure=0&host=investors.spotify.com.cyylr.eu.cc&fp=chrome&type=ws&allowInsecure=0&sni=investors.spotify.com.cyylr.eu.cc#Free%2073%20%40Outline_Vpn",
+    "type": "vless",
+    "source": "Outline_vpn",
+    "added_at": "2026-06-04T18:08:44Z",
+    "last_check": "2026-06-04T18:08:44Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "213e3131e172",
+    "url": "ss://fc965ad9-bdd7-4815-ad71-b39ec5972dc1@173.245.58.75:443?path=%2Ftsghdws&security=tls&encryption=none&insecure=0&host=octopusss4.com&type=ws&allowInsecure=0&sni=octopusss4.com#Free%2040%20%40Outline_Vpn",
+    "type": "shadowsocks",
+    "source": "Outline_vpn",
+    "added_at": "2026-06-04T18:08:44Z",
+    "last_check": "2026-06-04T18:08:44Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "943f14503af3",
+    "url": "vless://ae0dd58e-e222-40bf-84ae-365a97532737@172.64.146.178:2053?path=%2Fbt&security=tls&encryption=none&insecure=1&host=pagescm.freen30.cc.cd&type=ws&allowInsecure=1&sni=pagescm.freen30.cc.cd#Free%2016%20%40Outline_Vpn",
+    "type": "vless",
+    "source": "Outline_vpn",
+    "added_at": "2026-06-04T18:08:47Z",
+    "last_check": "2026-06-04T18:08:47Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "98fb977ef1b1",
+    "url": "ss://228639b0-48de-4162-a818-d5651ee297b3@27.50.48.49:443?encryption=none&type=ws&security=tls&path=%2Fin-do&host=investors.spotify.com.cyylr.eu.cc&sni=investors.spotify.com.cyylr.eu.cc&allowInsecure=0#@meliproxyy",
+    "type": "shadowsocks",
+    "source": "meliproxyy",
+    "added_at": "2026-06-04T18:08:23Z",
+    "last_check": "2026-06-04T18:08:23Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "7ebe18d5e266",
+    "url": "ss://96eec36e-2c44-5b09-898e-6f0f0526e57f@151.101.1.57:80?mode=auto&path=%2Flogin&security=none&encryption=none&extra=%7B%22mode%22%3A%22auto%22%2C%22scMaxEachPostBytes%22%3A%221000000%22%2C%22xPaddingBytes%22%3A%22100-1000%22%7D&host=shangulin.global.ssl.fastly.net&type=xhttp#@meliproxyy",
+    "type": "shadowsocks",
+    "source": "meliproxyy",
+    "added_at": "2026-06-04T18:09:10Z",
+    "last_check": "2026-06-04T18:09:10Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "c8a61abd34b5",
+    "url": "vless://7113486d-0d19-461f-a9e6-31437a8fe019@151.101.108.223:443?encryption=none&type=ws&security=tls&path=%2F%3Fed%3D1555&host=nleiyajji.global.ssl.fastly.neT.&sni=speedtest.net&allowInsecure=1#%F0%9F%87%AF%F0%9F%87%B548714%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
+    "type": "vless",
+    "source": "LonUp_M",
+    "added_at": "2026-06-04T18:08:17Z",
+    "last_check": "2026-06-04T18:08:17Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
+    "id": "072057268c6a",
+    "url": "vless://96eec36e-2c44-5b09-898e-6f0f0526e57f@151.101.65.57:80?mode=auto&path=%2Flogin&security=none&encryption=none&host=shangulin.global.ssl.fastly.net&type=xhttp#%F0%9F%87%A8%F0%9F%87%A648860%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
+    "type": "vless",
+    "source": "LonUp_M",
+    "added_at": "2026-06-04T18:08:52Z",
+    "last_check": "2026-06-04T18:08:52Z",
+    "status": "active",
+    "latency_ms": 1
+  },
+  {
     "id": "129beb25b1db",
     "url": "trojan://humanity@104.19.229.21:443?path=assignment&security=tls&insecure=0&type=ws&allowInsecure=0&sni=www.ignitelimit.com#%40Maznet%20-SOS465",
     "type": "trojan",
@@ -2786,216 +2996,6 @@
     "source": "LonUp_M",
     "added_at": "2026-06-04T15:53:49Z",
     "last_check": "2026-06-04T15:53:49Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "9d1c84f5651e",
-    "url": "ss://ece716f9-a8b5-46ec-8d19-9ec07e3c814b@cell3.jupitter.ir:443?security=tls&type=ws&headerType=&path=%2F%3Fed%3D80&host=ssj.new-persian-song.ir&sni=ssj.new-persian-song.ir&fp=chrome#%F0%9F%87%A8%F0%9F%87%A648584%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:53:49Z",
-    "last_check": "2026-06-04T15:53:49Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "c7748e8842ed",
-    "url": "vless://6202b230-417c-4d8e-b624-0f71afa9c75d@185.238.228.238:2096?path=%2F%3Fed%3D2560%26telegram%F0%9F%87%A8%F0%9F%87%B3%2B%40wangcai2&security=tls&encryption=none&insecure=1&host=sni.jpmj.dev&fp=chrome&type=ws&allowInsecure=1&sni=sni.jpmj.dev#%F0%9F%87%AC%F0%9F%87%A748596%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "vless",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:53:50Z",
-    "last_check": "2026-06-04T15:53:50Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "1685ec9d3831",
-    "url": "vless://ece716f9-a8b5-46ec-8d19-9ec07e3c814b@45.130.125.160:443?security=tls&type=ws&headerType=&path=&host=ssj.new-persian-song.ir&sni=ssj.new-persian-song.ir&fp=chrome&alpn=h3%2Ch2#%F0%9F%87%B8%F0%9F%87%A848580%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "vless",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:53:54Z",
-    "last_check": "2026-06-04T15:53:54Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "6b56a06b8eb4",
-    "url": "ss://d08d180d-cb07-4d82-b1bd-1e42fa523cd7@104.17.107.92:443?path=%2Fsg-orcl&security=tls&encryption=none&insecure=0&host=ads.ruangguru.com.cyylr.eu.cc&type=ws&allowInsecure=0&sni=ads.ruangguru.com.cyylr.eu.cc#%F0%9F%87%A8%F0%9F%87%A648462%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:53:55Z",
-    "last_check": "2026-06-04T15:53:55Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "9aef44aea8ea",
-    "url": "ss://ece716f9-a8b5-46ec-8d19-9ec07e3c814b@45.130.125.160:8443?security=tls&type=xhttp&headerType=&path=&host=&mode=auto&extra=%7B%22scMaxEachPostBytes%22%3A+1000000%2C+%22scMaxConcurrentPosts%22%3A+100%2C+%22scMinPostsIntervalMs%22%3A+30%2C+%22xPaddingBytes%22%3A+%22100-1000%22%2C+%22noGRPCHeader%22%3A+false%7D&sni=sst3.nimhub.ir&fp=chrome&alpn=h2#%F0%9F%87%B8%F0%9F%87%A848563%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:53:55Z",
-    "last_check": "2026-06-04T15:53:55Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "ffa4cad6a051",
-    "url": "ss://8525fe74-67e6-4a55-8a26-95f227bd1384@45.80.111.45:2096?path=%2Fproxyip%3D77.110.125.6%2C205.196.81.159%2C45.39.230.219%2C162.243.0.223%2C162.243.115.21%2C45.77.206.201%2C31.172.69.16%2C172.86.105.36&security=tls&encryption=none&insecure=0&host=fragrant-voice-8088.alvlirm5757.workers.dev&fp=random&type=ws&allowInsecure=0&sni=fragrant-voice-8088.alvlirm5757.workers.dev#%F0%9F%87%A9%F0%9F%87%AA48492%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:53:58Z",
-    "last_check": "2026-06-04T15:53:58Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "87ac4c5fbafe",
-    "url": "ss://9ce7ac33-5004-40ea-8236-15bc2d25a37c@172.66.1.190:443?path=%2FMaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1&security=tls&encryption=none&host=black-leaf-044c.azertfrtyu.workers.dev&fp=chrome&type=ws&sni=black-leaf-044c.azertfrtyu.workers.dev#%F0%9F%87%A8%F0%9F%87%A648527%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:01Z",
-    "last_check": "2026-06-04T15:54:01Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "643e7bb3e20b",
-    "url": "ss://6202b230-417c-4d8e-b624-0f71afa9c75d@139.64.235.238:2096?fp=chrome&host=sni.jpmj.dev&path=%2F&security=tls&sni=sni.jpmj.dev&type=ws#%F0%9F%87%BA%F0%9F%87%B848593%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:03Z",
-    "last_check": "2026-06-04T15:54:03Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "ff6066f8bb67",
-    "url": "ss://6202b230-417c-4d8e-b624-0f71afa9c75d@104.17.101.139:443?host=sni.111000.dynv6.net&path=%2F%3Fproxyip%3Dip.111000.de5.net%253A443&security=tls&sni=sni.111000.dynv6.net&type=ws#%F0%9F%87%A8%F0%9F%87%A648435%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:04Z",
-    "last_check": "2026-06-04T15:54:04Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "37546a28da4b",
-    "url": "ss://c15cbeac-3340-4dbc-8cbd-f86efbafc715@151.101.71.220:443?security=tls&type=xhttp&headerType=&path=%2F&host=ov95.global.ssl.fastly.net&mode=packet-up&extra=%7B%22scMaxEachPostBytes%22%3A+%221000000%22%2C+%22scMaxConcurrentPosts%22%3A+100%2C+%22scMinPostsIntervalMs%22%3A+30%2C+%22xPaddingBytes%22%3A+%22100-1000%22%2C+%22noGRPCHeader%22%3A+false%7D&sni=www.fastly.com&fp=chrome&alpn=h3#%F0%9F%87%BA%F0%9F%87%B848472%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:04Z",
-    "last_check": "2026-06-04T15:54:04Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "29de074a5417",
-    "url": "ss://17e24042-beeb-4fd3-9718-c067842280a9@151.101.110.219:443?security=tls&type=xhttp&headerType=&path=%2F&host=de-nbg-1.global.ssl.fastly.net&mode=auto&sni=biography.com&fp=chrome&alpn=h3%2Ch2%2Chttp%2F1.1&allowInsecure=1#%F0%9F%87%AF%F0%9F%87%B548557%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:08Z",
-    "last_check": "2026-06-04T15:54:08Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "7d37e40cc689",
-    "url": "vless://6b043e1b-6856-40ae-9b72-e47e6e25d6a9@45.67.215.228:2086?encryption=none&type=httpupgrade&path=%2F%3Fed%3D2048&host=wallweb.hydradllvip.info#%F0%9F%87%B7%F0%9F%87%BA48544%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "vless",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:10Z",
-    "last_check": "2026-06-04T15:54:10Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "b424fc4d00a1",
-    "url": "ss://6202b230-417c-4d8e-b624-0f71afa9c75d@104.16.80.73:443?allowInsecure=1&encryption=none&host=sni.jpmj.dev&path=%2F&security=tls&sni=sni.jpmj.dev&type=ws#%F0%9F%87%A8%F0%9F%87%A648436%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:11Z",
-    "last_check": "2026-06-04T15:54:11Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "d670bf88bcd8",
-    "url": "ss://bf81297b-1ac0-462c-8499-3139391ea9ee@104.19.229.21:443?encryption=none&security=tls&sni=www.genflix.co.id.cyylr.eu.cc&type=ws&host=www.genflix.co.id.cyylr.eu.cc&path=%2Fsg-amz#%F0%9F%87%A8%F0%9F%87%A648529%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:13Z",
-    "last_check": "2026-06-04T15:54:13Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "352c65421c8e",
-    "url": "ss://5cdf99d3-a51b-570e-8245-f87d674dc652@151.101.193.57:80?encryption=none&security=none&type=xhttp&host=InternetAzadRobot31dx253.global.ssl.fastly.net&path=%2F&mode=auto#%F0%9F%87%A8%F0%9F%87%A648559%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:13Z",
-    "last_check": "2026-06-04T15:54:13Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "e8151cd67c24",
-    "url": "ss://a8adfa26-ceeb-4b68-8e40-158b3de44aaa@104.26.6.159:2053?security=tls&encryption=none&insecure=0&host=noone.bingnet.online&type=ws&allowInsecure=0&sni=noone.bingnet.online#%F0%9F%87%A8%F0%9F%87%A648420%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:16Z",
-    "last_check": "2026-06-04T15:54:16Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "5aa1bd583e26",
-    "url": "vless://5e5608a2-9893-4eaa-b90a-e202bacef5b6@208.103.161.170:443?mode=auto&path=%2Fkir&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=1&host=cdn.safev2ray.store&fp=chrome&type=xhttp&allowInsecure=1&sni=cdn.safev2ray.store#%F0%9F%87%BA%F0%9F%87%B848427%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "vless",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:17Z",
-    "last_check": "2026-06-04T15:54:17Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "8c7f46a1fe06",
-    "url": "ss://9ce7ac33-5004-40ea-8236-15bc2d25a37c@198.41.223.244:2083?path=%2FMaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1-MaSTeRSeRVeR1&security=tls&encryption=none&host=withered-wood-8b9e.miunhkl.workers.dev&fp=chrome&type=ws&sni=withered-wood-8b9e.miunhkl.workers.dev#%F0%9F%87%A8%F0%9F%87%A648525%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:17Z",
-    "last_check": "2026-06-04T15:54:17Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "a6b18da0d351",
-    "url": "vless://d08d180d-cb07-4d82-b1bd-1e42fa523cd7@104.17.107.92:443?path=%2Fsg-orcl&security=tls&encryption=none&insecure=0&host=ads.ruangguru.com.cyylr.eu.cc&type=ws&allowInsecure=0&sni=ads.ruangguru.com.cyylr.eu.cc#%F0%9F%87%A8%F0%9F%87%A648462%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "vless",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:17Z",
-    "last_check": "2026-06-04T15:54:17Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "9358489bd84c",
-    "url": "ss://77777777-8a3e-6666-b6d1-a9c5f0e8b3a2@172.64.52.173:2087?encryption=none&security=tls&sni=fgnix832fx.fx6hsv0.ccwu.cc&insecure=0&allowInsecure=0&type=ws&host=fgnix832fx.fx6hsv0.ccwu.cc&path=%2F#%F0%9F%87%A8%F0%9F%87%A648509%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:17Z",
-    "last_check": "2026-06-04T15:54:17Z",
-    "status": "active",
-    "latency_ms": 1
-  },
-  {
-    "id": "b497fe7db828",
-    "url": "ss://17e24042-beeb-4fd3-9718-c067842280a9@94.140.0.0:2087?security=tls&type=ws&headerType=&path=%2F&host=nl-ams-1.easyrain.com.tr&sni=nl-ams-1.easyrain.com.tr&fp=chrome&alpn=h2%2Chttp%2F1.1#%F0%9F%87%A6%F0%9F%87%AA48555%20%7C%20%E2%9A%A1%EF%B8%8FTelegram%20%3D%20t.me%2FLonUp_M",
-    "type": "shadowsocks",
-    "source": "LonUp_M",
-    "added_at": "2026-06-04T15:54:17Z",
-    "last_check": "2026-06-04T15:54:17Z",
     "status": "active",
     "latency_ms": 1
   }
