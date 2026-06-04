@@ -27,7 +27,7 @@ jobs:
       - name: 🌐 Run Proxy Finder Script
         run: |
           # این اسکریپت در هر دو زمان‌بندی (۲ ساعته و روزانه) برای تزریق پراکسی تازه اجرا می‌شود
-          python scripts/proxy_finder.py
+          python scripts/proxy-finder.py
 
       - name: 📊 Run GA4 Daily Snapshot Script
         # شرط بررسی: اسکریپت آنالیتیکس فقط در اجرای دستی یا راس ساعت ۱۲ شب اجرا می‌شود تا پایداری سهمیه API حفظ شود.
