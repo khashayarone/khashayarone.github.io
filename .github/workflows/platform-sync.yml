@@ -1,50 +1,43 @@
-name: Platform Automated Data Sync
+name: Analytics Engine (BigQuery Production)
 
 on:
   schedule:
-    - cron: '0 */2 * * *'  # اجرای منظم هر ۲ ساعت یک‌بار برای پراکسی‌ها
-    - cron: '0 0 * * *'    # اجرای روزانه راس ساعت 00:00 UTC برای آنالیتیکس
-  workflow_dispatch:      # امکان اجرای دستی هر زمان که بخواهید از پنل گیت‌هاب
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  platform-sync:
+  analytics:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python Environment
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
 
-      - name: Install Core Dependencies
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install requests aiohttp google-analytics-data beautifulsoup4
+          pip install google-cloud-bigquery
 
-      - name: 🌐 Run Proxy Finder Script
+      - name: Auth to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run BigQuery Analytics
         run: |
-          # این اسکریپت در هر دو زمان‌بندی (۲ ساعته و روزانه) برای تزریق پراکسی تازه اجرا می‌شود
-          python scripts/proxy-finder.py
+          python scripts/bq_analytics.py
 
-      - name: 📊 Run GA4 Daily Snapshot Script
-        # شرط بررسی: اسکریپت آنالیتیکس فقط در اجرای دستی یا راس ساعت ۱۲ شب اجرا می‌شود تا پایداری سهمیه API حفظ شود.
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 0 * * *')
-        env:
-          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
-          GA4_CREDENTIALS: ${{ secrets.GA4_CREDENTIALS }}
-        run: |
-          python scripts/ga4_snapshot.py
-
-      - name: 🔄 Commit and Push Updated Pipeline Data
+      - name: Commit results
         run: |
           git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action Pipeline"
+          git config --local user.name "GitHub Action"
           git add data/
-          git commit -m "🔄 Pipeline Auto-Update: Proxies & Analytics Dashboard Data [skip ci]" || echo "No changes to commit"
+          git commit -m "analytics update" || echo "no changes"
           git push
