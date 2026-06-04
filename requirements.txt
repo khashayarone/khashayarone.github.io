@@ -1,3 +1,4 @@
 requests
 aiohttp
 google-analytics-data
+beautifulsoup4
