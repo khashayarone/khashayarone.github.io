@@ -1,70 +1,86 @@
-name: Proxy Intelligence Engine — Core Production V1
+name: Proxy Finder Engine
 
 on:
   schedule:
-    # اجرای منظم هر ۱۵ دقیقه یک‌بار جهت پایش مستمر شبکه
-    - cron: '*/15 * * * *'
+    - cron: "*/10 * * * *"
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/proxy-finder.yml'
-      - 'scripts/proxy-finder.py'
 
 permissions:
-  contents: write
+  contents: write   # لازم برای push
+
+concurrency:
+  group: proxy-finder-cron
+  cancel-in-progress: true
 
 jobs:
-  automation-engine:
+  run-engine:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
-      - name: "⬇️ Checkout Target Repository Node"
+      # =========================================
+      # 1. Checkout
+      # =========================================
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "🐍 Initialize Python Runtime Environment"
+      # =========================================
+      # 2. Python Setup (optimized cache)
+      # =========================================
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.11"
+          cache: "pip"
 
-      - name: "📦 Install Core Network Dependencies"
+      # =========================================
+      # 3. Install dependencies (minimal + fast)
+      # =========================================
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip --quiet
-          pip install requests beautifulsoup4 --quiet
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir requests beautifulsoup4
 
-      - name: "🚀 Execute Aggregation Engine Pipeline"
-        run: python scripts/proxy-finder.py
+      # =========================================
+      # 4. Run engine (safe execution)
+      # =========================================
+      - name: Run proxy finder engine
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python main/scripts/proxy-finder.py
 
-      - name: "📊 Secure Database Commit & Distributed Push"
-        if: success()
+      # =========================================
+      # 5. Validate output (basic sanity check)
+      # =========================================
+      - name: Validate output files
+        run: |
+          echo "Checking generated data..."
+
+          ls -R data || echo "No data folder found"
+
+          test -f data/proxy-finder/proxy.json && echo "proxy.json OK" || echo "proxy.json MISSING"
+
+      # =========================================
+      # 6. Commit & Push (safe + clean)
+      # =========================================
+      - name: Commit results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # استیج کردن هر دو پوشه اصلی لایه داده فرانت‌پروژه
-          git add data/proxy-finder/
-          git add data/system/
-          
-          if git diff --staged --quiet; then
-            echo "⚡ Core Alert: Matrix data is already up-to-date. Skipping deployment."
+
+          git add data/
+
+          # جلوگیری از commit خالی
+          if git diff --cached --quiet; then
+            echo "No changes detected"
             exit 0
           fi
-          
-          git commit -m "🔄 Telemetry Sync — Live Data Engine Update [$(date -u +'%Y-%m-%d %H:%M UTC')]"
-          
-          # مکانیزم تاخیر و ری‌بیس جهت جلوگیری از تداخل همزمانی جابز گیت‌هاب
-          for i in 1 2 3; do
-            echo "🌐 Transferring data packets to cloud origin (Attempt $i/3)..."
-            git pull --rebase origin main 2>/dev/null || true
-            if git push origin main; then
-              echo "✅ Cluster Synchronization Successful."
-              exit 0
-            fi
-            echo "⚠️ Collision detected; retrying connection in 5s..."
-            sleep 5
-          done
-          echo "❌ Fatal: Cloud push operation terminated."
-          exit 1
+
+          git commit -m "⚡ proxy engine update $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
