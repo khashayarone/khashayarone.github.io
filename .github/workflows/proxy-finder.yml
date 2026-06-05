@@ -48,7 +48,7 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
         run: |
-          python main/scripts/proxy-finder.py
+          python /scripts/proxy-finder.py
 
       # =========================================
       # 5. Validate output (basic sanity check)
