@@ -1,419 +1,516 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark" data-theme="black">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KHASHAYAR.ONE | Proxy Intelligence</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#050505',
+                            glass: 'rgba(255, 255, 255, 0.03)',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            primary: '#8b5cf6', // Vless Purple
+                            secondary: '#3b82f6', // Vmess Blue
+                            accent: '#10b981', // Success Green
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
 
-<title>Proxy OS • Intelligence Layer</title>
+    <style>
+        /* Lenis Smooth Scroll Setup */
+        html.lenis, html.lenis body { height: auto; width: 100vw; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
+        
+        /* Custom Glass Classes */
+        .glass-panel {
+            background: var(--tw-colors-brand-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--tw-colors-brand-border);
+            border-radius: 1rem;
+        }
+        
+        /* Hide Scrollbar but keep functionality */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        /* Custom Text Gradient */
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 
-<!-- Core CDN Stack -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-/* =========================================================
-   🌌 DESIGN SYSTEM (Apple + Linear + Netflix hybrid)
-========================================================= */
-
-:root {
-  --bg: #05060a;
-  --glass: rgba(255,255,255,0.04);
-  --glass2: rgba(255,255,255,0.07);
-  --stroke: rgba(255,255,255,0.08);
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --green: #22c55e;
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --purple: #8b5cf6;
-}
-
-body {
-  margin:0;
-  font-family: ui-sans-serif, system-ui;
-  background: radial-gradient(circle at top, #0b1020, #05060a);
-  color: var(--text);
-  overflow-x:hidden;
-}
-
-/* =========================================================
-   GLASS CORE
-========================================================= */
-
-.glass {
-  background: var(--glass);
-  border:1px solid var(--stroke);
-  backdrop-filter: blur(18px);
-  border-radius:18px;
-}
-
-.glass-hover {
-  transition:0.25s ease;
-}
-
-.glass-hover:hover {
-  transform: translateY(-5px) scale(1.01);
-  background: var(--glass2);
-}
-
-/* =========================================================
-   HERO (Apple cinematic layer)
-========================================================= */
-
-.hero {
-  padding:70px 50px;
-  position:relative;
-}
-
-.hero::before {
-  content:'';
-  position:absolute;
-  width:500px;
-  height:500px;
-  background: radial-gradient(circle, var(--purple), transparent);
-  filter: blur(90px);
-  opacity:0.35;
-  top:-120px;
-  left:-120px;
-}
-
-/* =========================================================
-   NAV BAR (Linear style)
-========================================================= */
-
-.nav {
-  display:flex;
-  justify-content:space-between;
-  padding:20px 40px;
-  position:sticky;
-  top:0;
-  backdrop-filter: blur(20px);
-  background: rgba(0,0,0,0.2);
-  border-bottom:1px solid var(--stroke);
-  z-index:100;
-}
-
-/* =========================================================
-   PROXY CARD (core UI atom)
-========================================================= */
-
-.card {
-  padding:14px;
-  border-radius:16px;
-  border:1px solid var(--stroke);
-  background: rgba(255,255,255,0.03);
-  transition:0.25s ease;
-  position:relative;
-  overflow:hidden;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255,255,255,0.2);
-}
-
-/* shimmer */
-.card::before {
-  content:'';
-  position:absolute;
-  inset:0;
-  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.05), transparent);
-  transform: translateX(-100%);
-}
-
-.card:hover::before {
-  animation: shine 1s ease;
-}
-
-@keyframes shine {
-  100% { transform: translateX(100%); }
-}
-
-/* =========================================================
-   BUTTON SYSTEM
-========================================================= */
-
-.btn {
-  padding:10px 14px;
-  border-radius:12px;
-  border:1px solid var(--stroke);
-  background: rgba(255,255,255,0.04);
-  cursor:pointer;
-  transition:0.2s;
-}
-
-.btn:hover {
-  background: rgba(255,255,255,0.08);
-  transform: translateY(-2px);
-}
-
-/* =========================================================
-   GRID SYSTEM
-========================================================= */
-
-.grid {
-  display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap:16px;
-}
-
-@media (max-width: 900px) {
-  .grid { grid-template-columns:1fr; }
-}
-
-/* =========================================================
-   SEARCH BAR
-========================================================= */
-
-.search {
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background: rgba(255,255,255,0.03);
-  color:white;
-  outline:none;
-}
-
-/* =========================================================
-   SECTION TITLE
-========================================================= */
-
-.h1 {
-  font-size:30px;
-  font-weight:700;
-}
-
-.sub {
-  color: var(--muted);
-  font-size:13px;
-}
-
-</style>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body x-data="proxyOS()" x-init="init()">
-
-<!-- =========================================================
- NAV
-========================================================= -->
-
-<div class="nav">
-  <div>🧠 Proxy OS</div>
-  <div class="sub">Apple-grade Intelligence Layer</div>
-</div>
-
-<!-- =========================================================
- HERO
-========================================================= -->
-
-<section class="hero">
-  <div class="h1">Live Proxy Intelligence System</div>
-  <div class="sub">Netflix feed • Apple UI • Real-time ranking engine</div>
-
-  <input class="search mt-4"
-         placeholder="Search proxy, type, or trust grade..."
-         x-model="query"
-         @input="filter()"/>
-</section>
-
-<!-- =========================================================
- STATS
-========================================================= -->
-
-<section class="grid px-10">
-
-  <template x-for="s in statsCards">
-    <div class="glass card">
-      <div class="sub" x-text="s.label"></div>
-      <div class="text-xl font-bold mt-2" x-text="s.value"></div>
+<body class="bg-brand-dark text-gray-200 antialiased overflow-x-hidden min-h-screen relative selection:bg-brand-primary selection:text-white" x-data="commandCenter()">
+    
+    <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-primary/10 blur-[120px] mix-blend-screen"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-brand-secondary/10 blur-[120px] mix-blend-screen"></div>
     </div>
-  </template>
 
-</section>
-
-<!-- =========================================================
- PROXY FEED
-========================================================= -->
-
-<section class="px-10 mt-10">
-
-  <div class="flex justify-between mb-4">
-    <div class="h1">Feed</div>
-    <button class="btn" @click="loadMore()">Load More</button>
-  </div>
-
-  <div class="grid">
-
-    <template x-for="p in visible">
-
-      <div class="card glass-hover">
-
-        <div class="flex justify-between">
-          <div x-text="p.type"></div>
-          <div x-text="p.trust_grade"></div>
+    <nav class="fixed top-0 w-full z-50 glass-panel border-x-0 border-t-0 rounded-none bg-brand-dark/50 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i data-lucide="hexagon" class="text-brand-primary w-6 h-6 animate-pulse-slow"></i>
+                <span class="font-bold tracking-widest text-sm md:text-base text-gradient">KHASHAYAR.ONE</span>
+                <span class="hidden md:inline text-xs bg-white/10 px-2 py-0.5 rounded-md text-gray-400 font-mono ml-2 border border-white/5">CMD_CENTER_v2</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-xs font-mono">
+                    <span class="relative flex h-3 w-3">
+                        <span x-show="systemStatus === 'healthy'" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3" :class="systemStatus === 'healthy' ? 'bg-green-500' : 'bg-red-500'"></span>
+                    </span>
+                    <span class="hidden sm:inline text-gray-400" x-text="systemStatus === 'healthy' ? 'ENGINE ONLINE' : 'ENGINE OFFLINE'"></span>
+                </div>
+            </div>
         </div>
+    </nav>
 
-        <div class="sub mt-2 break-all" x-text="p.url"></div>
+    <main class="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
+        
+        <section class="gsap-fade-up grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="glass-panel p-5 flex flex-col gap-2 hover:bg-white/5 transition-colors duration-300">
+                <div class="flex justify-between items-center text-gray-400">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Active Configs</span>
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                </div>
+                <div class="text-3xl font-bold font-mono text-white" x-text="stats.total_configs || 0"></div>
+            </div>
+            <div class="glass-panel p-5 flex flex-col gap-2 hover:bg-white/5 transition-colors duration-300">
+                <div class="flex justify-between items-center text-gray-400">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Channels Mined</span>
+                    <i data-lucide="rss" class="w-4 h-4"></i>
+                </div>
+                <div class="text-3xl font-bold font-mono text-white" x-text="stats.channels_checked || 0"></div>
+            </div>
+            <div class="glass-panel p-5 flex flex-col gap-2 hover:bg-white/5 transition-colors duration-300">
+                <div class="flex justify-between items-center text-gray-400">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Messages Scraped</span>
+                    <i data-lucide="message-square-dashed" class="w-4 h-4"></i>
+                </div>
+                <div class="text-3xl font-bold font-mono text-brand-secondary" x-text="stats.total_messages_scraped || 0"></div>
+            </div>
+            <div class="glass-panel p-5 flex flex-col gap-2 hover:bg-white/5 transition-colors duration-300 relative overflow-hidden">
+                <div class="absolute right-[-10%] top-[-20%] w-24 h-24 bg-brand-primary/20 blur-[30px] rounded-full"></div>
+                <div class="flex justify-between items-center text-gray-400 relative z-10">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Last Sync</span>
+                    <i data-lucide="timer" class="w-4 h-4"></i>
+                </div>
+                <div class="text-sm font-medium text-white mt-1 relative z-10" x-text="timeAgo(stats.generated_at)"></div>
+                <div class="text-[10px] text-gray-500 mt-auto font-mono relative z-10">Cron: */10 * * * *</div>
+            </div>
+        </section>
 
-        <div class="mt-3 text-sm">
-          ⚡ <span x-text="p.latency_ms"></span> ms
-        </div>
+        <section class="gsap-fade-up space-y-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="award" class="text-yellow-500 w-5 h-5"></i>
+                <h2 class="text-lg font-semibold tracking-wide text-white">Premium Grade A</h2>
+            </div>
+            <div class="flex overflow-x-auto pb-4 gap-4 snap-x snap-mandatory hide-scrollbar">
+                <template x-for="proxy in recommendations" :key="proxy.id">
+                    <div class="glass-panel min-w-[280px] p-5 snap-center flex flex-col gap-4 group hover:border-brand-primary/50 transition-all duration-500 relative overflow-hidden transform hover:-translate-y-1">
+                        <div class="absolute top-0 left-0 w-full h-1 opacity-50" :class="getProtocolColor(proxy.type)"></div>
+                        
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded bg-white/5 border border-white/10" :class="getProtocolTextColor(proxy.type)" x-text="proxy.type"></span>
+                                <div class="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                                    <i data-lucide="zap" class="w-3 h-3 text-yellow-400"></i>
+                                    <span x-text="proxy.latency_ms + 'ms'"></span>
+                                </div>
+                            </div>
+                            <div class="radial-progress text-brand-primary text-[10px] font-bold" :style="'--value:' + proxy.trust_score + '; --size:2.5rem; --thickness: 3px;'" role="progressbar" x-text="proxy.trust_score"></div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-300 truncate font-mono bg-black/30 p-2 rounded border border-white/5" x-text="proxy.source"></div>
+                        
+                        <button @click="copy(proxy.url, $event.currentTarget)" class="btn btn-sm btn-ghost w-full border border-white/10 hover:bg-white/10 text-xs font-medium uppercase tracking-widest gap-2">
+                            <i data-lucide="copy" class="w-4 h-4 copy-icon"></i>
+                            <span class="btn-text">Copy URL</span>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </section>
 
-      </div>
+        <section class="gsap-fade-up space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-2">
+                <div class="flex overflow-x-auto hide-scrollbar gap-1 p-1">
+                    <template x-for="tab in ['all', 'vless', 'vmess', 'trojan', 'shadowsocks', 'mtproto']">
+                        <button @click="activeTab = tab" 
+                                class="px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-300"
+                                :class="activeTab === tab ? 'bg-white/10 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'"
+                                x-text="tab"></button>
+                    </template>
+                </div>
+                <div class="relative w-full md:w-64 p-1">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+                    <input x-model="searchQuery" type="text" placeholder="Search source or ID..." class="w-full bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-primary/50 transition-colors placeholder-gray-600">
+                </div>
+            </div>
 
-    </template>
+            <div class="glass-panel overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="table table-sm w-full font-mono text-xs">
+                        <thead class="text-gray-400 bg-white/5 border-b border-white/10">
+                            <tr>
+                                <th class="py-4 pl-6">Protocol</th>
+                                <th>Source Channel</th>
+                                <th>Latency</th>
+                                <th>Trust</th>
+                                <th>Last Seen</th>
+                                <th class="text-right pr-6">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr x-show="isLoading" class="animate-pulse">
+                                <td colspan="6" class="py-10 text-center text-gray-500 font-sans text-sm">Synchronizing Data Streams...</td>
+                            </tr>
+                            
+                            <template x-for="(proxy, index) in paginatedProxies" :key="proxy.id">
+                                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+                                    <td class="py-3 pl-6">
+                                        <span class="px-2 py-1 rounded border border-white/5 uppercase" :class="getProtocolTextColor(proxy.type) + ' bg-black/50'" x-text="proxy.type"></span>
+                                    </td>
+                                    <td class="text-gray-300 truncate max-w-[150px]" x-text="proxy.source"></td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-2 h-2 rounded-full" :class="proxy.latency_ms < 200 ? 'bg-green-500' : (proxy.latency_ms < 500 ? 'bg-yellow-500' : 'bg-red-500')"></div>
+                                            <span x-text="proxy.latency_ms ? proxy.latency_ms + 'ms' : 'N/A'"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="font-bold" :class="proxy.trust_score >= 80 ? 'text-green-400' : 'text-gray-400'" x-text="proxy.trust_score + '%'"></span>
+                                    </td>
+                                    <td class="text-gray-500" x-text="formatDate(proxy.last_seen)"></td>
+                                    <td class="text-right pr-6">
+                                        <button @click="copy(proxy.url, $event.currentTarget)" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
+                                            <i data-lucide="clipboard" class="w-4 h-4 text-gray-400 group-hover:text-white copy-icon"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4 border-t border-white/5 flex justify-between items-center bg-black/20" x-show="filteredProxies.length > itemsPerPage">
+                    <span class="text-xs text-gray-500" x-text="`Showing ${currentPage * itemsPerPage - itemsPerPage + 1} - ${Math.min(currentPage * itemsPerPage, filteredProxies.length)} of ${filteredProxies.length}`"></span>
+                    <div class="flex gap-2">
+                        <button class="btn btn-xs btn-outline border-white/10" @click="currentPage > 1 ? currentPage-- : null" :disabled="currentPage === 1">Prev</button>
+                        <button class="btn btn-xs btn-outline border-white/10" @click="currentPage < maxPage ? currentPage++ : null" :disabled="currentPage === maxPage">Next</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  </div>
+        <section class="gsap-fade-up grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 glass-panel p-6">
+                <div class="flex items-center gap-2 mb-6">
+                    <i data-lucide="bar-chart-2" class="text-brand-secondary w-5 h-5"></i>
+                    <h2 class="text-lg font-semibold text-white">Source Intelligence Board</h2>
+                </div>
+                <div id="leaderboard-chart" class="w-full h-[300px]"></div>
+            </div>
+            
+            <div class="glass-panel p-6 overflow-hidden flex flex-col">
+                <div class="flex items-center gap-2 mb-6">
+                    <i data-lucide="activity" class="text-brand-primary w-5 h-5"></i>
+                    <h2 class="text-lg font-semibold text-white">System Feed</h2>
+                </div>
+                <div class="flex-1 overflow-y-auto hide-scrollbar space-y-4">
+                    <template x-for="item in feed" :key="item.timestamp">
+                        <div class="flex gap-3 items-start relative before:absolute before:left-[11px] before:top-6 before:bottom-[-20px] before:w-[1px] before:bg-white/10 last:before:hidden">
+                            <div class="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 z-10">
+                                <i data-lucide="check-circle" class="w-3 h-3 text-brand-primary" x-show="item.type === 'sync'"></i>
+                                <i data-lucide="trending-up" class="w-3 h-3 text-brand-secondary" x-show="item.type === 'leaderboard'"></i>
+                            </div>
+                            <div class="pt-0.5">
+                                <div class="text-sm text-white font-medium" x-text="item.title"></div>
+                                <div class="text-xs text-gray-500 font-mono mt-1" x-text="item.description"></div>
+                                <div class="text-[10px] text-gray-600 mt-1" x-text="timeAgo(item.timestamp)"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
 
-</section>
+    </main>
 
-<!-- =========================================================
- FASTEST
-========================================================= -->
+    <script>
+        function commandCenter() {
+            return {
+                isLoading: true,
+                systemStatus: 'checking',
+                stats: {},
+                recommendations: [],
+                proxies: [],
+                leaderboard: [],
+                feed: [],
+                
+                // Table State
+                searchQuery: '',
+                activeTab: 'all',
+                currentPage: 1,
+                itemsPerPage: 15,
+                
+                // Initialize component
+                async init() {
+                    await this.fetchData();
+                    this.initECharts();
+                    this.initGSAP();
+                    this.initLenis();
+                    // Re-initialize Lucide icons for dynamically added content
+                    this.$watch('proxies', () => { setTimeout(() => lucide.createIcons(), 50); });
+                    lucide.createIcons();
+                },
 
-<section class="px-10 mt-16">
+                // Simulated Fetch with fallback data logic
+                async fetchData() {
+                    try {
+                        // In production, these fetch directly from the generated files
+                        const [healthRes, statsRes, recRes, proxyRes, leadRes, feedRes] = await Promise.all([
+                            fetch('data/system/health.json').catch(() => ({ok: false})),
+                            fetch('data/proxy-finder/stats.json').catch(() => ({ok: false})),
+                            fetch('data/proxy-finder/recommendations.json').catch(() => ({ok: false})),
+                            fetch('data/proxy-finder/proxy.json').catch(() => ({ok: false})),
+                            fetch('data/proxy-finder/leaderboard.json').catch(() => ({ok: false})),
+                            fetch('data/system/feed.json').catch(() => ({ok: false}))
+                        ]);
 
-  <div class="h1 mb-4">Fast Nodes</div>
+                        if(proxyRes.ok) {
+                            this.systemStatus = (await healthRes.json()).status;
+                            this.stats = await statsRes.json();
+                            this.recommendations = await recRes.json();
+                            this.proxies = await proxyRes.json();
+                            this.leaderboard = await leadRes.json();
+                            this.feed = await feedRes.json();
+                        } else {
+                            this.loadFallbackData(); // To show UI if data isn't generated yet
+                        }
+                    } catch (error) {
+                        console.warn("Using fallback data for demonstration...");
+                        this.loadFallbackData();
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
 
-  <div class="grid">
+                // Derived state for the table
+                get filteredProxies() {
+                    let result = this.proxies;
+                    
+                    if (this.activeTab !== 'all') {
+                        result = result.filter(p => p.type.toLowerCase() === this.activeTab.toLowerCase());
+                    }
+                    
+                    if (this.searchQuery) {
+                        const q = this.searchQuery.toLowerCase();
+                        result = result.filter(p => 
+                            p.source.toLowerCase().includes(q) || 
+                            p.type.toLowerCase().includes(q) ||
+                            p.id.toLowerCase().includes(q)
+                        );
+                    }
+                    
+                    // Reset to page 1 on filter change
+                    this.currentPage = 1;
+                    return result;
+                },
 
-    <template x-for="f in fastest">
-      <div class="glass card">
-        <div class="sub break-all" x-text="f.url"></div>
-        <div class="mt-2">⚡ <span x-text="f.latency_ms"></span> ms</div>
-      </div>
-    </template>
+                get paginatedProxies() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.filteredProxies.slice(start, start + this.itemsPerPage);
+                },
 
-  </div>
+                get maxPage() {
+                    return Math.ceil(this.filteredProxies.length / this.itemsPerPage);
+                },
 
-</section>
+                // Utilities
+                getProtocolColor(type) {
+                    const colors = { vless: 'bg-purple-500', vmess: 'bg-blue-500', trojan: 'bg-red-500', shadowsocks: 'bg-green-500', mtproto: 'bg-yellow-500' };
+                    return colors[type.toLowerCase()] || 'bg-gray-500';
+                },
+                
+                getProtocolTextColor(type) {
+                    const colors = { vless: 'text-purple-400', vmess: 'text-blue-400', trojan: 'text-red-400', shadowsocks: 'text-green-400', mtproto: 'text-yellow-400' };
+                    return colors[type.toLowerCase()] || 'text-gray-400';
+                },
 
-<!-- =========================================================
- HEALTH CHART
-========================================================= -->
+                formatDate(isoString) {
+                    if (!isoString) return 'N/A';
+                    const date = new Date(isoString);
+                    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit' });
+                },
 
-<section class="px-10 mt-20">
+                timeAgo(isoString) {
+                    if (!isoString) return 'Just now';
+                    const diff = Math.floor((new Date() - new Date(isoString)) / 1000);
+                    if (diff < 60) return `${diff} seconds ago`;
+                    if (diff < 3600) return `${Math.floor(diff/60)} mins ago`;
+                    return `${Math.floor(diff/3600)} hours ago`;
+                },
 
-  <div class="glass p-6">
-    <div class="h1 mb-4">System Health</div>
-    <canvas id="chart"></canvas>
-  </div>
+                // Copy interaction with GSAP
+                copy(text, btnElement) {
+                    navigator.clipboard.writeText(text);
+                    const iconElement = btnElement.querySelector('.copy-icon');
+                    
+                    // GSAP Animation for micro-interaction
+                    gsap.to(btnElement, { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1 });
+                    
+                    if(iconElement) {
+                        iconElement.setAttribute('data-lucide', 'check');
+                        iconElement.classList.add('text-green-400');
+                        lucide.createIcons({ attrs: { class: ["copy-icon", "w-4", "h-4", "text-green-400"] } });
+                        
+                        setTimeout(() => {
+                            iconElement.setAttribute('data-lucide', 'copy');
+                            iconElement.classList.remove('text-green-400');
+                            lucide.createIcons({ attrs: { class: ["copy-icon", "w-4", "h-4"] } });
+                        }, 2000);
+                    }
+                },
 
-</section>
+                // ECharts Initialization
+                initECharts() {
+                    setTimeout(() => {
+                        const chartDom = document.getElementById('leaderboard-chart');
+                        if (!chartDom || this.leaderboard.length === 0) return;
+                        
+                        const myChart = echarts.init(chartDom, 'dark', { renderer: 'svg' });
+                        
+                        // Get top 5
+                        const topData = this.leaderboard.slice(0, 5).reverse();
+                        
+                        const option = {
+                            backgroundColor: 'transparent',
+                            grid: { top: 10, bottom: 20, left: 100, right: 20 },
+                            xAxis: { type: 'value', show: false },
+                            yAxis: { 
+                                type: 'category', 
+                                data: topData.map(d => d.source.substring(0, 12) + '...'),
+                                axisLine: { show: false },
+                                axisTick: { show: false },
+                                axisLabel: { color: '#9ca3af', fontFamily: 'Fira Code', fontSize: 10 }
+                            },
+                            series: [{
+                                data: topData.map(d => d.trust),
+                                type: 'bar',
+                                showBackground: true,
+                                backgroundStyle: { color: 'rgba(255, 255, 255, 0.05)', borderRadius: 4 },
+                                itemStyle: {
+                                    borderRadius: 4,
+                                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                                        { offset: 0, color: '#8b5cf6' },
+                                        { offset: 1, color: '#3b82f6' }
+                                    ])
+                                },
+                                label: { show: true, position: 'insideRight', formatter: '{c} Pt', color: '#fff', fontSize: 10, fontFamily: 'Fira Code' }
+                            }],
+                            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#333' }
+                        };
+                        myChart.setOption(option);
+                        
+                        window.addEventListener('resize', () => myChart.resize());
+                    }, 100);
+                },
 
-<!-- =========================================================
- SCRIPT ENGINE
-========================================================= -->
+                // Animations
+                initGSAP() {
+                    gsap.registerPlugin(ScrollTrigger);
+                    // Fade up effect for sections
+                    gsap.utils.toArray('.gsap-fade-up').forEach((el, i) => {
+                        gsap.fromTo(el, 
+                            { opacity: 0, y: 30 },
+                            { 
+                                opacity: 1, 
+                                y: 0, 
+                                duration: 0.8, 
+                                delay: i * 0.1, 
+                                ease: "power3.out",
+                                scrollTrigger: { trigger: el, start: "top 90%" }
+                            }
+                        );
+                    });
+                },
 
-<script>
+                initLenis() {
+                    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smooth: true });
+                    function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+                    requestAnimationFrame(raf);
+                },
 
-function proxyOS() {
-  return {
-
-    all: [],
-    visible: [],
-    fastest: [],
-    stats: {},
-    statsCards: [],
-    page: 0,
-    perPage: 30,
-    query: "",
-
-    async init() {
-      await this.fetch();
-      this.initScroll();
-      this.animate();
-      this.chart();
-    },
-
-    async fetch() {
-
-      const base = "https://raw.githubusercontent.com/khashayarone/khashayarone.github.io/main/data/";
-
-      this.all = await fetch(base + "proxy-finder/proxy.json").then(r => r.json());
-      this.fastest = await fetch(base + "proxy-finder/fastest.json").then(r => r.json());
-      this.stats = await fetch(base + "system/stats.json").then(r => r.json());
-
-      this.statsCards = [
-        { label:"Active", value:this.stats.configs },
-        { label:"Sources", value:this.stats.sources },
-        { label:"Status", value:"LIVE" }
-      ];
-
-      this.loadMore(true);
-    },
-
-    loadMore(reset=false) {
-
-      if(reset){
-        this.visible = [];
-        this.page = 0;
-      }
-
-      const start = this.page * this.perPage;
-      const end = start + this.perPage;
-
-      this.visible.push(...this.all.slice(start, end));
-      this.page++;
-
-      gsap.from(".card", {
-        opacity:0,
-        y:20,
-        stagger:0.02
-      });
-    },
-
-    filter() {
-
-      if(!this.query) {
-        this.loadMore(true);
-        return;
-      }
-
-      const q = this.query.toLowerCase();
-
-      this.visible = this.all.filter(p =>
-        p.url.toLowerCase().includes(q) ||
-        p.type.toLowerCase().includes(q) ||
-        p.trust_grade.toLowerCase().includes(q)
-      );
-
-    },
-
-    initScroll() {
-      const lenis = new Lenis();
-      function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
-      requestAnimationFrame(raf);
-    },
-
-    animate() {
-      gsap.from(".h1", { opacity:0, y:20, duration:1 });
-    },
-
-    chart() {
-      const ctx = document.getElementById('chart');
-
-      new Chart(ctx, {
-        type:'doughnut',
-        data:{
-          labels:['Active','Unknown'],
-          datasets:[{
-            data:[75,25],
-            backgroundColor:['#22c55e','#ef4444']
-          }]
+                // Mock Data for layout testing if actual JSON isn't available yet
+                loadFallbackData() {
+                    this.systemStatus = 'healthy';
+                    this.stats = { total_configs: 942, channels_checked: 12, total_messages_scraped: 300, generated_at: new Date().toISOString() };
+                    this.feed = [
+                        { type: 'sync', title: 'Database Updated', description: '942 active configs synced', timestamp: new Date().toISOString() },
+                        { type: 'leaderboard', title: 'Top Source Updated', description: 'V2rayngvpn holds #1', timestamp: new Date(Date.now() - 600000).toISOString() }
+                    ];
+                    this.leaderboard = [
+                        { source: 'v2rayngvpn', configs: 120, trust: 8500 },
+                        { source: 'ProxyMTProto', configs: 90, trust: 7200 },
+                        { source: 'shaxhabb', configs: 85, trust: 6800 }
+                    ];
+                    const mockSources = ['Spotify_Porteghali', 'lightning6', 'v2rayngvpn', 'ProxyDaemi'];
+                    const mockTypes = ['vless', 'vmess', 'trojan', 'shadowsocks'];
+                    
+                    for(let i=0; i<50; i++) {
+                        const type = mockTypes[Math.floor(Math.random() * mockTypes.length)];
+                        const proxy = {
+                            id: Math.random().toString(36).substring(2, 10),
+                            type: type,
+                            source: mockSources[Math.floor(Math.random() * mockSources.length)],
+                            latency_ms: Math.floor(Math.random() * 800) + 50,
+                            trust_score: Math.floor(Math.random() * 40) + 60,
+                            last_seen: new Date(Date.now() - Math.floor(Math.random() * 10000000)).toISOString(),
+                            url: `${type}://mock-url-for-testing-${i}`
+                        };
+                        this.proxies.push(proxy);
+                        if(proxy.trust_score > 90) this.recommendations.push(proxy);
+                    }
+                }
+            }
         }
-      });
-    }
-
-  }
-}
-
-</script>
-
+    </script>
 </body>
 </html>
