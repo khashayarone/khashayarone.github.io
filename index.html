@@ -1,106 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proxy Finder</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <link rel="stylesheet" href="./app.css" />
+<title>Proxy OS • Intelligence Layer</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+<!-- Core CDN Stack -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+/* =========================================================
+   🌌 DESIGN SYSTEM (Apple + Linear + Netflix hybrid)
+========================================================= */
+
+:root {
+  --bg: #05060a;
+  --glass: rgba(255,255,255,0.04);
+  --glass2: rgba(255,255,255,0.07);
+  --stroke: rgba(255,255,255,0.08);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+}
+
+body {
+  margin:0;
+  font-family: ui-sans-serif, system-ui;
+  background: radial-gradient(circle at top, #0b1020, #05060a);
+  color: var(--text);
+  overflow-x:hidden;
+}
+
+/* =========================================================
+   GLASS CORE
+========================================================= */
+
+.glass {
+  background: var(--glass);
+  border:1px solid var(--stroke);
+  backdrop-filter: blur(18px);
+  border-radius:18px;
+}
+
+.glass-hover {
+  transition:0.25s ease;
+}
+
+.glass-hover:hover {
+  transform: translateY(-5px) scale(1.01);
+  background: var(--glass2);
+}
+
+/* =========================================================
+   HERO (Apple cinematic layer)
+========================================================= */
+
+.hero {
+  padding:70px 50px;
+  position:relative;
+}
+
+.hero::before {
+  content:'';
+  position:absolute;
+  width:500px;
+  height:500px;
+  background: radial-gradient(circle, var(--purple), transparent);
+  filter: blur(90px);
+  opacity:0.35;
+  top:-120px;
+  left:-120px;
+}
+
+/* =========================================================
+   NAV BAR (Linear style)
+========================================================= */
+
+.nav {
+  display:flex;
+  justify-content:space-between;
+  padding:20px 40px;
+  position:sticky;
+  top:0;
+  backdrop-filter: blur(20px);
+  background: rgba(0,0,0,0.2);
+  border-bottom:1px solid var(--stroke);
+  z-index:100;
+}
+
+/* =========================================================
+   PROXY CARD (core UI atom)
+========================================================= */
+
+.card {
+  padding:14px;
+  border-radius:16px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,0.03);
+  transition:0.25s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* shimmer */
+.card::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.05), transparent);
+  transform: translateX(-100%);
+}
+
+.card:hover::before {
+  animation: shine 1s ease;
+}
+
+@keyframes shine {
+  100% { transform: translateX(100%); }
+}
+
+/* =========================================================
+   BUTTON SYSTEM
+========================================================= */
+
+.btn {
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,0.04);
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.btn:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   GRID SYSTEM
+========================================================= */
+
+.grid {
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:16px;
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns:1fr; }
+}
+
+/* =========================================================
+   SEARCH BAR
+========================================================= */
+
+.search {
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,0.03);
+  color:white;
+  outline:none;
+}
+
+/* =========================================================
+   SECTION TITLE
+========================================================= */
+
+.h1 {
+  font-size:30px;
+  font-weight:700;
+}
+
+.sub {
+  color: var(--muted);
+  font-size:13px;
+}
+
+</style>
 </head>
-<body>
 
-  <header class="hero">
-    <div class="hero-content">
-      <h1>VPN Config Finder</h1>
-      <p>Live Config Intelligence Engine</p>
+<body x-data="proxyOS()" x-init="init()">
 
-      <div id="heroStats" class="hero-stats">
-        <div class="stat">
-          <span id="totalConfigs">0</span>
-          <small>Configs</small>
-        </div>
-        <div class="stat">
-          <span id="totalSources">0</span>
-          <small>Sources</small>
-        </div>
-        <div class="stat">
-          <span id="lastUpdate">--</span>
-          <small>Updated</small>
-        </div>
-      </div>
+<!-- =========================================================
+ NAV
+========================================================= -->
+
+<div class="nav">
+  <div>🧠 Proxy OS</div>
+  <div class="sub">Apple-grade Intelligence Layer</div>
+</div>
+
+<!-- =========================================================
+ HERO
+========================================================= -->
+
+<section class="hero">
+  <div class="h1">Live Proxy Intelligence System</div>
+  <div class="sub">Netflix feed • Apple UI • Real-time ranking engine</div>
+
+  <input class="search mt-4"
+         placeholder="Search proxy, type, or trust grade..."
+         x-model="query"
+         @input="filter()"/>
+</section>
+
+<!-- =========================================================
+ STATS
+========================================================= -->
+
+<section class="grid px-10">
+
+  <template x-for="s in statsCards">
+    <div class="glass card">
+      <div class="sub" x-text="s.label"></div>
+      <div class="text-xl font-bold mt-2" x-text="s.value"></div>
     </div>
-  </header>
+  </template>
 
-  <section class="status-bar">
-    <span class="pulse"></span>
-    <span id="statusText">Loading live network telemetry...</span>
-  </section>
+</section>
 
-  <section class="controls">
-    <input id="searchInput" type="search" placeholder="Search protocol, source..." />
+<!-- =========================================================
+ PROXY FEED
+========================================================= -->
 
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="vless">VLESS</button>
-      <button class="filter-btn" data-filter="vmess">VMESS</button>
-      <button class="filter-btn" data-filter="trojan">TROJAN</button>
-      <button class="filter-btn" data-filter="mtproto">MTProto</button>
-    </div>
-  </section>
+<section class="px-10 mt-10">
 
-  <main>
-
-    <section>
-      <h2>Recommended</h2>
-      <div id="recommendedConfigs" class="cards"></div>
-    </section>
-
-    <section>
-      <h2>Fastest Configs</h2>
-      <div id="fastConfigs" class="cards"></div>
-    </section>
-
-    <section>
-      <h2>Telegram Proxies</h2>
-      <div id="telegramConfigs" class="cards"></div>
-    </section>
-
-    <section>
-      <h2>All Configs</h2>
-      <div id="allConfigs" class="cards"></div>
-    </section>
-
-    <section>
-      <h2>Live Feed</h2>
-      <div id="feed"></div>
-    </section>
-
-    <section>
-      <h2>Source Leaderboard</h2>
-      <div id="leaderboard"></div>
-    </section>
-
-  </main>
-
-  <div id="qrModal" class="modal hidden">
-    <div class="modal-content">
-      <button id="closeQr">✕</button>
-      <canvas id="qrCanvas"></canvas>
-    </div>
+  <div class="flex justify-between mb-4">
+    <div class="h1">Feed</div>
+    <button class="btn" @click="loadMore()">Load More</button>
   </div>
 
-  <nav class="bottom-bar">
-    <button onclick="window.scrollTo({top:0,behavior:'smooth'})">
-      <i data-lucide="arrow-up"></i>
-    </button>
-    <button onclick="location.reload()">
-      <i data-lucide="refresh-cw"></i>
-    </button>
-  </nav>
+  <div class="grid">
 
-  <script src="./app.js"></script>
+    <template x-for="p in visible">
+
+      <div class="card glass-hover">
+
+        <div class="flex justify-between">
+          <div x-text="p.type"></div>
+          <div x-text="p.trust_grade"></div>
+        </div>
+
+        <div class="sub mt-2 break-all" x-text="p.url"></div>
+
+        <div class="mt-3 text-sm">
+          ⚡ <span x-text="p.latency_ms"></span> ms
+        </div>
+
+      </div>
+
+    </template>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+ FASTEST
+========================================================= -->
+
+<section class="px-10 mt-16">
+
+  <div class="h1 mb-4">Fast Nodes</div>
+
+  <div class="grid">
+
+    <template x-for="f in fastest">
+      <div class="glass card">
+        <div class="sub break-all" x-text="f.url"></div>
+        <div class="mt-2">⚡ <span x-text="f.latency_ms"></span> ms</div>
+      </div>
+    </template>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+ HEALTH CHART
+========================================================= -->
+
+<section class="px-10 mt-20">
+
+  <div class="glass p-6">
+    <div class="h1 mb-4">System Health</div>
+    <canvas id="chart"></canvas>
+  </div>
+
+</section>
+
+<!-- =========================================================
+ SCRIPT ENGINE
+========================================================= -->
+
+<script>
+
+function proxyOS() {
+  return {
+
+    all: [],
+    visible: [],
+    fastest: [],
+    stats: {},
+    statsCards: [],
+    page: 0,
+    perPage: 30,
+    query: "",
+
+    async init() {
+      await this.fetch();
+      this.initScroll();
+      this.animate();
+      this.chart();
+    },
+
+    async fetch() {
+
+      const base = "https://raw.githubusercontent.com/khashayarone/khashayarone.github.io/main/data/";
+
+      this.all = await fetch(base + "proxy-finder/proxy.json").then(r => r.json());
+      this.fastest = await fetch(base + "proxy-finder/fastest.json").then(r => r.json());
+      this.stats = await fetch(base + "system/stats.json").then(r => r.json());
+
+      this.statsCards = [
+        { label:"Active", value:this.stats.configs },
+        { label:"Sources", value:this.stats.sources },
+        { label:"Status", value:"LIVE" }
+      ];
+
+      this.loadMore(true);
+    },
+
+    loadMore(reset=false) {
+
+      if(reset){
+        this.visible = [];
+        this.page = 0;
+      }
+
+      const start = this.page * this.perPage;
+      const end = start + this.perPage;
+
+      this.visible.push(...this.all.slice(start, end));
+      this.page++;
+
+      gsap.from(".card", {
+        opacity:0,
+        y:20,
+        stagger:0.02
+      });
+    },
+
+    filter() {
+
+      if(!this.query) {
+        this.loadMore(true);
+        return;
+      }
+
+      const q = this.query.toLowerCase();
+
+      this.visible = this.all.filter(p =>
+        p.url.toLowerCase().includes(q) ||
+        p.type.toLowerCase().includes(q) ||
+        p.trust_grade.toLowerCase().includes(q)
+      );
+
+    },
+
+    initScroll() {
+      const lenis = new Lenis();
+      function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+      requestAnimationFrame(raf);
+    },
+
+    animate() {
+      gsap.from(".h1", { opacity:0, y:20, duration:1 });
+    },
+
+    chart() {
+      const ctx = document.getElementById('chart');
+
+      new Chart(ctx, {
+        type:'doughnut',
+        data:{
+          labels:['Active','Unknown'],
+          datasets:[{
+            data:[75,25],
+            backgroundColor:['#22c55e','#ef4444']
+          }]
+        }
+      });
+    }
+
+  }
+}
+
+</script>
+
 </body>
 </html>
