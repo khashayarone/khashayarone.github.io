@@ -1,37 +1,32 @@
 [
   {
     "source": "LonUp_M",
-    "configs": 242,
-    "trust": 21015
+    "configs": 294,
+    "trust": 24628
   },
   {
     "source": "meliproxyy",
-    "configs": 215,
-    "trust": 20109
+    "configs": 234,
+    "trust": 20989
   },
   {
     "source": "ConfigX2ray",
     "configs": 63,
-    "trust": 6010
+    "trust": 5943
   },
   {
     "source": "Spotify_Porteghali",
-    "configs": 41,
-    "trust": 3826
+    "configs": 42,
+    "trust": 3793
   },
   {
     "source": "v2rayngvpn",
-    "configs": 34,
-    "trust": 3051
+    "configs": 37,
+    "trust": 3195
   },
   {
     "source": "sorenab2",
-    "configs": 4,
-    "trust": 352
-  },
-  {
-    "source": "ProxyDaemi",
-    "configs": 1,
-    "trust": 93
+    "configs": 6,
+    "trust": 518
   }
 ]
