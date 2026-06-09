@@ -1,102 +1,92 @@
 [
   {
     "source": "v2ray_official",
-    "configs": 210,
-    "trust": 19856
+    "configs": 181,
+    "trust": 16543
   },
   {
     "source": "outline_vpn",
     "configs": 164,
-    "trust": 15598
+    "trust": 15067
   },
   {
     "source": "v2rayconfigs",
     "configs": 116,
-    "trust": 11182
+    "trust": 11288
   },
   {
     "source": "iProxyChannel",
-    "configs": 109,
-    "trust": 9879
+    "configs": 106,
+    "trust": 9184
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3191
+    "trust": 3234
+  },
+  {
+    "source": "v2ray_configs_pool",
+    "configs": 32,
+    "trust": 2622
   },
   {
     "source": "opensafer",
     "configs": 23,
-    "trust": 2201
-  },
-  {
-    "source": "v2ray_configs_pool",
-    "configs": 24,
-    "trust": 2104
+    "trust": 2244
   },
   {
     "source": "Raiv2mmr",
-    "configs": 23,
-    "trust": 1941
-  },
-  {
-    "source": "proxiteiegram",
-    "configs": 15,
-    "trust": 1331
+    "configs": 27,
+    "trust": 2190
   },
   {
     "source": "V2RayRootFree",
     "configs": 15,
-    "trust": 1312
+    "trust": 1307
   },
   {
     "source": "v2ray3",
     "configs": 11,
-    "trust": 931
+    "trust": 962
+  },
+  {
+    "source": "irproxy",
+    "configs": 11,
+    "trust": 925
   },
   {
     "source": "vpnbaz",
     "configs": 10,
-    "trust": 898
+    "trust": 878
   },
   {
     "source": "v2ray_team",
     "configs": 6,
-    "trust": 582
+    "trust": 588
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 485
+    "trust": 460
   },
   {
     "source": "freeproxymaker",
     "configs": 4,
-    "trust": 368
+    "trust": 352
   },
   {
-    "source": "v2rayvpnchannel",
-    "configs": 3,
-    "trust": 283
+    "source": "filtereshekan",
+    "configs": 4,
+    "trust": 331
   },
   {
     "source": "proxystore11",
     "configs": 3,
-    "trust": 281
+    "trust": 264
   },
   {
-    "source": "filtereshekan",
-    "configs": 1,
-    "trust": 97
-  },
-  {
-    "source": "feriproxy",
-    "configs": 1,
-    "trust": 91
-  },
-  {
-    "source": "pinkproxy",
-    "configs": 1,
-    "trust": 86
+    "source": "v2rayvpnchannel",
+    "configs": 3,
+    "trust": 244
   }
 ]
