@@ -1,23 +1,23 @@
 [
   {
     "source": "v2ray_official",
-    "configs": 184,
-    "trust": 17752
+    "configs": 244,
+    "trust": 22722
   },
   {
     "source": "outline_vpn",
-    "configs": 162,
-    "trust": 15800
+    "configs": 167,
+    "trust": 16185
   },
   {
     "source": "v2rayconfigs",
     "configs": 116,
-    "trust": 11530
+    "trust": 11520
   },
   {
     "source": "iProxyChannel",
-    "configs": 105,
-    "trust": 9763
+    "configs": 81,
+    "trust": 7384
   },
   {
     "source": "FilterShekanChannel",
@@ -26,38 +26,38 @@
   },
   {
     "source": "Raiv2mmr",
-    "configs": 33,
-    "trust": 2791
+    "configs": 36,
+    "trust": 3053
   },
   {
     "source": "v2ray_configs_pool",
-    "configs": 27,
-    "trust": 2355
+    "configs": 34,
+    "trust": 2936
   },
   {
     "source": "opensafer",
     "configs": 23,
-    "trust": 2290
+    "trust": 2280
   },
   {
     "source": "V2RayRootFree",
     "configs": 15,
-    "trust": 1338
+    "trust": 1308
   },
   {
     "source": "vpnbaz",
-    "configs": 14,
-    "trust": 1246
-  },
-  {
-    "source": "proxiteiegram",
     "configs": 13,
-    "trust": 1079
+    "trust": 1178
   },
   {
     "source": "v2ray3",
-    "configs": 10,
-    "trust": 894
+    "configs": 11,
+    "trust": 976
+  },
+  {
+    "source": "irproxy",
+    "configs": 9,
+    "trust": 779
   },
   {
     "source": "v2ray_team",
@@ -67,7 +67,12 @@
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 500
+    "trust": 490
+  },
+  {
+    "source": "proxystore11",
+    "configs": 5,
+    "trust": 432
   },
   {
     "source": "freeproxymaker",
@@ -76,21 +81,16 @@
   },
   {
     "source": "filtereshekan",
-    "configs": 4,
-    "trust": 309
-  },
-  {
-    "source": "proxystore11",
     "configs": 3,
-    "trust": 270
+    "trust": 272
   },
   {
     "source": "v2rayvpnchannel",
-    "configs": 1,
-    "trust": 91
+    "configs": 2,
+    "trust": 182
   },
   {
-    "source": "feriproxy",
+    "source": "iMTProxy_ir",
     "configs": 1,
     "trust": 81
   }
