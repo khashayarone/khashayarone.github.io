@@ -1,33 +1,33 @@
 [
   {
     "source": "v2ray_official",
-    "configs": 233,
-    "trust": 22668
+    "configs": 218,
+    "trust": 21151
   },
   {
     "source": "outline_vpn",
-    "configs": 174,
-    "trust": 16828
+    "configs": 173,
+    "trust": 16802
   },
   {
     "source": "v2rayconfigs",
     "configs": 116,
-    "trust": 11540
+    "trust": 11480
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
+    "trust": 3300
   },
   {
     "source": "v2ray_configs_pool",
-    "configs": 33,
-    "trust": 2903
+    "configs": 37,
+    "trust": 3279
   },
   {
     "source": "Raiv2mmr",
-    "configs": 30,
-    "trust": 2634
+    "configs": 33,
+    "trust": 2785
   },
   {
     "source": "opensafer",
@@ -36,18 +36,18 @@
   },
   {
     "source": "vpnbaz",
-    "configs": 17,
-    "trust": 1560
+    "configs": 18,
+    "trust": 1661
   },
   {
     "source": "V2RayRootFree",
-    "configs": 17,
-    "trust": 1508
+    "configs": 19,
+    "trust": 1634
   },
   {
     "source": "proxiteiegram",
-    "configs": 14,
-    "trust": 1258
+    "configs": 15,
+    "trust": 1310
   },
   {
     "source": "v2ray3",
@@ -57,7 +57,7 @@
   {
     "source": "v2ray_team",
     "configs": 6,
-    "trust": 590
+    "trust": 580
   },
   {
     "source": "v2rayng_channel",
@@ -70,28 +70,33 @@
     "trust": 470
   },
   {
-    "source": "proxystore11",
-    "configs": 5,
-    "trust": 460
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 4,
-    "trust": 358
-  },
-  {
     "source": "freeproxymaker",
-    "configs": 4,
-    "trust": 352
+    "configs": 3,
+    "trust": 270
+  },
+  {
+    "source": "proxystore11",
+    "configs": 3,
+    "trust": 270
   },
   {
     "source": "proxymtprotoir",
-    "configs": 4,
-    "trust": 348
+    "configs": 3,
+    "trust": 264
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 2,
+    "trust": 172
   },
   {
     "source": "filtereshekan",
     "configs": 2,
-    "trust": 169
+    "trust": 171
+  },
+  {
+    "source": "iMTProxy_ir",
+    "configs": 2,
+    "trust": 162
   }
 ]
