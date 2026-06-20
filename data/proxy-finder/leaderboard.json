@@ -2,22 +2,22 @@
   {
     "source": "outline_vpn",
     "configs": 205,
-    "trust": 18534
+    "trust": 19537
   },
   {
     "source": "v2rayconfigs",
     "configs": 116,
-    "trust": 11540
+    "trust": 11520
   },
   {
     "source": "v2ray_official",
-    "configs": 122,
-    "trust": 11405
+    "configs": 81,
+    "trust": 7824
   },
   {
     "source": "iProxyChannel",
     "configs": 60,
-    "trust": 5237
+    "trust": 5350
   },
   {
     "source": "FilterShekanChannel",
@@ -26,8 +26,13 @@
   },
   {
     "source": "Raiv2mmr",
-    "configs": 31,
-    "trust": 2524
+    "configs": 35,
+    "trust": 2829
+  },
+  {
+    "source": "irproxy",
+    "configs": 27,
+    "trust": 2305
   },
   {
     "source": "opensafer",
@@ -35,24 +40,19 @@
     "trust": 2290
   },
   {
-    "source": "proxiteiegram",
-    "configs": 27,
-    "trust": 2249
+    "source": "V2RayRootFree",
+    "configs": 18,
+    "trust": 1588
   },
   {
     "source": "vpnbaz",
     "configs": 16,
-    "trust": 1414
-  },
-  {
-    "source": "V2RayRootFree",
-    "configs": 15,
-    "trust": 1310
+    "trust": 1452
   },
   {
     "source": "proxymtprotoir",
     "configs": 14,
-    "trust": 1186
+    "trust": 1200
   },
   {
     "source": "proxystore11",
@@ -65,9 +65,9 @@
     "trust": 600
   },
   {
-    "source": "feriproxy",
-    "configs": 6,
-    "trust": 486
+    "source": "iMTProxy_ir",
+    "configs": 7,
+    "trust": 599
   },
   {
     "source": "v2rayng_channel",
@@ -80,28 +80,28 @@
     "trust": 460
   },
   {
-    "source": "v2rayvpnchannel",
-    "configs": 4,
-    "trust": 327
-  },
-  {
     "source": "freeproxymaker",
     "configs": 3,
-    "trust": 270
+    "trust": 250
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 3,
+    "trust": 247
   },
   {
     "source": "filtereshekan",
     "configs": 3,
-    "trust": 232
+    "trust": 244
+  },
+  {
+    "source": "proxy_qavi",
+    "configs": 1,
+    "trust": 88
   },
   {
     "source": "proxydaemi",
     "configs": 1,
     "trust": 80
-  },
-  {
-    "source": "proxy_qavi",
-    "configs": 1,
-    "trust": 77
   }
 ]
