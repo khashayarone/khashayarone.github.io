@@ -1,8 +1,8 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 204,
-    "trust": 19547
+    "configs": 196,
+    "trust": 17765
   },
   {
     "source": "v2rayconfigs",
@@ -12,12 +12,12 @@
   {
     "source": "v2ray_official",
     "configs": 93,
-    "trust": 8864
+    "trust": 8708
   },
   {
     "source": "iProxyChannel",
-    "configs": 58,
-    "trust": 5287
+    "configs": 55,
+    "trust": 5054
   },
   {
     "source": "FilterShekanChannel",
@@ -26,33 +26,38 @@
   },
   {
     "source": "Raiv2mmr",
-    "configs": 31,
-    "trust": 2572
+    "configs": 30,
+    "trust": 2471
+  },
+  {
+    "source": "proxiteiegram",
+    "configs": 30,
+    "trust": 2350
+  },
+  {
+    "source": "vpnbaz",
+    "configs": 26,
+    "trust": 2330
   },
   {
     "source": "opensafer",
     "configs": 23,
-    "trust": 2280
+    "trust": 2300
   },
   {
     "source": "V2RayRootFree",
-    "configs": 20,
-    "trust": 1710
-  },
-  {
-    "source": "vpnbaz",
-    "configs": 16,
-    "trust": 1510
+    "configs": 15,
+    "trust": 1295
   },
   {
     "source": "proxystore11",
-    "configs": 7,
-    "trust": 618
+    "configs": 8,
+    "trust": 720
   },
   {
     "source": "v2ray_team",
     "configs": 6,
-    "trust": 580
+    "trust": 570
   },
   {
     "source": "v2rayng_channel",
@@ -65,14 +70,9 @@
     "trust": 460
   },
   {
-    "source": "proxiteiegram",
-    "configs": 5,
-    "trust": 431
-  },
-  {
     "source": "feriproxy",
     "configs": 4,
-    "trust": 335
+    "trust": 329
   },
   {
     "source": "freeproxymaker",
@@ -80,23 +80,23 @@
     "trust": 270
   },
   {
-    "source": "v2rayvpnchannel",
+    "source": "filtereshekan",
     "configs": 3,
-    "trust": 246
+    "trust": 231
   },
   {
-    "source": "filtereshekan",
-    "configs": 2,
-    "trust": 169
+    "source": "v2rayvpnchannel",
+    "configs": 1,
+    "trust": 83
   },
   {
     "source": "proxydaemi",
     "configs": 1,
-    "trust": 90
+    "trust": 80
   },
   {
     "source": "proxy_qavi",
     "configs": 1,
-    "trust": 90
+    "trust": 80
   }
 ]
