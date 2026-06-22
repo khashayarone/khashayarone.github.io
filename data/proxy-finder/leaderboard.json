@@ -1,8 +1,8 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 211,
-    "trust": 20484
+    "configs": 209,
+    "trust": 18874
   },
   {
     "source": "v2rayconfigs",
@@ -11,48 +11,48 @@
   },
   {
     "source": "v2ray_official",
-    "configs": 91,
-    "trust": 8925
+    "configs": 90,
+    "trust": 8516
   },
   {
     "source": "iProxyChannel",
-    "configs": 93,
-    "trust": 8783
+    "configs": 92,
+    "trust": 8325
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
-  },
-  {
-    "source": "Raiv2mmr",
-    "configs": 28,
-    "trust": 2593
-  },
-  {
-    "source": "irproxy",
-    "configs": 30,
-    "trust": 2566
+    "trust": 3300
   },
   {
     "source": "vpnbaz",
     "configs": 26,
-    "trust": 2498
+    "trust": 2388
+  },
+  {
+    "source": "Raiv2mmr",
+    "configs": 26,
+    "trust": 2345
   },
   {
     "source": "opensafer",
     "configs": 23,
-    "trust": 2270
+    "trust": 2290
+  },
+  {
+    "source": "irproxy",
+    "configs": 24,
+    "trust": 1985
   },
   {
     "source": "V2RayRootFree",
-    "configs": 17,
-    "trust": 1462
+    "configs": 14,
+    "trust": 1200
   },
   {
     "source": "proxystore11",
-    "configs": 7,
-    "trust": 650
+    "configs": 9,
+    "trust": 792
   },
   {
     "source": "v2ray_team",
@@ -60,24 +60,19 @@
     "trust": 600
   },
   {
-    "source": "iMTProxy_ir",
+    "source": "feriproxy",
     "configs": 6,
-    "trust": 556
+    "trust": 522
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 490
+    "trust": 470
   },
   {
     "source": "v2ray3",
-    "configs": 5,
-    "trust": 460
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 3,
-    "trust": 285
+    "configs": 4,
+    "trust": 360
   },
   {
     "source": "freeproxymaker",
@@ -85,17 +80,22 @@
     "trust": 270
   },
   {
-    "source": "filtereshekan",
+    "source": "v2rayvpnchannel",
     "configs": 3,
-    "trust": 247
+    "trust": 258
   },
   {
-    "source": "proxydaemi",
+    "source": "filtereshekan",
+    "configs": 3,
+    "trust": 248
+  },
+  {
+    "source": "proxy_qavi",
     "configs": 1,
     "trust": 90
   },
   {
-    "source": "proxy_qavi",
+    "source": "proxydaemi",
     "configs": 1,
     "trust": 80
   }
