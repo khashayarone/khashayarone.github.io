@@ -1,23 +1,23 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 210,
-    "trust": 20387
+    "configs": 212,
+    "trust": 19647
   },
   {
     "source": "v2rayconfigs",
     "configs": 116,
-    "trust": 11530
+    "trust": 11520
   },
   {
     "source": "iProxyChannel",
     "configs": 104,
-    "trust": 9355
+    "trust": 9185
   },
   {
     "source": "v2ray_official",
-    "configs": 91,
-    "trust": 8901
+    "configs": 54,
+    "trust": 4982
   },
   {
     "source": "FilterShekanChannel",
@@ -26,8 +26,8 @@
   },
   {
     "source": "Raiv2mmr",
-    "configs": 31,
-    "trust": 2581
+    "configs": 33,
+    "trust": 2620
   },
   {
     "source": "opensafer",
@@ -36,33 +36,33 @@
   },
   {
     "source": "vpnbaz",
-    "configs": 19,
-    "trust": 1778
+    "configs": 25,
+    "trust": 2245
+  },
+  {
+    "source": "proxiteiegram",
+    "configs": 23,
+    "trust": 1885
   },
   {
     "source": "V2RayRootFree",
     "configs": 16,
-    "trust": 1391
+    "trust": 1421
   },
   {
     "source": "proxystore11",
     "configs": 11,
-    "trust": 1004
-  },
-  {
-    "source": "irproxy",
-    "configs": 11,
-    "trust": 912
+    "trust": 1008
   },
   {
     "source": "v2ray_team",
     "configs": 6,
-    "trust": 590
+    "trust": 600
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 500
+    "trust": 470
   },
   {
     "source": "v2ray3",
@@ -72,17 +72,17 @@
   {
     "source": "freeproxymaker",
     "configs": 3,
-    "trust": 280
+    "trust": 270
   },
   {
     "source": "v2rayvpnchannel",
-    "configs": 3,
-    "trust": 280
+    "configs": 2,
+    "trust": 171
   },
   {
-    "source": "filtereshekan",
-    "configs": 3,
-    "trust": 249
+    "source": "proxymtprotoir",
+    "configs": 2,
+    "trust": 163
   },
   {
     "source": "proxydaemi",
@@ -90,17 +90,12 @@
     "trust": 90
   },
   {
-    "source": "proxymtprotoir",
+    "source": "iMTProxy_ir",
     "configs": 1,
-    "trust": 81
+    "trust": 90
   },
   {
     "source": "proxy_qavi",
-    "configs": 1,
-    "trust": 80
-  },
-  {
-    "source": "feriproxy",
     "configs": 1,
     "trust": 80
   }
