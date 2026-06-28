@@ -1,68 +1,78 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 206,
-    "trust": 18797
+    "configs": 208,
+    "trust": 20321
   },
   {
     "source": "v2rayconfigs",
     "configs": 116,
-    "trust": 11540
+    "trust": 11490
   },
   {
     "source": "iProxyChannel",
-    "configs": 63,
-    "trust": 5310
+    "configs": 95,
+    "trust": 8488
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3300
+    "trust": 3290
   },
   {
     "source": "Raiv2mmr",
-    "configs": 29,
-    "trust": 2337
+    "configs": 28,
+    "trust": 2356
   },
   {
     "source": "opensafer",
     "configs": 23,
-    "trust": 2300
+    "trust": 2270
   },
   {
     "source": "irproxy",
-    "configs": 23,
-    "trust": 1948
+    "configs": 24,
+    "trust": 2031
   },
   {
     "source": "vpnbaz",
-    "configs": 19,
-    "trust": 1808
+    "configs": 18,
+    "trust": 1740
   },
   {
     "source": "V2RayRootFree",
-    "configs": 14,
-    "trust": 1135
+    "configs": 19,
+    "trust": 1604
   },
   {
     "source": "proxystore11",
     "configs": 10,
-    "trust": 945
+    "trust": 967
   },
   {
-    "source": "feriproxy",
+    "source": "iMTProxy_ir",
     "configs": 8,
-    "trust": 659
+    "trust": 694
   },
   {
     "source": "v2ray_team",
     "configs": 6,
-    "trust": 600
+    "trust": 580
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 470
+    "trust": 500
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 4,
+    "trust": 372
+  },
+  {
+    "source": "filtereshekan",
+    "configs": 4,
+    "trust": 360
   },
   {
     "source": "v2ray3",
@@ -70,33 +80,23 @@
     "trust": 360
   },
   {
-    "source": "filtereshekan",
-    "configs": 4,
-    "trust": 340
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 4,
-    "trust": 328
-  },
-  {
     "source": "freeproxymaker",
     "configs": 3,
-    "trust": 270
+    "trust": 290
   },
   {
     "source": "proxy_qavi",
     "configs": 2,
-    "trust": 170
-  },
-  {
-    "source": "mtp_roto",
-    "configs": 1,
-    "trust": 81
+    "trust": 180
   },
   {
     "source": "proxydaemi",
     "configs": 1,
     "trust": 80
+  },
+  {
+    "source": "mtp_roto",
+    "configs": 1,
+    "trust": 72
   }
 ]
