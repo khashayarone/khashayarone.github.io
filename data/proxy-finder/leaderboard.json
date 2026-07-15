@@ -2,47 +2,47 @@
   {
     "source": "iProxyChannel",
     "configs": 288,
-    "trust": 27712
+    "trust": 27634
   },
   {
     "source": "outline_vpn",
-    "configs": 142,
-    "trust": 13709
+    "configs": 146,
+    "trust": 14061
   },
   {
     "source": "v2rayconfigs",
     "configs": 116,
-    "trust": 11490
+    "trust": 11520
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
+    "trust": 3280
   },
   {
     "source": "vpnbaz",
     "configs": 32,
-    "trust": 3020
+    "trust": 3025
   },
   {
     "source": "proxiteiegram",
     "configs": 33,
-    "trust": 2899
+    "trust": 2871
   },
   {
     "source": "Raiv2mmr",
     "configs": 12,
-    "trust": 1044
+    "trust": 1036
   },
   {
     "source": "V2RayRootFree",
     "configs": 9,
-    "trust": 854
+    "trust": 856
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 690
+    "trust": 700
   },
   {
     "source": "v2rayng_channel",
@@ -62,11 +62,11 @@
   {
     "source": "filtereshekan",
     "configs": 2,
-    "trust": 168
+    "trust": 180
   },
   {
     "source": "v2rayvpnchannel",
     "configs": 2,
-    "trust": 166
+    "trust": 168
   }
 ]
