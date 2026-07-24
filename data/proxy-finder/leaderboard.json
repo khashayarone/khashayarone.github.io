@@ -1,28 +1,28 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 159,
-    "trust": 14668
+    "configs": 163,
+    "trust": 14639
   },
   {
     "source": "outline_vpn",
-    "configs": 143,
-    "trust": 14046
+    "configs": 145,
+    "trust": 13881
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12100
-  },
-  {
-    "source": "v2ray_official",
-    "configs": 93,
-    "trust": 8816
+    "trust": 12110
   },
   {
     "source": "v2raycollector",
-    "configs": 94,
-    "trust": 8535
+    "configs": 123,
+    "trust": 10918
+  },
+  {
+    "source": "v2ray_official",
+    "configs": 97,
+    "trust": 8754
   },
   {
     "source": "FilterShekanChannel",
@@ -32,61 +32,61 @@
   {
     "source": "vpnbaz",
     "configs": 33,
-    "trust": 3093
+    "trust": 3073
   },
   {
-    "source": "irproxy",
-    "configs": 32,
-    "trust": 2854
+    "source": "proxiteiegram",
+    "configs": 33,
+    "trust": 2935
   },
   {
     "source": "V2RayRootFree",
     "configs": 11,
-    "trust": 1080
+    "trust": 1050
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 8,
-    "trust": 760
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 8,
-    "trust": 744
+    "trust": 740
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 700
+    "trust": 690
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 8,
+    "trust": 682
   },
   {
     "source": "filtereshekan",
     "configs": 7,
-    "trust": 634
+    "trust": 619
   },
   {
     "source": "iMTProxy_ir",
     "configs": 6,
-    "trust": 508
+    "trust": 499
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 490
+    "trust": 470
   },
   {
     "source": "opensafer",
     "configs": 4,
-    "trust": 370
-  },
-  {
-    "source": "proxydaemi",
-    "configs": 2,
-    "trust": 180
+    "trust": 390
   },
   {
     "source": "v2ray3",
     "configs": 2,
-    "trust": 171
+    "trust": 173
+  },
+  {
+    "source": "proxydaemi",
+    "configs": 2,
+    "trust": 170
   }
 ]
