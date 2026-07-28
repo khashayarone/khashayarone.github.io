@@ -1,33 +1,33 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 167,
-    "trust": 16176
+    "configs": 156,
+    "trust": 14738
   },
   {
     "source": "v2ray_official",
     "configs": 149,
-    "trust": 13567
+    "trust": 13430
   },
   {
     "source": "outline_vpn",
-    "configs": 136,
-    "trust": 13104
+    "configs": 133,
+    "trust": 12546
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12140
+    "trust": 12090
   },
   {
     "source": "v2raycollector",
-    "configs": 80,
-    "trust": 7005
+    "configs": 75,
+    "trust": 6326
   },
   {
     "source": "v2ray_configs_pool",
     "configs": 41,
-    "trust": 3529
+    "trust": 3500
   },
   {
     "source": "FilterShekanChannel",
@@ -36,13 +36,13 @@
   },
   {
     "source": "irproxy",
-    "configs": 34,
-    "trust": 2890
+    "configs": 32,
+    "trust": 2694
   },
   {
     "source": "vpnbaz",
     "configs": 26,
-    "trust": 2558
+    "trust": 2550
   },
   {
     "source": "V2RAY_SPATIAL",
@@ -52,56 +52,56 @@
   {
     "source": "Raiv2mmr",
     "configs": 12,
-    "trust": 1114
+    "trust": 1055
   },
   {
     "source": "V2RayRootFree",
-    "configs": 10,
-    "trust": 950
+    "configs": 11,
+    "trust": 1031
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 700
+    "trust": 690
   },
   {
     "source": "proxystore11",
     "configs": 6,
-    "trust": 562
+    "trust": 564
   },
   {
     "source": "iMTProxy_ir",
     "configs": 7,
-    "trust": 557
+    "trust": 504
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 490
+    "trust": 470
   },
   {
     "source": "opensafer",
     "configs": 4,
-    "trust": 380
+    "trust": 370
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 4,
+    "trust": 324
   },
   {
     "source": "filtereshekan",
     "configs": 3,
-    "trust": 226
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 2,
-    "trust": 182
-  },
-  {
-    "source": "proxydaemi",
-    "configs": 2,
-    "trust": 168
+    "trust": 219
   },
   {
     "source": "v2ray3",
     "configs": 2,
-    "trust": 164
+    "trust": 166
+  },
+  {
+    "source": "proxydaemi",
+    "configs": 1,
+    "trust": 89
   }
 ]
