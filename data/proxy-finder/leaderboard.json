@@ -1,18 +1,18 @@
 [
   {
-    "source": "v2ray_official",
-    "configs": 151,
-    "trust": 14069
-  },
-  {
     "source": "iProxyChannel",
-    "configs": 146,
-    "trust": 14014
+    "configs": 154,
+    "trust": 14384
   },
   {
     "source": "v2raycollector",
-    "configs": 148,
-    "trust": 12922
+    "configs": 151,
+    "trust": 13005
+  },
+  {
+    "source": "v2ray_official",
+    "configs": 142,
+    "trust": 12634
   },
   {
     "source": "v2rayconfigs",
@@ -21,8 +21,8 @@
   },
   {
     "source": "outline_vpn",
-    "configs": 125,
-    "trust": 12087
+    "configs": 123,
+    "trust": 11518
   },
   {
     "source": "FilterShekanChannel",
@@ -32,32 +32,32 @@
   {
     "source": "proxiteiegram",
     "configs": 34,
-    "trust": 2977
+    "trust": 2938
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 23,
-    "trust": 2280
+    "trust": 2250
   },
   {
     "source": "vpnbaz",
     "configs": 22,
-    "trust": 2170
+    "trust": 2160
   },
   {
     "source": "v2ray_configs_pool",
-    "configs": 21,
-    "trust": 1957
+    "configs": 14,
+    "trust": 1292
   },
   {
     "source": "V2RayRootFree",
     "configs": 11,
-    "trust": 1070
+    "trust": 1050
   },
   {
     "source": "Raiv2mmr",
     "configs": 10,
-    "trust": 936
+    "trust": 858
   },
   {
     "source": "v2ray_team",
@@ -67,12 +67,17 @@
   {
     "source": "proxystore11",
     "configs": 6,
-    "trust": 570
+    "trust": 560
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 6,
+    "trust": 496
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 500
+    "trust": 470
   },
   {
     "source": "opensafer",
@@ -80,23 +85,18 @@
     "trust": 380
   },
   {
-    "source": "v2rayvpnchannel",
-    "configs": 4,
-    "trust": 370
-  },
-  {
     "source": "filtereshekan",
     "configs": 3,
-    "trust": 229
-  },
-  {
-    "source": "proxydaemi",
-    "configs": 1,
-    "trust": 80
+    "trust": 212
   },
   {
     "source": "v2ray3",
-    "configs": 1,
-    "trust": 64
+    "configs": 2,
+    "trust": 186
+  },
+  {
+    "source": "proxydaemi",
+    "configs": 2,
+    "trust": 141
   }
 ]
