@@ -1,53 +1,53 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 131,
-    "trust": 12671
+    "configs": 132,
+    "trust": 12468
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12118
+    "trust": 12080
+  },
+  {
+    "source": "v2ray_official",
+    "configs": 126,
+    "trust": 11406
   },
   {
     "source": "iProxyChannel",
     "configs": 117,
-    "trust": 11334
-  },
-  {
-    "source": "v2ray_official",
-    "configs": 124,
-    "trust": 11295
+    "trust": 11260
   },
   {
     "source": "v2raycollector",
-    "configs": 57,
-    "trust": 4939
+    "configs": 54,
+    "trust": 4690
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3280
+    "trust": 3290
   },
   {
-    "source": "proxiteiegram",
+    "source": "irproxy",
     "configs": 33,
-    "trust": 2807
+    "trust": 2820
   },
   {
     "source": "vpnbaz",
     "configs": 28,
-    "trust": 2607
+    "trust": 2596
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 23,
-    "trust": 2280
+    "trust": 2240
   },
   {
     "source": "V2RayRootFree",
     "configs": 10,
-    "trust": 990
+    "trust": 960
   },
   {
     "source": "v2ray_team",
@@ -57,12 +57,7 @@
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 500
-  },
-  {
-    "source": "proxystore11",
-    "configs": 4,
-    "trust": 390
+    "trust": 470
   },
   {
     "source": "opensafer",
@@ -70,23 +65,28 @@
     "trust": 380
   },
   {
-    "source": "v2ray3",
-    "configs": 3,
-    "trust": 262
+    "source": "proxystore11",
+    "configs": 4,
+    "trust": 380
   },
   {
     "source": "v2rayvpnchannel",
-    "configs": 2,
-    "trust": 186
+    "configs": 4,
+    "trust": 340
   },
   {
-    "source": "filtereshekan",
-    "configs": 2,
-    "trust": 173
+    "source": "v2ray3",
+    "configs": 3,
+    "trust": 254
   },
   {
     "source": "proxydaemi",
     "configs": 2,
-    "trust": 152
+    "trust": 163
+  },
+  {
+    "source": "filtereshekan",
+    "configs": 2,
+    "trust": 155
   }
 ]
