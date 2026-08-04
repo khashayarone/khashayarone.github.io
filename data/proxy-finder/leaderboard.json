@@ -1,28 +1,28 @@
 [
   {
-    "source": "outline_vpn",
-    "configs": 134,
-    "trust": 12629
-  },
-  {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12125
+    "trust": 12106
+  },
+  {
+    "source": "outline_vpn",
+    "configs": 126,
+    "trust": 11864
   },
   {
     "source": "v2ray_official",
-    "configs": 129,
-    "trust": 11648
+    "configs": 127,
+    "trust": 11527
   },
   {
     "source": "iProxyChannel",
-    "configs": 118,
-    "trust": 11348
+    "configs": 117,
+    "trust": 11189
   },
   {
     "source": "v2raycollector",
-    "configs": 77,
-    "trust": 6581
+    "configs": 92,
+    "trust": 7765
   },
   {
     "source": "FilterShekanChannel",
@@ -30,29 +30,34 @@
     "trust": 3300
   },
   {
-    "source": "irproxy",
-    "configs": 33,
-    "trust": 2818
+    "source": "proxiteiegram",
+    "configs": 32,
+    "trust": 2664
   },
   {
     "source": "vpnbaz",
-    "configs": 28,
-    "trust": 2591
+    "configs": 26,
+    "trust": 2404
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 23,
-    "trust": 2230
+    "trust": 2300
+  },
+  {
+    "source": "v2ray_configs_pool",
+    "configs": 11,
+    "trust": 975
   },
   {
     "source": "V2RayRootFree",
-    "configs": 10,
-    "trust": 960
+    "configs": 8,
+    "trust": 770
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 700
+    "trust": 690
   },
   {
     "source": "v2rayng_channel",
@@ -60,24 +65,19 @@
     "trust": 470
   },
   {
-    "source": "opensafer",
-    "configs": 4,
-    "trust": 400
-  },
-  {
     "source": "proxystore11",
     "configs": 4,
     "trust": 390
   },
   {
-    "source": "v2ray3",
-    "configs": 3,
-    "trust": 257
+    "source": "opensafer",
+    "configs": 4,
+    "trust": 370
   },
   {
-    "source": "v2ray_configs_pool",
+    "source": "v2ray3",
     "configs": 2,
-    "trust": 184
+    "trust": 180
   },
   {
     "source": "filtereshekan",
@@ -85,8 +85,8 @@
     "trust": 170
   },
   {
-    "source": "proxydaemi",
+    "source": "v2rayvpnchannel",
     "configs": 2,
-    "trust": 156
+    "trust": 162
   }
 ]
