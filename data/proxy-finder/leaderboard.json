@@ -1,33 +1,38 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 137,
-    "trust": 12918
+    "configs": 132,
+    "trust": 12829
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12121
+    "trust": 12113
   },
   {
     "source": "iProxyChannel",
-    "configs": 114,
-    "trust": 10824
+    "configs": 118,
+    "trust": 11381
   },
   {
     "source": "v2ray_official",
     "configs": 88,
-    "trust": 7986
+    "trust": 8091
   },
   {
     "source": "v2raycollector",
-    "configs": 88,
-    "trust": 7810
+    "configs": 86,
+    "trust": 7880
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 37,
-    "trust": 3680
+    "trust": 3640
+  },
+  {
+    "source": "proxiteiegram",
+    "configs": 37,
+    "trust": 3307
   },
   {
     "source": "FilterShekanChannel",
@@ -35,63 +40,58 @@
     "trust": 3300
   },
   {
-    "source": "irproxy",
-    "configs": 37,
-    "trust": 3171
-  },
-  {
     "source": "vpnbaz",
     "configs": 28,
-    "trust": 2582
+    "trust": 2654
   },
   {
     "source": "v2ray_configs_pool",
     "configs": 12,
-    "trust": 1120
+    "trust": 1110
   },
   {
     "source": "V2RayRootFree",
     "configs": 8,
-    "trust": 764
+    "trust": 766
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 700
+    "trust": 680
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 470
+    "trust": 490
   },
   {
     "source": "pro_proxy_ir",
     "configs": 5,
-    "trust": 450
-  },
-  {
-    "source": "proxystore11",
-    "configs": 4,
-    "trust": 390
+    "trust": 480
   },
   {
     "source": "opensafer",
     "configs": 4,
+    "trust": 390
+  },
+  {
+    "source": "proxystore11",
+    "configs": 4,
     "trust": 380
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 4,
+    "trust": 347
   },
   {
     "source": "proxydaemi",
     "configs": 4,
-    "trust": 326
+    "trust": 320
   },
   {
     "source": "v2ray3",
     "configs": 3,
-    "trust": 256
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 2,
-    "trust": 163
+    "trust": 258
   }
 ]
