@@ -1,92 +1,97 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 135,
-    "trust": 12721
+    "configs": 138,
+    "trust": 13255
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12115
+    "trust": 12136
   },
   {
     "source": "iProxyChannel",
-    "configs": 111,
-    "trust": 10786
+    "configs": 112,
+    "trust": 10966
   },
   {
     "source": "v2ray_official",
-    "configs": 87,
-    "trust": 7878
+    "configs": 88,
+    "trust": 8062
   },
   {
     "source": "v2raycollector",
-    "configs": 86,
-    "trust": 7421
+    "configs": 87,
+    "trust": 7778
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 37,
-    "trust": 3680
+    "trust": 3660
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3280
+    "trust": 3300
   },
   {
     "source": "irproxy",
     "configs": 38,
-    "trust": 3250
+    "trust": 3280
   },
   {
     "source": "vpnbaz",
     "configs": 16,
-    "trust": 1510
+    "trust": 1540
   },
   {
     "source": "v2ray_configs_pool",
     "configs": 12,
-    "trust": 1110
+    "trust": 1120
   },
   {
     "source": "V2RayRootFree",
     "configs": 8,
-    "trust": 760
+    "trust": 790
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 680
+    "trust": 700
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 470
+    "trust": 500
   },
   {
     "source": "pro_proxy_ir",
     "configs": 5,
-    "trust": 443
-  },
-  {
-    "source": "proxystore11",
-    "configs": 4,
-    "trust": 390
+    "trust": 488
   },
   {
     "source": "opensafer",
     "configs": 4,
+    "trust": 400
+  },
+  {
+    "source": "proxystore11",
+    "configs": 4,
     "trust": 380
   },
   {
-    "source": "filtereshekan",
+    "source": "v2rayvpnchannel",
     "configs": 4,
-    "trust": 360
+    "trust": 364
+  },
+  {
+    "source": "proxydaemi",
+    "configs": 4,
+    "trust": 304
   },
   {
     "source": "v2ray3",
-    "configs": 2,
-    "trust": 151
+    "configs": 3,
+    "trust": 223
   }
 ]
