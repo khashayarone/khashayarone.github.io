@@ -1,38 +1,38 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 135,
-    "trust": 12691
+    "configs": 134,
+    "trust": 13014
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12101
+    "trust": 12102
   },
   {
     "source": "iProxyChannel",
     "configs": 114,
-    "trust": 11021
+    "trust": 11187
   },
   {
     "source": "v2ray_official",
-    "configs": 100,
-    "trust": 9096
+    "configs": 98,
+    "trust": 9014
   },
   {
     "source": "v2raycollector",
-    "configs": 84,
-    "trust": 7512
+    "configs": 83,
+    "trust": 7584
   },
   {
     "source": "V2RAY_SPATIAL",
-    "configs": 36,
-    "trust": 3590
+    "configs": 37,
+    "trust": 3661
   },
   {
     "source": "irproxy",
     "configs": 40,
-    "trust": 3478
+    "trust": 3594
   },
   {
     "source": "FilterShekanChannel",
@@ -42,27 +42,27 @@
   {
     "source": "vpnbaz",
     "configs": 20,
-    "trust": 1884
+    "trust": 1922
   },
   {
     "source": "v2ray_configs_pool",
     "configs": 12,
-    "trust": 1120
+    "trust": 1110
   },
   {
     "source": "V2RayRootFree",
     "configs": 8,
-    "trust": 780
+    "trust": 800
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 690
+    "trust": 680
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 470
+    "trust": 490
   },
   {
     "source": "proxystore11",
@@ -72,26 +72,26 @@
   {
     "source": "opensafer",
     "configs": 4,
-    "trust": 370
+    "trust": 360
   },
   {
     "source": "proxydaemi",
     "configs": 4,
-    "trust": 350
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 4,
-    "trust": 346
+    "trust": 360
   },
   {
     "source": "v2ray3",
     "configs": 3,
-    "trust": 255
+    "trust": 266
   },
   {
     "source": "filtereshekan",
     "configs": 3,
-    "trust": 248
+    "trust": 260
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 2,
+    "trust": 200
   }
 ]
