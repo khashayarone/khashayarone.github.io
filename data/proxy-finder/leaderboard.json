@@ -1,28 +1,28 @@
 [
   {
     "source": "outline_vpn",
-    "configs": 140,
-    "trust": 13154
+    "configs": 138,
+    "trust": 12983
   },
   {
     "source": "v2rayconfigs",
-    "configs": 121,
-    "trust": 11963
+    "configs": 122,
+    "trust": 12105
   },
   {
     "source": "v2ray_official",
-    "configs": 131,
-    "trust": 11246
+    "configs": 130,
+    "trust": 11250
   },
   {
     "source": "iProxyChannel",
     "configs": 117,
-    "trust": 11135
+    "trust": 11171
   },
   {
     "source": "v2raycollector",
     "configs": 67,
-    "trust": 6135
+    "trust": 6158
   },
   {
     "source": "V2RAY_SPATIAL",
@@ -30,39 +30,39 @@
     "trust": 4850
   },
   {
+    "source": "v2ray_configs_pool",
+    "configs": 48,
+    "trust": 3902
+  },
+  {
     "source": "irproxy",
     "configs": 38,
-    "trust": 3336
+    "trust": 3376
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3280
+    "trust": 3300
   },
   {
     "source": "vpnbaz",
-    "configs": 29,
-    "trust": 2707
-  },
-  {
-    "source": "v2ray_configs_pool",
-    "configs": 10,
-    "trust": 880
+    "configs": 31,
+    "trust": 2850
   },
   {
     "source": "V2RayRootFree",
     "configs": 8,
-    "trust": 770
+    "trust": 780
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 680
+    "trust": 700
   },
   {
     "source": "filtereshekan",
-    "configs": 7,
-    "trust": 613
+    "configs": 6,
+    "trust": 530
   },
   {
     "source": "v2rayng_channel",
@@ -72,12 +72,12 @@
   {
     "source": "pro_proxy_ir",
     "configs": 5,
-    "trust": 442
+    "trust": 443
   },
   {
     "source": "proxystore11",
     "configs": 4,
-    "trust": 380
+    "trust": 390
   },
   {
     "source": "opensafer",
@@ -87,16 +87,16 @@
   {
     "source": "v2rayvpnchannel",
     "configs": 4,
-    "trust": 335
+    "trust": 339
   },
   {
     "source": "proxydaemi",
     "configs": 4,
-    "trust": 316
+    "trust": 320
   },
   {
     "source": "v2ray3",
     "configs": 3,
-    "trust": 252
+    "trust": 255
   }
 ]
