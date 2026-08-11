@@ -2,42 +2,37 @@
   {
     "source": "iProxyChannel",
     "configs": 172,
-    "trust": 16678
+    "trust": 16362
   },
   {
     "source": "outline_vpn",
-    "configs": 145,
-    "trust": 14066
+    "configs": 141,
+    "trust": 13167
   },
   {
     "source": "v2rayconfigs",
     "configs": 120,
-    "trust": 11920
+    "trust": 11960
   },
   {
     "source": "v2ray_official",
-    "configs": 116,
-    "trust": 10888
+    "configs": 115,
+    "trust": 10496
   },
   {
     "source": "v2raycollector",
-    "configs": 100,
-    "trust": 9018
+    "configs": 102,
+    "trust": 9059
+  },
+  {
+    "source": "v2ray_configs_pool",
+    "configs": 79,
+    "trust": 6605
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4900
-  },
-  {
-    "source": "v2ray_configs_pool",
-    "configs": 55,
-    "trust": 4752
-  },
-  {
-    "source": "vpnbaz",
-    "configs": 39,
-    "trust": 3718
+    "trust": 4860
   },
   {
     "source": "FilterShekanChannel",
@@ -50,29 +45,24 @@
     "trust": 3062
   },
   {
+    "source": "vpnbaz",
+    "configs": 27,
+    "trust": 2371
+  },
+  {
     "source": "V2RayRootFree",
     "configs": 8,
-    "trust": 800
+    "trust": 770
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 690
-  },
-  {
-    "source": "ParsProxyIr",
-    "configs": 7,
-    "trust": 580
+    "trust": 700
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 480
-  },
-  {
-    "source": "opensafer",
-    "configs": 4,
-    "trust": 390
+    "trust": 470
   },
   {
     "source": "proxystore11",
@@ -82,21 +72,21 @@
   {
     "source": "v2rayvpnchannel",
     "configs": 4,
-    "trust": 378
+    "trust": 342
+  },
+  {
+    "source": "ParsProxyIr",
+    "configs": 3,
+    "trust": 250
   },
   {
     "source": "v2ray3",
-    "configs": 3,
-    "trust": 259
+    "configs": 2,
+    "trust": 177
   },
   {
     "source": "filtereshekan",
     "configs": 2,
     "trust": 160
-  },
-  {
-    "source": "iMTProxy_ir",
-    "configs": 1,
-    "trust": 91
   }
 ]
