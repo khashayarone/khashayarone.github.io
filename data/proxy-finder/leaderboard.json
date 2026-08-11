@@ -1,48 +1,48 @@
 [
   {
-    "source": "v2ray_official",
-    "configs": 158,
-    "trust": 14267
+    "source": "iProxyChannel",
+    "configs": 167,
+    "trust": 15841
   },
   {
-    "source": "iProxyChannel",
-    "configs": 138,
-    "trust": 13341
+    "source": "v2ray_official",
+    "configs": 157,
+    "trust": 14272
   },
   {
     "source": "outline_vpn",
-    "configs": 139,
-    "trust": 12958
+    "configs": 138,
+    "trust": 12806
   },
   {
     "source": "v2rayconfigs",
     "configs": 120,
-    "trust": 11960
+    "trust": 11940
   },
   {
     "source": "v2raycollector",
     "configs": 79,
-    "trust": 6852
+    "trust": 7013
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4880
+    "trust": 4840
+  },
+  {
+    "source": "vpnbaz",
+    "configs": 39,
+    "trust": 3401
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
+    "trust": 3300
   },
   {
-    "source": "irproxy",
-    "configs": 35,
-    "trust": 2964
-  },
-  {
-    "source": "vpnbaz",
-    "configs": 28,
-    "trust": 2495
+    "source": "proxiteiegram",
+    "configs": 34,
+    "trust": 2956
   },
   {
     "source": "V2RayRootFree",
@@ -52,17 +52,17 @@
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 700
-  },
-  {
-    "source": "pro_proxy_ir",
-    "configs": 6,
-    "trust": 544
+    "trust": 690
   },
   {
     "source": "ParsProxyIr",
     "configs": 7,
-    "trust": 540
+    "trust": 560
+  },
+  {
+    "source": "pro_proxy_ir",
+    "configs": 6,
+    "trust": 535
   },
   {
     "source": "v2rayng_channel",
@@ -72,26 +72,26 @@
   {
     "source": "proxystore11",
     "configs": 4,
-    "trust": 390
+    "trust": 380
   },
   {
     "source": "opensafer",
     "configs": 4,
-    "trust": 380
+    "trust": 370
   },
   {
     "source": "v2rayvpnchannel",
     "configs": 4,
-    "trust": 326
+    "trust": 330
   },
   {
     "source": "v2ray3",
-    "configs": 3,
-    "trust": 253
+    "configs": 2,
+    "trust": 162
   },
   {
     "source": "filtereshekan",
     "configs": 2,
-    "trust": 148
+    "trust": 159
   }
 ]
