@@ -1,58 +1,58 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 191,
-    "trust": 18504
+    "configs": 187,
+    "trust": 18103
   },
   {
     "source": "outline_vpn",
-    "configs": 159,
-    "trust": 14577
+    "configs": 155,
+    "trust": 14152
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12104
+    "trust": 12097
   },
   {
     "source": "v2ray_official",
-    "configs": 131,
-    "trust": 11980
+    "configs": 129,
+    "trust": 11704
   },
   {
     "source": "v2raycollector",
     "configs": 119,
-    "trust": 10415
+    "trust": 10494
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4870
+    "trust": 4850
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
+    "trust": 3300
   },
   {
-    "source": "proxiteiegram",
+    "source": "irproxy",
     "configs": 32,
-    "trust": 2802
+    "trust": 2761
   },
   {
     "source": "vpnbaz",
-    "configs": 27,
-    "trust": 2459
+    "configs": 23,
+    "trust": 2070
   },
   {
     "source": "v2ray_configs_pool",
-    "configs": 26,
-    "trust": 2130
+    "configs": 20,
+    "trust": 1680
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 690
+    "trust": 680
   },
   {
     "source": "V2RayRootFree",
@@ -62,12 +62,7 @@
   {
     "source": "iMTProxy_ir",
     "configs": 7,
-    "trust": 504
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 6,
-    "trust": 492
+    "trust": 511
   },
   {
     "source": "v2rayng_channel",
@@ -80,14 +75,14 @@
     "trust": 390
   },
   {
-    "source": "opensafer",
-    "configs": 4,
-    "trust": 380
-  },
-  {
     "source": "proxydaemi",
     "configs": 4,
     "trust": 350
+  },
+  {
+    "source": "v2ray3",
+    "configs": 3,
+    "trust": 253
   },
   {
     "source": "ParsProxyIr",
@@ -97,12 +92,12 @@
   {
     "source": "filtereshekan",
     "configs": 3,
-    "trust": 248
+    "trust": 250
   },
   {
-    "source": "v2ray3",
+    "source": "v2rayvpnchannel",
     "configs": 3,
-    "trust": 240
+    "trust": 250
   },
   {
     "source": "vless_ir",
