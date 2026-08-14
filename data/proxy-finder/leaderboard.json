@@ -1,38 +1,33 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 198,
-    "trust": 19108
-  },
-  {
-    "source": "v2ray_official",
-    "configs": 156,
-    "trust": 14004
+    "configs": 199,
+    "trust": 19381
   },
   {
     "source": "outline_vpn",
-    "configs": 151,
-    "trust": 13760
+    "configs": 158,
+    "trust": 14507
+  },
+  {
+    "source": "v2ray_official",
+    "configs": 150,
+    "trust": 13653
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12107
+    "trust": 12083
   },
   {
     "source": "v2raycollector",
-    "configs": 115,
-    "trust": 10121
+    "configs": 117,
+    "trust": 10384
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
     "trust": 4880
-  },
-  {
-    "source": "v2ray_configs_pool",
-    "configs": 48,
-    "trust": 3805
   },
   {
     "source": "FilterShekanChannel",
@@ -41,13 +36,23 @@
   },
   {
     "source": "irproxy",
-    "configs": 34,
-    "trust": 2958
+    "configs": 36,
+    "trust": 3147
+  },
+  {
+    "source": "v2ray_configs_pool",
+    "configs": 29,
+    "trust": 2482
   },
   {
     "source": "vpnbaz",
-    "configs": 14,
-    "trust": 1309
+    "configs": 16,
+    "trust": 1496
+  },
+  {
+    "source": "v2ray_team",
+    "configs": 7,
+    "trust": 690
   },
   {
     "source": "V2RayRootFree",
@@ -55,19 +60,9 @@
     "trust": 680
   },
   {
-    "source": "v2ray_team",
-    "configs": 7,
-    "trust": 670
-  },
-  {
     "source": "pro_proxy_ir",
     "configs": 6,
-    "trust": 550
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 6,
-    "trust": 500
+    "trust": 540
   },
   {
     "source": "v2rayng_channel",
@@ -77,17 +72,22 @@
   {
     "source": "proxystore11",
     "configs": 4,
-    "trust": 380
+    "trust": 390
   },
   {
     "source": "proxydaemi",
     "configs": 4,
-    "trust": 340
+    "trust": 350
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 4,
+    "trust": 342
   },
   {
     "source": "v2ray3",
     "configs": 3,
-    "trust": 260
+    "trust": 262
   },
   {
     "source": "filtereshekan",
