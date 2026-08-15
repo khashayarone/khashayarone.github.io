@@ -1,43 +1,43 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 238,
-    "trust": 22762
+    "configs": 237,
+    "trust": 22887
   },
   {
     "source": "outline_vpn",
-    "configs": 153,
-    "trust": 14264
+    "configs": 151,
+    "trust": 14512
   },
   {
     "source": "v2ray_official",
-    "configs": 142,
-    "trust": 13115
+    "configs": 140,
+    "trust": 13216
   },
   {
     "source": "v2rayconfigs",
-    "configs": 121,
-    "trust": 11991
+    "configs": 122,
+    "trust": 12113
+  },
+  {
+    "source": "v2ray_configs_pool",
+    "configs": 86,
+    "trust": 7334
   },
   {
     "source": "v2raycollector",
     "configs": 61,
-    "trust": 5570
-  },
-  {
-    "source": "v2ray_configs_pool",
-    "configs": 64,
-    "trust": 5300
+    "trust": 5726
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4810
+    "trust": 4870
   },
   {
     "source": "proxiteiegram",
     "configs": 38,
-    "trust": 3354
+    "trust": 3388
   },
   {
     "source": "FilterShekanChannel",
@@ -46,48 +46,48 @@
   },
   {
     "source": "vpnbaz",
-    "configs": 17,
-    "trust": 1547
+    "configs": 18,
+    "trust": 1646
   },
   {
     "source": "V2RayRootFree",
     "configs": 7,
-    "trust": 680
+    "trust": 700
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 680
+    "trust": 690
   },
   {
     "source": "pro_proxy_ir",
     "configs": 6,
-    "trust": 550
+    "trust": 590
   },
   {
     "source": "proxydaemi",
     "configs": 6,
-    "trust": 520
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 6,
-    "trust": 502
+    "trust": 530
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 470
+    "trust": 500
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 5,
+    "trust": 466
   },
   {
     "source": "proxystore11",
     "configs": 4,
-    "trust": 390
+    "trust": 400
   },
   {
     "source": "v2ray3",
-    "configs": 2,
-    "trust": 180
+    "configs": 3,
+    "trust": 261
   },
   {
     "source": "ParsProxyIr",
