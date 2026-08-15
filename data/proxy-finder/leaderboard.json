@@ -1,73 +1,73 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 241,
-    "trust": 22932
+    "configs": 236,
+    "trust": 22483
   },
   {
     "source": "outline_vpn",
-    "configs": 161,
-    "trust": 14758
+    "configs": 152,
+    "trust": 13962
   },
   {
     "source": "v2ray_official",
     "configs": 144,
-    "trust": 13127
+    "trust": 13134
   },
   {
     "source": "v2rayconfigs",
-    "configs": 122,
-    "trust": 12120
-  },
-  {
-    "source": "v2ray_configs_pool",
-    "configs": 73,
-    "trust": 5916
+    "configs": 121,
+    "trust": 12000
   },
   {
     "source": "v2raycollector",
-    "configs": 62,
-    "trust": 5574
+    "configs": 59,
+    "trust": 5354
+  },
+  {
+    "source": "v2ray_configs_pool",
+    "configs": 64,
+    "trust": 5186
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4831
+    "trust": 4860
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
+    "trust": 3300
   },
   {
     "source": "proxiteiegram",
-    "configs": 37,
-    "trust": 3276
+    "configs": 38,
+    "trust": 3250
   },
   {
     "source": "vpnbaz",
-    "configs": 15,
-    "trust": 1421
+    "configs": 20,
+    "trust": 1783
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 693
+    "trust": 700
   },
   {
     "source": "V2RayRootFree",
     "configs": 7,
-    "trust": 670
+    "trust": 680
   },
   {
     "source": "pro_proxy_ir",
     "configs": 6,
-    "trust": 540
+    "trust": 530
   },
   {
     "source": "proxydaemi",
     "configs": 6,
-    "trust": 540
+    "trust": 530
   },
   {
     "source": "v2rayng_channel",
@@ -77,21 +77,21 @@
   {
     "source": "proxystore11",
     "configs": 4,
-    "trust": 390
-  },
-  {
-    "source": "v2rayvpnchannel",
-    "configs": 4,
-    "trust": 324
+    "trust": 380
   },
   {
     "source": "v2ray3",
     "configs": 3,
-    "trust": 268
+    "trust": 259
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 3,
+    "trust": 246
   },
   {
     "source": "ParsProxyIr",
     "configs": 2,
-    "trust": 160
+    "trust": 150
   }
 ]
