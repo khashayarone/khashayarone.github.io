@@ -1,58 +1,58 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 201,
-    "trust": 19501
-  },
-  {
-    "source": "v2ray_official",
-    "configs": 158,
-    "trust": 14468
+    "configs": 199,
+    "trust": 19614
   },
   {
     "source": "v2raycollector",
-    "configs": 161,
-    "trust": 14414
+    "configs": 165,
+    "trust": 15224
+  },
+  {
+    "source": "v2ray_official",
+    "configs": 156,
+    "trust": 14671
   },
   {
     "source": "outline_vpn",
-    "configs": 149,
-    "trust": 13808
+    "configs": 148,
+    "trust": 14461
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12026
+    "trust": 12082
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4840
+    "trust": 4850
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
-  },
-  {
-    "source": "irproxy",
-    "configs": 36,
-    "trust": 3210
+    "trust": 3300
   },
   {
     "source": "v2ray_configs_pool",
-    "configs": 31,
-    "trust": 2900
+    "configs": 34,
+    "trust": 3213
+  },
+  {
+    "source": "irproxy",
+    "configs": 35,
+    "trust": 3112
   },
   {
     "source": "vpnbaz",
-    "configs": 20,
-    "trust": 1901
+    "configs": 19,
+    "trust": 1839
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 680
+    "trust": 690
   },
   {
     "source": "V2RayRootFree",
@@ -60,38 +60,38 @@
     "trust": 680
   },
   {
-    "source": "pro_proxy_ir",
-    "configs": 6,
-    "trust": 538
-  },
-  {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 470
+    "trust": 490
+  },
+  {
+    "source": "pro_proxy_ir",
+    "configs": 5,
+    "trust": 485
   },
   {
     "source": "proxystore11",
     "configs": 4,
-    "trust": 390
+    "trust": 380
   },
   {
     "source": "v2rayvpnchannel",
     "configs": 4,
-    "trust": 338
+    "trust": 372
   },
   {
     "source": "proxydaemi",
-    "configs": 3,
-    "trust": 260
+    "configs": 4,
+    "trust": 351
   },
   {
     "source": "v2ray3",
     "configs": 3,
-    "trust": 254
+    "trust": 256
   },
   {
     "source": "filtereshekan",
     "configs": 1,
-    "trust": 80
+    "trust": 90
   }
 ]
