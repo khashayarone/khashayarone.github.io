@@ -2,32 +2,32 @@
   {
     "source": "iProxyChannel",
     "configs": 201,
-    "trust": 19778
-  },
-  {
-    "source": "outline_vpn",
-    "configs": 158,
-    "trust": 15317
+    "trust": 19501
   },
   {
     "source": "v2ray_official",
-    "configs": 156,
-    "trust": 14579
+    "configs": 158,
+    "trust": 14468
   },
   {
     "source": "v2raycollector",
-    "configs": 155,
-    "trust": 14196
+    "configs": 161,
+    "trust": 14414
+  },
+  {
+    "source": "outline_vpn",
+    "configs": 149,
+    "trust": 13808
   },
   {
     "source": "v2rayconfigs",
-    "configs": 116,
-    "trust": 11510
+    "configs": 122,
+    "trust": 12026
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4830
+    "trust": 4840
   },
   {
     "source": "FilterShekanChannel",
@@ -35,24 +35,24 @@
     "trust": 3290
   },
   {
-    "source": "v2ray_configs_pool",
-    "configs": 34,
-    "trust": 3252
+    "source": "irproxy",
+    "configs": 36,
+    "trust": 3210
   },
   {
-    "source": "proxiteiegram",
-    "configs": 36,
-    "trust": 3190
+    "source": "v2ray_configs_pool",
+    "configs": 31,
+    "trust": 2900
   },
   {
     "source": "vpnbaz",
     "configs": 20,
-    "trust": 1933
+    "trust": 1901
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 690
+    "trust": 680
   },
   {
     "source": "V2RayRootFree",
@@ -62,41 +62,36 @@
   {
     "source": "pro_proxy_ir",
     "configs": 6,
-    "trust": 542
+    "trust": 538
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 500
+    "trust": 470
   },
   {
     "source": "proxystore11",
     "configs": 4,
-    "trust": 380
-  },
-  {
-    "source": "proxydaemi",
-    "configs": 4,
-    "trust": 340
+    "trust": 390
   },
   {
     "source": "v2rayvpnchannel",
+    "configs": 4,
+    "trust": 338
+  },
+  {
+    "source": "proxydaemi",
     "configs": 3,
-    "trust": 284
+    "trust": 260
   },
   {
     "source": "v2ray3",
-    "configs": 2,
-    "trust": 172
+    "configs": 3,
+    "trust": 254
   },
   {
     "source": "filtereshekan",
-    "configs": 2,
-    "trust": 170
-  },
-  {
-    "source": "ParsProxyIr",
-    "configs": 2,
-    "trust": 161
+    "configs": 1,
+    "trust": 80
   }
 ]
