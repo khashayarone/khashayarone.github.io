@@ -1,38 +1,38 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 242,
-    "trust": 23590
+    "configs": 244,
+    "trust": 23412
   },
   {
     "source": "outline_vpn",
-    "configs": 180,
-    "trust": 17219
+    "configs": 181,
+    "trust": 16495
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12125
+    "trust": 12127
   },
   {
     "source": "v2ray_official",
-    "configs": 125,
-    "trust": 11749
+    "configs": 127,
+    "trust": 11623
   },
   {
     "source": "v2raycollector",
     "configs": 103,
-    "trust": 9255
+    "trust": 9267
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4880
+    "trust": 4900
   },
   {
     "source": "proxiteiegram",
     "configs": 41,
-    "trust": 3592
+    "trust": 3631
   },
   {
     "source": "FilterShekanChannel",
@@ -42,17 +42,17 @@
   {
     "source": "v2ray_configs_pool",
     "configs": 26,
-    "trust": 2206
+    "trust": 2236
   },
   {
     "source": "vpnbaz",
     "configs": 21,
-    "trust": 2022
+    "trust": 1956
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 700
+    "trust": 690
   },
   {
     "source": "V2RayRootFree",
@@ -62,7 +62,7 @@
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 500
+    "trust": 470
   },
   {
     "source": "proxystore11",
@@ -71,22 +71,17 @@
   },
   {
     "source": "v2ray3",
-    "configs": 2,
-    "trust": 172
+    "configs": 3,
+    "trust": 254
   },
   {
     "source": "proxydaemi",
     "configs": 2,
-    "trust": 170
+    "trust": 180
   },
   {
     "source": "ParsProxyIr",
     "configs": 2,
-    "trust": 154
-  },
-  {
-    "source": "iMTProxy_ir",
-    "configs": 1,
-    "trust": 91
+    "trust": 156
   }
 ]
