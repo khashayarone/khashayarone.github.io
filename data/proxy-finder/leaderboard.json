@@ -1,58 +1,63 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 340,
-    "trust": 32002
+    "configs": 347,
+    "trust": 32716
   },
   {
     "source": "outline_vpn",
     "configs": 148,
-    "trust": 13238
+    "trust": 13277
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12080
+    "trust": 12090
   },
   {
     "source": "v2raycollector",
-    "configs": 122,
-    "trust": 10742
+    "configs": 121,
+    "trust": 10713
   },
   {
     "source": "v2ray_official",
-    "configs": 83,
-    "trust": 7545
+    "configs": 78,
+    "trust": 7173
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4850
+    "trust": 4900
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3294
+    "trust": 3295
   },
   {
     "source": "irproxy",
     "configs": 30,
-    "trust": 2543
+    "trust": 2568
   },
   {
     "source": "proxymtprotoir",
-    "configs": 20,
-    "trust": 1876
+    "configs": 19,
+    "trust": 1776
   },
   {
     "source": "vpnbaz",
-    "configs": 16,
-    "trust": 1561
+    "configs": 18,
+    "trust": 1735
+  },
+  {
+    "source": "vless_ir",
+    "configs": 8,
+    "trust": 764
   },
   {
     "source": "v2ray_team",
     "configs": 7,
-    "trust": 694
+    "trust": 695
   },
   {
     "source": "V2RayRootFree",
@@ -60,24 +65,14 @@
     "trust": 500
   },
   {
-    "source": "v2rayvpnchannel",
-    "configs": 6,
-    "trust": 497
-  },
-  {
     "source": "v2rayng_channel",
     "configs": 5,
     "trust": 470
   },
   {
-    "source": "vless_ir",
-    "configs": 4,
-    "trust": 400
-  },
-  {
     "source": "proxydaemi",
     "configs": 3,
-    "trust": 234
+    "trust": 246
   },
   {
     "source": "proxystore11",
@@ -87,11 +82,16 @@
   {
     "source": "v2ray3",
     "configs": 2,
-    "trust": 169
+    "trust": 171
   },
   {
     "source": "ParsProxyIr",
     "configs": 2,
-    "trust": 134
+    "trust": 146
+  },
+  {
+    "source": "v2rayvpnchannel",
+    "configs": 1,
+    "trust": 82
   }
 ]
