@@ -1,58 +1,58 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 366,
-    "trust": 35343
+    "configs": 359,
+    "trust": 33756
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12113
+    "trust": 12105
   },
   {
     "source": "outline_vpn",
-    "configs": 125,
-    "trust": 11908
+    "configs": 130,
+    "trust": 11665
   },
   {
     "source": "v2ray_official",
     "configs": 106,
-    "trust": 10079
+    "trust": 9719
   },
   {
     "source": "v2raycollector",
-    "configs": 103,
-    "trust": 9507
+    "configs": 104,
+    "trust": 9448
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4830
+    "trust": 4860
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3290
+    "trust": 3300
   },
   {
     "source": "vpnbaz",
-    "configs": 29,
-    "trust": 2783
+    "configs": 28,
+    "trust": 2709
   },
   {
     "source": "irproxy",
-    "configs": 26,
-    "trust": 2204
+    "configs": 27,
+    "trust": 2326
   },
   {
     "source": "v2ray_team",
     "configs": 9,
-    "trust": 882
+    "trust": 863
   },
   {
     "source": "vless_ir",
     "configs": 8,
-    "trust": 795
+    "trust": 796
   },
   {
     "source": "V2RayRootFree",
@@ -62,36 +62,36 @@
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 490
+    "trust": 470
   },
   {
     "source": "pro_proxy_ir",
     "configs": 5,
-    "trust": 490
-  },
-  {
-    "source": "filtereshekan",
-    "configs": 3,
-    "trust": 234
+    "trust": 460
   },
   {
     "source": "v2rayvpnchannel",
-    "configs": 2,
-    "trust": 186
-  },
-  {
-    "source": "ParsProxyIr",
-    "configs": 2,
-    "trust": 142
+    "configs": 4,
+    "trust": 330
   },
   {
     "source": "v2ray3",
-    "configs": 1,
-    "trust": 90
+    "configs": 2,
+    "trust": 171
+  },
+  {
+    "source": "filtereshekan",
+    "configs": 2,
+    "trust": 164
   },
   {
     "source": "proxydaemi",
     "configs": 1,
     "trust": 80
+  },
+  {
+    "source": "ParsProxyIr",
+    "configs": 1,
+    "trust": 72
   }
 ]
