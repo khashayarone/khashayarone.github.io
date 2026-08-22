@@ -1,33 +1,33 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 360,
-    "trust": 35037
-  },
-  {
-    "source": "outline_vpn",
-    "configs": 131,
-    "trust": 12640
+    "configs": 356,
+    "trust": 33592
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12103
+    "trust": 12067
+  },
+  {
+    "source": "outline_vpn",
+    "configs": 131,
+    "trust": 11761
   },
   {
     "source": "v2ray_official",
-    "configs": 111,
-    "trust": 10529
+    "configs": 107,
+    "trust": 9900
   },
   {
     "source": "v2raycollector",
-    "configs": 98,
-    "trust": 9230
+    "configs": 106,
+    "trust": 9370
   },
   {
     "source": "V2RAY_SPATIAL",
-    "configs": 47,
-    "trust": 4680
+    "configs": 49,
+    "trust": 4862
   },
   {
     "source": "FilterShekanChannel",
@@ -36,23 +36,23 @@
   },
   {
     "source": "vpnbaz",
-    "configs": 28,
-    "trust": 2753
+    "configs": 29,
+    "trust": 2785
   },
   {
     "source": "irproxy",
     "configs": 30,
-    "trust": 2604
+    "trust": 2596
+  },
+  {
+    "source": "v2ray_team",
+    "configs": 9,
+    "trust": 871
   },
   {
     "source": "vless_ir",
     "configs": 8,
-    "trust": 799
-  },
-  {
-    "source": "v2ray_team",
-    "configs": 8,
-    "trust": 790
+    "trust": 800
   },
   {
     "source": "V2RayRootFree",
@@ -60,33 +60,28 @@
     "trust": 500
   },
   {
-    "source": "pro_proxy_ir",
-    "configs": 5,
-    "trust": 500
-  },
-  {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 490
+    "trust": 470
   },
   {
-    "source": "v2rayvpnchannel",
-    "configs": 4,
-    "trust": 362
-  },
-  {
-    "source": "filtereshekan",
-    "configs": 2,
-    "trust": 177
+    "source": "pro_proxy_ir",
+    "configs": 5,
+    "trust": 460
   },
   {
     "source": "v2ray3",
     "configs": 2,
-    "trust": 174
+    "trust": 195
+  },
+  {
+    "source": "filtereshekan",
+    "configs": 2,
+    "trust": 178
   },
   {
     "source": "proxydaemi",
     "configs": 1,
-    "trust": 90
+    "trust": 80
   }
 ]
