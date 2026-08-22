@@ -1,13 +1,8 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 331,
-    "trust": 32353
-  },
-  {
-    "source": "outline_vpn",
-    "configs": 132,
-    "trust": 12605
+    "configs": 328,
+    "trust": 31302
   },
   {
     "source": "v2rayconfigs",
@@ -15,19 +10,24 @@
     "trust": 12110
   },
   {
+    "source": "outline_vpn",
+    "configs": 129,
+    "trust": 11662
+  },
+  {
     "source": "v2ray_official",
-    "configs": 118,
-    "trust": 11170
+    "configs": 120,
+    "trust": 11000
   },
   {
     "source": "v2raycollector",
-    "configs": 106,
-    "trust": 9848
+    "configs": 107,
+    "trust": 9753
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 49,
-    "trust": 4861
+    "trust": 4892
   },
   {
     "source": "FilterShekanChannel",
@@ -36,36 +36,31 @@
   },
   {
     "source": "vpnbaz",
-    "configs": 28,
-    "trust": 2723
+    "configs": 29,
+    "trust": 2806
   },
   {
     "source": "proxiteiegram",
-    "configs": 26,
-    "trust": 2213
+    "configs": 28,
+    "trust": 2354
   },
   {
     "source": "proxymtprotoir",
-    "configs": 22,
-    "trust": 2069
+    "configs": 17,
+    "trust": 1614
   },
   {
     "source": "v2ray_team",
     "configs": 8,
-    "trust": 781
+    "trust": 791
   },
   {
-    "source": "v2rayvpnchannel",
-    "configs": 6,
-    "trust": 564
+    "source": "vless_ir",
+    "configs": 8,
+    "trust": 728
   },
   {
     "source": "V2RayRootFree",
-    "configs": 5,
-    "trust": 500
-  },
-  {
-    "source": "pro_proxy_ir",
     "configs": 5,
     "trust": 500
   },
@@ -75,18 +70,23 @@
     "trust": 470
   },
   {
+    "source": "pro_proxy_ir",
+    "configs": 5,
+    "trust": 460
+  },
+  {
     "source": "proxydaemi",
-    "configs": 2,
-    "trust": 171
+    "configs": 3,
+    "trust": 253
   },
   {
     "source": "v2ray3",
-    "configs": 1,
-    "trust": 82
+    "configs": 2,
+    "trust": 164
   },
   {
-    "source": "filtereshekan",
-    "configs": 1,
-    "trust": 81
+    "source": "v2rayvpnchannel",
+    "configs": 2,
+    "trust": 164
   }
 ]
