@@ -1,58 +1,53 @@
 [
   {
     "source": "iProxyChannel",
-    "configs": 303,
-    "trust": 28755
+    "configs": 336,
+    "trust": 31221
   },
   {
     "source": "v2ray_official",
-    "configs": 172,
-    "trust": 15586
-  },
-  {
-    "source": "outline_vpn",
-    "configs": 134,
-    "trust": 12539
+    "configs": 159,
+    "trust": 14565
   },
   {
     "source": "v2rayconfigs",
     "configs": 122,
-    "trust": 12115
+    "trust": 12106
+  },
+  {
+    "source": "outline_vpn",
+    "configs": 128,
+    "trust": 11510
   },
   {
     "source": "v2raycollector",
-    "configs": 62,
-    "trust": 5310
+    "configs": 88,
+    "trust": 7637
   },
   {
     "source": "V2RAY_SPATIAL",
     "configs": 41,
-    "trust": 4030
+    "trust": 4060
   },
   {
     "source": "FilterShekanChannel",
     "configs": 33,
-    "trust": 3280
+    "trust": 3290
   },
   {
     "source": "irproxy",
-    "configs": 32,
-    "trust": 2700
+    "configs": 29,
+    "trust": 2469
   },
   {
     "source": "vpnbaz",
-    "configs": 26,
-    "trust": 2373
-  },
-  {
-    "source": "proxymtprotoir",
-    "configs": 23,
-    "trust": 2036
+    "configs": 25,
+    "trust": 2249
   },
   {
     "source": "v2ray_team",
     "configs": 9,
-    "trust": 870
+    "trust": 880
   },
   {
     "source": "vless_ir",
@@ -62,36 +57,31 @@
   {
     "source": "V2RayRootFree",
     "configs": 7,
-    "trust": 690
-  },
-  {
-    "source": "iMTProxy_ir",
-    "configs": 7,
-    "trust": 507
+    "trust": 680
   },
   {
     "source": "v2rayng_channel",
     "configs": 5,
-    "trust": 500
-  },
-  {
-    "source": "proxydaemi",
-    "configs": 5,
-    "trust": 400
+    "trust": 470
   },
   {
     "source": "filtereshekan",
-    "configs": 5,
-    "trust": 387
+    "configs": 4,
+    "trust": 326
   },
   {
     "source": "v2ray3",
     "configs": 2,
-    "trust": 171
+    "trust": 172
+  },
+  {
+    "source": "proxydaemi",
+    "configs": 2,
+    "trust": 162
   },
   {
     "source": "ParsProxyIr",
     "configs": 2,
-    "trust": 145
+    "trust": 147
   }
 ]
